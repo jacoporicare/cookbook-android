@@ -77,6 +77,12 @@ android {
 
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_11.toString()
+        freeCompilerArgs =
+            freeCompilerArgs + listOf(
+                "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                "-Xopt-in=kotlinx.coroutines.FlowPreview",
+                "-Xallow-result-return-type"
+            )
     }
 
     buildFeatures {
@@ -119,6 +125,12 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha09")
 
+    // Preference
+    implementation("androidx.preference:preference-ktx:1.1.1")
+
+    // Work
+    implementation("androidx.work:work-runtime-ktx:2.6.0")
+
     // Apollo
     implementation("com.apollographql.apollo:apollo-runtime:${Versions.apollo}")
     implementation("com.apollographql.apollo:apollo-coroutines-support:${Versions.apollo}")
@@ -126,7 +138,12 @@ dependencies {
 
     // Hilt
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")
+    implementation("com.google.android.material:material:1.4.0")
     kapt("com.google.dagger:hilt-compiler:${Versions.hilt}")
+    implementation("androidx.hilt:hilt-work:1.0.0")
+
+    // Logging
+    implementation("com.jakewharton.timber:timber:5.0.1")
 
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")

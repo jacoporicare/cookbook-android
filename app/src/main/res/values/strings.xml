@@ -1,3 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Žrádelník</string>
+
+    <string name="generic_error">Něco se pokazilo…</string>
+
+    <!-- Labels -->
+    <string name="fragment_recipe_list_label">Žrádelník</string>
+    <string name="fragment_side_dishes_label">Přílohy</string>
+    <string name="fragment_settings_label">Nastavení</string>
+    <string name="activity_login_label">Přihlášení</string>
+
+    <!-- Toolbar -->
+    <string name="action_refresh">Synchronizovat</string>
+    <string name="action_search">Hledat…</string>
+    <string name="action_side_dishes">Přílohy</string>
+    <string name="action_settings">Nastavení</string>
+
+    <!-- Connection -->
+    <string name="connection_error_image_description">Chyba spojení</string>
+    <string name="connection_error_text">Nastal problém s připojením.</string>
+    <string name="connection_error_try_again_button">Zkusit znovu</string>
+
+    <!-- Recipe List -->
+    <string name="recipe_image">Fotka receptu</string>
+    <string name="no_recipes">Žádné výsledky.</string>
+
+    <!-- Recipe -->
+    <string name="preparation_time_title">Doba přípravy:</string>
+    <string name="serving_count_title">Počet porcí:</string>
+    <string name="side_dish_title">Příloha:</string>
+    <string name="ingredient_list_title">Ingredience</string>
+    <string name="directions_title">Postup</string>
+    <string name="no_directions">Kde nic tu nic.</string>
+
+    <!-- Preferences -->
+    <string name="action_login">Přihlásit</string>
+    <string name="action_logout">Odhlásit</string>
+
+    <!-- Theme -->
+    <string name="preference_theme_title">Motiv</string>
+    <string name="preference_theme_key">theme</string>
+    <string name="preference_theme_entries_light">Světlý</string>
+    <string name="preference_theme_entries_dark">Tmavý</string>
+    <string name="preference_theme_entries_default">Výchozí nastavení systému</string>
+    <string name="preference_theme_values_light">light</string>
+    <string name="preference_theme_values_dark">dark</string>
+    <string name="preference_theme_values_default">default</string>
+
+    <!-- Data Category -->
+    <string name="preference_category_data_title">Využití dat</string>
+
+    <!-- Sync On -->
+    <string name="preference_sync_on_title">Synchronizace</string>
+    <string name="preference_sync_on_key">sync_on</string>
+    <string name="preference_sync_on_summary">Naposledy: %1$s</string>
+
+    <!-- Sync Freq -->
+    <string name="preference_sync_title">Frekvence synchronizace</string>
+    <string name="preference_sync_key">sync</string>
+    <string name="preference_sync_entries_never">Nikdy</string>
+    <string name="preference_sync_entries_daily">Denně</string>
+    <string name="preference_sync_entries_weekly">Týdně</string>
+    <string name="preference_sync_values_never">never</string>
+    <string name="preference_sync_values_daily">daily</string>
+    <string name="preference_sync_values_weekly">weekly</string>
+
+    <!-- Sync Mobile Data -->
+    <string name="preference_sync_wifi_title">Synchronizovat pouze přes Wi-Fi</string>
+    <string name="preference_sync_wifi_key">sync_wifi</string>
+    <string name="preference_sync_wifi_summary">Není-li připojení Wi-Fi k dispozici, bude synchronizace pozastavena.</string>
+
+    <!-- Login -->
+    <string name="login_hint_username">Uživatelské jméno</string>
+    <string name="login_hint_password">Heslo</string>
+    <string name="login_action_sign_in">Přihlásit</string>
+    <string name="login_invalid_username">Uživatelské jméno je povinné</string>
+    <string name="login_invalid_password">Heslo je povinné</string>
+    <string name="login_failed">Neplatné uživatelské jméno nebo heslo.</string>
+    <string name="login_account_already_exists">Účet pro Žrádelník již existuje.</string>
 </resources>
