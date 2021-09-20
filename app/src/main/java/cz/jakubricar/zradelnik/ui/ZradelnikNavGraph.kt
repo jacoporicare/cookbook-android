@@ -18,7 +18,6 @@ object MainDestinations {
     const val SETTINGS_ROUTE = "settings"
 }
 
-
 @Composable
 fun ZradelnikNavGraph(
     navController: NavHostController = rememberNavController(),
