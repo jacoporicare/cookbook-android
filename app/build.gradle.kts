@@ -1,8 +1,19 @@
 plugins {
+    // Standard
     id("com.android.application")
     kotlin("android")
+
+    // Annotation processors
     kotlin("kapt")
+
+    // Apollo
+    id("com.apollographql.apollo") version Versions.apollo
+
+    // Hilt
     id("dagger.hilt.android.plugin")
+
+    // App version via Git tags
+    id("com.gladed.androidgitversion") version "0.4.14"
 }
 
 android {
@@ -12,16 +23,23 @@ android {
         applicationId = "cz.jakubricar.zradelnik"
         minSdk = 26
         targetSdk = 31
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = androidGitVersion.code()
+        versionName = androidGitVersion.name()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        resValue("string", "uses_cleartext_traffic", "false")
     }
 
     buildTypes {
+        named("debug") {
+            applicationIdSuffix = ".debug"
+            versionNameSuffix = "-DEBUG"
+        }
+
         named("release") {
             isMinifyEnabled = false
             setProguardFiles(
@@ -33,13 +51,32 @@ android {
         }
     }
 
+    flavorDimensions.add("environment")
+    productFlavors {
+        create("local") {
+            dimension = "environment"
+            buildConfigField("String", "API_URL", "\"http://10.0.2.2:8888/graphql\"")
+            resValue("string", "uses_cleartext_traffic", "true")
+        }
+
+        create("development") {
+            dimension = "environment"
+            buildConfigField("String", "API_URL", "\"https://develop.api.zradelnik.eu/graphql\"")
+        }
+
+        create("production") {
+            dimension = "environment"
+            buildConfigField("String", "API_URL", "\"https://api.zradelnik.eu/graphql\"")
+        }
+    }
+
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_11
+        targetCompatibility = JavaVersion.VERSION_11
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8.toString()
+        jvmTarget = JavaVersion.VERSION_11.toString()
     }
 
     buildFeatures {
@@ -61,10 +98,12 @@ dependencies {
     implementation(kotlin("stdlib", Versions.kotlin))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.coroutines}")
 
+    // Jetpack Compose
     implementation("androidx.compose.ui:ui:${Versions.compose}")
     implementation("androidx.compose.material:material:${Versions.compose}")
     implementation("androidx.compose.ui:ui-tooling-preview:${Versions.compose}")
 
+    // Accompanist
     implementation("com.google.accompanist:accompanist-insets:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
@@ -76,6 +115,12 @@ dependencies {
 
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha09")
 
+    // Apollo
+    implementation("com.apollographql.apollo:apollo-runtime:${Versions.apollo}")
+    implementation("com.apollographql.apollo:apollo-coroutines-support:${Versions.apollo}")
+    implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:${Versions.apollo}")
+
+    // Hilt
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")
     kapt("com.google.dagger:hilt-compiler:${Versions.hilt}")
 
@@ -85,4 +130,13 @@ dependencies {
     androidTestImplementation("androidx.compose.ui:ui-test-junit4:${Versions.compose}")
 
     debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
+}
+
+apollo {
+    generateKotlinModels.set(true)
+    customTypeMapping.set(
+        mapOf(
+            "Date" to "java.time.OffsetDateTime"
+        )
+    )
 }
