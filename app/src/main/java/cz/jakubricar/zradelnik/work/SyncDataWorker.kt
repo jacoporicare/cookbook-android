@@ -1,7 +1,6 @@
 package cz.jakubricar.zradelnik.work
 
 import android.content.Context
-import androidx.core.content.edit
 import androidx.hilt.work.HiltWorker
 import androidx.preference.PreferenceManager
 import androidx.work.Constraints
@@ -11,11 +10,15 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import cz.jakubricar.zradelnik.AppSharedPreferences.Companion.PERIODIC_SYNC_DATA_VERSION
-import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.getAppSharedPreferences
 import cz.jakubricar.zradelnik.repository.SyncDataRepository
-import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.PERIODIC_SYNC_DATA_WORK_NAME
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.PERIODIC_SYNC_DATA_VERSION
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_INTERVAL
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_INTERVAL_DAILY
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_INTERVAL_WEEKLY
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_ON
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_WIFI
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.WORK_NAME
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.util.concurrent.TimeUnit
@@ -27,7 +30,16 @@ class SyncDataWorker @AssistedInject constructor(
     private val syncDataRepository: SyncDataRepository
 ) : CoroutineWorker(appContext, params) {
     companion object {
-        const val PERIODIC_SYNC_DATA_WORK_NAME = "SyncData"
+        const val WORK_NAME = "SyncData"
+
+        // Increase when work definition changes
+        const val PERIODIC_SYNC_DATA_VERSION = 1
+
+        const val SYNC_ON = "sync_on"
+        const val SYNC_INTERVAL = "sync"
+        const val SYNC_INTERVAL_DAILY = "daily"
+        const val SYNC_INTERVAL_WEEKLY = "weekly"
+        const val SYNC_WIFI = "sync_wifi"
     }
 
     override suspend fun doWork(): Result {
@@ -45,38 +57,25 @@ fun Context.setupPeriodicSyncDataWork(
     newIntervalType: String? = null,
     newUnMeteredOnly: Boolean? = null
 ) {
-    val daily = getString(R.string.preference_sync_values_daily)
-    val weekly = getString(R.string.preference_sync_values_weekly)
-
     val appPreferences = getAppSharedPreferences()
     val preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
-    // Migrate old "never"
-    val syncFreq = preferences.getString(getString(R.string.preference_sync_key), "")
-    val never = getString(R.string.preference_sync_values_never)
-    if (syncFreq == never) {
-        preferences.edit {
-            putBoolean(getString(R.string.preference_sync_on_key), false)
-            putString(getString(R.string.preference_sync_key), daily)
-        }
-    }
-
     val enabled = newEnabled
-        ?: preferences.getBoolean(getString(R.string.preference_sync_on_key), true)
+        ?: preferences.getBoolean(SYNC_ON, true)
 
     if (!enabled) {
-        WorkManager.getInstance(this).cancelUniqueWork(PERIODIC_SYNC_DATA_WORK_NAME)
+        WorkManager.getInstance(this).cancelUniqueWork(WORK_NAME)
         return
     }
 
     val intervalType = newIntervalType
-        ?: preferences.getString(getString(R.string.preference_sync_key), daily)
+        ?: preferences.getString(SYNC_INTERVAL, SYNC_INTERVAL_DAILY)
     val unMeteredOnly = newUnMeteredOnly
-        ?: preferences.getBoolean(getString(R.string.preference_sync_wifi_key), true)
+        ?: preferences.getBoolean(SYNC_WIFI, true)
 
     val (interval, intervalUnit) = when (intervalType) {
-        daily -> Pair(1L, TimeUnit.DAYS)
-        weekly -> Pair(7L, TimeUnit.DAYS)
+        SYNC_INTERVAL_DAILY -> Pair(1L, TimeUnit.DAYS)
+        SYNC_INTERVAL_WEEKLY -> Pair(7L, TimeUnit.DAYS)
         else -> {
             throw IllegalArgumentException("Invalid interval type")
         }
@@ -109,7 +108,7 @@ fun Context.setupPeriodicSyncDataWork(
     }
 
     WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-        PERIODIC_SYNC_DATA_WORK_NAME,
+        WORK_NAME,
         existingPeriodicWorkPolicy,
         request
     )
