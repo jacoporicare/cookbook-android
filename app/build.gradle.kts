@@ -129,7 +129,7 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.1.1")
 
     // Work
-    implementation("androidx.work:work-runtime-ktx:2.6.0")
+    implementation("androidx.work:work-runtime-ktx:2.7.0-beta01")
 
     // Apollo
     implementation("com.apollographql.apollo:apollo-runtime:${Versions.apollo}")
