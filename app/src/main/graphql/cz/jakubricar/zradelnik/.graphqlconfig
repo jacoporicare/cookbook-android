@@ -1,0 +1,9 @@
+{
+  "schemaPath": "schema.json",
+  "extensions": {
+    "endpoints": {
+      "local": "http://localhost:8888/graphql",
+      "dev": "https://develop.api.zradelnik.eu/graphql"
+    }
+  }
+}

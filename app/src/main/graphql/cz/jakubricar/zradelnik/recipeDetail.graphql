@@ -1,0 +1,6 @@
+query RecipeDetail($slug: String!) {
+  recipe(slug: $slug) {
+    ...RecipeFragment
+    ...RecipeDetailFragment
+  }
+}

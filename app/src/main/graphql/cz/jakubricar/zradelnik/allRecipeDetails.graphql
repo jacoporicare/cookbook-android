@@ -1,0 +1,7 @@
+query AllRecipeDetails($since: Date!, $deleted: Boolean!) {
+  recipes(since: $since, deleted: $deleted) {
+    ...RecipeFragment
+    ...RecipeDetailFragment
+    deleted
+  }
+}
