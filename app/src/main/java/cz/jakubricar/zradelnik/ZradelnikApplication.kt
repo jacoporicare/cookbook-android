@@ -34,7 +34,6 @@ class ZradelnikApplication : Application(), Configuration.Provider {
         super.onCreate()
         Timber.plant(Timber.DebugTree())
         delayedInit()
-        setupNightMode()
     }
 
     override fun getWorkManagerConfiguration() =
