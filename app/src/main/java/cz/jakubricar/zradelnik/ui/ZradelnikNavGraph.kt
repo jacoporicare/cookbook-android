@@ -8,12 +8,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import cz.jakubricar.zradelnik.ui.home.HomeScreen
 import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
 import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_ID_KEY
+import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
 
 object MainDestinations {
-    const val HOME_ROUTE = "home"
+    const val RECIPE_LIST_ROUTE = "recipelist"
     const val RECIPE_ROUTE = "recipe"
     const val SETTINGS_ROUTE = "settings"
 }
@@ -21,7 +21,7 @@ object MainDestinations {
 @Composable
 fun ZradelnikNavGraph(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = MainDestinations.HOME_ROUTE
+    startDestination: String = MainDestinations.RECIPE_LIST_ROUTE
 ) {
     val actions = remember(navController) { MainActions(navController) }
 
@@ -29,8 +29,8 @@ fun ZradelnikNavGraph(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(MainDestinations.HOME_ROUTE) {
-            HomeScreen(
+        composable(MainDestinations.RECIPE_LIST_ROUTE) {
+            RecipeListScreen(
                 navigateToRecipe = actions.navigateToRecipe
             )
         }

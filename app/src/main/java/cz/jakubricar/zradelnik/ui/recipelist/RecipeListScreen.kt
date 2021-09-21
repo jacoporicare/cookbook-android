@@ -1,4 +1,4 @@
-package cz.jakubricar.zradelnik.ui.home
+package cz.jakubricar.zradelnik.ui.recipelist
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,9 +17,9 @@ import com.google.accompanist.insets.statusBarsPadding
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 
 @Composable
-fun HomeScreen(
+fun RecipeListScreen(
     navigateToRecipe: (String) -> Unit,
-    viewModel: HomeViewModel = viewModel()
+    viewModel: RecipeListViewModel = viewModel()
 ) {
     Surface(
         color = MaterialTheme.colors.background,
