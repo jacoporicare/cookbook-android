@@ -8,12 +8,14 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun RecipeScreen(
-    recipeId: String,
+    slug: String,
+    viewModel: RecipeViewModel = viewModel(),
     onBack: () -> Unit
 ) {
     Surface(
@@ -25,7 +27,7 @@ fun RecipeScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            Text(text = recipeId)
+            Text(text = slug)
             Button(onClick = onBack) {
                 Text(text = "< Back")
             }

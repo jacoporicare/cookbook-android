@@ -2,6 +2,7 @@ package cz.jakubricar.zradelnik.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -9,13 +10,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
-import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_ID_KEY
+import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel
+import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_SLUG_KEY
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
 
 object MainDestinations {
     const val RECIPE_LIST_ROUTE = "recipelist"
     const val RECIPE_ROUTE = "recipe"
-    const val SETTINGS_ROUTE = "settings"
 }
 
 @Composable
@@ -35,11 +36,18 @@ fun ZradelnikNavGraph(
             )
         }
         composable(
-            route = "${MainDestinations.RECIPE_ROUTE}/{$RECIPE_ID_KEY}",
-            arguments = listOf(navArgument(RECIPE_ID_KEY) { type = NavType.StringType })
+            route = "${MainDestinations.RECIPE_ROUTE}/{$RECIPE_SLUG_KEY}",
+            arguments = listOf(navArgument(RECIPE_SLUG_KEY) { type = NavType.StringType })
         ) { backStackEntry ->
+            val slug = backStackEntry.arguments?.getString(RECIPE_SLUG_KEY)!!
+            val viewModel: RecipeViewModel = viewModel()
+
+            // Initial fetch (instead of view model's init to avoid view model factory)
+            viewModel.getRecipe(slug)
+
             RecipeScreen(
-                recipeId = backStackEntry.arguments?.getString(RECIPE_ID_KEY)!!,
+                slug = slug,
+                viewModel = viewModel,
                 onBack = actions.upPress
             )
         }
@@ -47,8 +55,8 @@ fun ZradelnikNavGraph(
 }
 
 class MainActions(navController: NavHostController) {
-    val navigateToRecipe: (String) -> Unit = { recipeId: String ->
-        navController.navigate("${MainDestinations.RECIPE_ROUTE}/$recipeId")
+    val navigateToRecipe: (String) -> Unit = { slug: String ->
+        navController.navigate("${MainDestinations.RECIPE_ROUTE}/$slug")
     }
 
     val upPress: () -> Unit = {
