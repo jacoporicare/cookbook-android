@@ -12,8 +12,7 @@ import cz.jakubricar.zradelnik.LoginMutation
 import cz.jakubricar.zradelnik.MeQuery
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator.Companion.ACCOUNT_TYPE
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator.Companion.AUTH_TOKEN_TYPE
-import cz.jakubricar.zradelnik.domain.LoggedInUser
-import cz.jakubricar.zradelnik.network.api.asDomain
+import cz.jakubricar.zradelnik.model.LoggedInUser
 import cz.jakubricar.zradelnik.network.mapToData
 import cz.jakubricar.zradelnik.network.toResult
 import kotlinx.coroutines.flow.Flow
@@ -52,8 +51,11 @@ class UserRepository @Inject constructor(
             .watcher()
             .toFlow()
             .mapToData()
-            .map {
-                it.asDomain()
+            .map { data ->
+                LoggedInUser(
+                    id = data.me.id,
+                    displayName = data.me.displayName
+                )
             }
 
     suspend fun getAuthToken(context: Context): String? {
