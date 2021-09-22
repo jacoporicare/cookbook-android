@@ -2,21 +2,27 @@ package cz.jakubricar.zradelnik.ui.recipe
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import cz.jakubricar.zradelnik.lifecycle.LoadingState
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.repository.RecipeRepository
 import cz.jakubricar.zradelnik.repository.SyncDataRepository
-import cz.jakubricar.zradelnik.ui.SyncResult
+import cz.jakubricar.zradelnik.ui.LoadingState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import javax.inject.Inject
+
+data class RecipeUiState(
+    val loadingState: LoadingState = LoadingState.NONE,
+    val recipe: RecipeDetail? = null
+)
 
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
@@ -28,36 +34,29 @@ class RecipeViewModel @Inject constructor(
         const val RECIPE_SLUG_KEY = "slug"
     }
 
-    private val _loadingState = MutableLiveData(LoadingState.NONE)
-    val loadingState: LiveData<LoadingState> = _loadingState
-
-    private val _recipe = MutableLiveData<RecipeDetail>()
-    val recipe: LiveData<RecipeDetail> = _recipe
-
-    private val _syncResult = MutableLiveData<SyncResult>()
-    val syncResult: LiveData<SyncResult> = _syncResult
+    private val _uiState = MutableStateFlow(RecipeUiState())
+    val uiState: StateFlow<RecipeUiState> = _uiState.asStateFlow()
 
     fun getRecipe(slug: String) {
         recipeRepository.getRecipe(slug)
             .onStart {
-                _loadingState.value = LoadingState.LOADING
+                _uiState.update { it.copy(loadingState = LoadingState.LOADING) }
             }
-            .catch {
-                Timber.e(it)
-                _loadingState.value = LoadingState.ERROR
+            .catch { error ->
+                Timber.e(error)
+                _uiState.update { it.copy(loadingState = LoadingState.ERROR) }
             }
-            .onEach {
-                try {
-                    if (syncDataRepository.initialFetch(app)) {
-                        return@onEach
-                    }
-                } catch (e: Exception) {
-                    _loadingState.value = LoadingState.ERROR
+            .onEach { recipe ->
+                if (syncDataRepository.initialFetch(app)) {
                     return@onEach
                 }
 
-                _loadingState.value = LoadingState.DATA
-                _recipe.value = it
+                _uiState.update {
+                    it.copy(
+                        loadingState = LoadingState.DATA,
+                        recipe = recipe
+                    )
+                }
             }
             .launchIn(viewModelScope)
     }

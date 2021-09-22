@@ -1,9 +1,8 @@
-package cz.jakubricar.zradelnik.lifecycle
+package cz.jakubricar.zradelnik.ui
 
 enum class LoadingState {
     NONE,
     LOADING,
-    REFRESHING,
     DATA,
     ERROR
 }

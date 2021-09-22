@@ -27,12 +27,7 @@ class SyncDataRepository @Inject constructor(
             return false
         }
 
-        try {
-            fetchAllRecipeDetails(context)
-        } catch (e: Exception) {
-            Timber.e(e)
-            throw e
-        }
+        fetchAllRecipeDetails(context)
 
         return true
     }

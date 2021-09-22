@@ -43,10 +43,11 @@ class SyncDataWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
-        return try {
-            syncDataRepository.fetchAllRecipeDetails(applicationContext)
+        val result = syncDataRepository.fetchAllRecipeDetails(applicationContext)
+
+        return if (result.isSuccess) {
             Result.success()
-        } catch (e: Exception) {
+        } else {
             Result.retry()
         }
     }
