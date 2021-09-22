@@ -11,7 +11,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
@@ -19,7 +19,7 @@ import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 @Composable
 fun RecipeListScreen(
     navigateToRecipe: (String) -> Unit,
-    viewModel: RecipeListViewModel = viewModel()
+    viewModel: RecipeListViewModel = hiltViewModel()
 ) {
     Surface(
         color = MaterialTheme.colors.background,

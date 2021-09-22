@@ -7,6 +7,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.insets.navigationBarsPadding
@@ -18,6 +19,8 @@ fun RecipeScreen(
     viewModel: RecipeViewModel = viewModel(),
     onBack: () -> Unit
 ) {
+    LaunchedEffect(slug) { viewModel.getRecipe(slug) }
+
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()

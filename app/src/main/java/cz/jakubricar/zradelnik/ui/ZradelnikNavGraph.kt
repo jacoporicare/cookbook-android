@@ -2,7 +2,7 @@ package cz.jakubricar.zradelnik.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -40,10 +40,7 @@ fun ZradelnikNavGraph(
             arguments = listOf(navArgument(RECIPE_SLUG_KEY) { type = NavType.StringType })
         ) { backStackEntry ->
             val slug = backStackEntry.arguments?.getString(RECIPE_SLUG_KEY)!!
-            val viewModel: RecipeViewModel = viewModel()
-
-            // Initial fetch (instead of view model's init to avoid view model factory)
-            viewModel.getRecipe(slug)
+            val viewModel: RecipeViewModel = hiltViewModel()
 
             RecipeScreen(
                 slug = slug,
