@@ -9,6 +9,11 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -21,6 +26,11 @@ fun RecipeListScreen(
     navigateToRecipe: (String) -> Unit,
     viewModel: RecipeListViewModel = hiltViewModel()
 ) {
+    var searchQuery by remember { mutableStateOf("") }
+    val uiState by viewModel.uiState.collectAsState()
+    val recipes =
+        remember(uiState.recipes, searchQuery) { filterRecipes(uiState.recipes, searchQuery) }
+
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
@@ -31,9 +41,9 @@ fun RecipeListScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            for (i in 1..100) {
-                Button(onClick = { navigateToRecipe(i.toString()) }) {
-                    Greeting("Android $i")
+            for (recipe in recipes) {
+                Button(onClick = { navigateToRecipe(recipe.slug) }) {
+                    Recipe(recipe.title)
                 }
             }
         }
@@ -41,14 +51,14 @@ fun RecipeListScreen(
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun Recipe(title: String) {
+    Text(text = title)
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     ZradelnikTheme {
-        Greeting("Android")
+        Recipe("Android")
     }
 }

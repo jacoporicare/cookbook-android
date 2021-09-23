@@ -24,8 +24,7 @@ import javax.inject.Inject
 
 data class RecipeListUiState(
     val loadingState: LoadingState = LoadingState.NONE,
-    val recipes: List<Recipe> = emptyList(),
-    val searchQuery: String? = null
+    val recipes: List<Recipe> = emptyList()
 )
 
 @HiltViewModel
@@ -34,8 +33,6 @@ class RecipeListViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
     private val syncDataRepository: SyncDataRepository
 ) : AndroidViewModel(app) {
-
-    private var allRecipes: List<Recipe> = emptyList()
 
     private val _uiState = MutableStateFlow(RecipeListUiState())
     val uiState: StateFlow<RecipeListUiState> = _uiState.asStateFlow()
@@ -63,12 +60,9 @@ class RecipeListViewModel @Inject constructor(
                 }
 
                 _uiState.update {
-                    allRecipes = recipes.sortedWith(recipeComparator)
-
                     it.copy(
                         loadingState = LoadingState.DATA,
-                        // TODO: Maybe too imperative? Move to a Composable with remember instead and remove searchQuery from the view model?
-                        recipes = getFilteredRecipes(allRecipes, it.searchQuery)
+                        recipes = recipes.sortedWith(recipeComparator)
                     )
                 }
             }
@@ -86,22 +80,12 @@ class RecipeListViewModel @Inject constructor(
             }
         }
     }
+}
 
-    // TODO: Maybe too imperative? Move to a Composable with remember instead and remove searchQuery from the view model?
-    fun filterRecipes(query: String?) {
-        _uiState.update {
-            it.copy(
-                searchQuery = query,
-                recipes = getFilteredRecipes(allRecipes, query)
-            )
-        }
-    }
-
-    private fun getFilteredRecipes(recipes: List<Recipe>, query: String?): List<Recipe> {
-        return if (query == null) {
-            recipes
-        } else {
-            recipes.filter { it.title.unaccent().contains(query.unaccent(), true) }
-        }
+fun filterRecipes(recipes: List<Recipe>, query: String?): List<Recipe> {
+    return if (query.isNullOrBlank()) {
+        recipes
+    } else {
+        recipes.filter { it.title.unaccent().contains(query.unaccent(), true) }
     }
 }

@@ -8,6 +8,8 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.google.accompanist.insets.navigationBarsPadding
@@ -21,6 +23,8 @@ fun RecipeScreen(
 ) {
     LaunchedEffect(slug) { viewModel.getRecipe(slug) }
 
+    val uiState by viewModel.uiState.collectAsState()
+
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
@@ -30,7 +34,7 @@ fun RecipeScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            Text(text = slug)
+            Text(text = uiState.recipe?.title ?: "Loading")
             Button(onClick = onBack) {
                 Text(text = "< Back")
             }
