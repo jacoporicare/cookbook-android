@@ -17,6 +17,7 @@ import kotlin.math.floor
 class RecipeRepository @Inject constructor(
     private val apolloClient: ApolloClient
 ) {
+
     fun getRecipes(): Flow<List<Recipe>> =
         apolloClient.query(RecipeListQuery())
             .toBuilder()

@@ -14,6 +14,7 @@ data class RecipeDetail(
     val servingCount: String?,
     val sideDish: String?,
 ) {
+
     @Immutable
     data class Ingredient(
         val name: String,

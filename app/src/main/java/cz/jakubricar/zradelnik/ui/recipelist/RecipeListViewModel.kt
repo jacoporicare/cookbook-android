@@ -34,6 +34,7 @@ class RecipeListViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
     private val syncDataRepository: SyncDataRepository
 ) : AndroidViewModel(app) {
+
     private var allRecipes: List<Recipe> = emptyList()
 
     private val _uiState = MutableStateFlow(RecipeListUiState())

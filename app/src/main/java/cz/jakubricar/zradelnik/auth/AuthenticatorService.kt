@@ -10,6 +10,7 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class AuthenticatorService : Service() {
+
     @Inject
     lateinit var userRepository: UserRepository
 

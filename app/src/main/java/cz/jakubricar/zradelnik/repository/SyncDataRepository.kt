@@ -22,6 +22,7 @@ import javax.inject.Inject
 class SyncDataRepository @Inject constructor(
     private val apolloClient: ApolloClient
 ) {
+
     suspend fun initialFetch(context: Context): Boolean {
         if (context.getAppSharedPreferences().lastSyncDate > 0) {
             return false

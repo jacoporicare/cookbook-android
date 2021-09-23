@@ -21,7 +21,9 @@ class AccountAuthenticator(
     private val context: Context,
     private val userRepository: UserRepository
 ) : AbstractAccountAuthenticator(context) {
+
     companion object {
+
         const val ACCOUNT_TYPE = "cz.jakubricar.zradelnik"
         const val AUTH_TOKEN_TYPE = "jwt"
     }

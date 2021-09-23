@@ -19,6 +19,7 @@ import javax.inject.Singleton
 
 @HiltAndroidApp
 class ZradelnikApplication : Application(), Configuration.Provider {
+
     private val applicationScope = CoroutineScope(Dispatchers.Default)
 
     @Inject
@@ -45,6 +46,7 @@ class ZradelnikApplication : Application(), Configuration.Provider {
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
     @Provides
     @Singleton
     @ZradelnikApiUrl

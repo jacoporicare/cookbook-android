@@ -9,6 +9,7 @@ open class TextFieldState(
     private val validator: (String) -> Boolean = { true },
     private val errorFor: (String) -> Int? = { null }
 ) {
+
     var text: String by mutableStateOf("")
 
     // was the TextField ever focused

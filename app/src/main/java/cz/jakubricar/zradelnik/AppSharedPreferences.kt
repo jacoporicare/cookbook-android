@@ -6,11 +6,13 @@ import androidx.core.content.edit
 
 class AppSharedPreferences(context: Context) {
     companion object {
+
         // Increase when data handling changes - e.g. incremental updates
         const val DATA_VERSION = 4
     }
 
     object Keys {
+
         const val APP_SHARED_PREFERENCES = "App"
 
         const val DATA_VERSION = "DataVersion"

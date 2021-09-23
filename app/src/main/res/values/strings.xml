@@ -39,7 +39,7 @@
 
     <!-- Theme -->
     <string name="preference_theme_title">Motiv</string>
-<!--    <string name="preference_theme_key">theme</string>-->
+    <!--    <string name="preference_theme_key">theme</string>-->
     <string name="preference_theme_entries_light">Světlý</string>
     <string name="preference_theme_entries_dark">Tmavý</string>
     <string name="preference_theme_entries_default">Výchozí nastavení systému</string>

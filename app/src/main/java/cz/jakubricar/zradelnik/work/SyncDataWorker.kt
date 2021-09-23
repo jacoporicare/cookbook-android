@@ -29,7 +29,9 @@ class SyncDataWorker @AssistedInject constructor(
     @Assisted params: WorkerParameters,
     private val syncDataRepository: SyncDataRepository
 ) : CoroutineWorker(appContext, params) {
+
     companion object {
+
         const val WORK_NAME = "SyncData"
 
         // Increase when work definition changes

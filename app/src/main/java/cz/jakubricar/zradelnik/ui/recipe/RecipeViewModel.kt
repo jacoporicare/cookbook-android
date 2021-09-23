@@ -30,7 +30,9 @@ class RecipeViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
     private val syncDataRepository: SyncDataRepository
 ) : AndroidViewModel(app) {
+
     companion object {
+
         const val RECIPE_SLUG_KEY = "slug"
     }
 

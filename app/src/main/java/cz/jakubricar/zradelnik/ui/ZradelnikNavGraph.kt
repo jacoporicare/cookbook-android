@@ -15,6 +15,7 @@ import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_SLUG_K
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
 
 object MainDestinations {
+
     const val RECIPE_LIST_ROUTE = "recipelist"
     const val RECIPE_ROUTE = "recipe"
 }
@@ -52,6 +53,7 @@ fun ZradelnikNavGraph(
 }
 
 class MainActions(navController: NavHostController) {
+
     val navigateToRecipe: (String) -> Unit = { slug: String ->
         navController.navigate("${MainDestinations.RECIPE_ROUTE}/$slug")
     }

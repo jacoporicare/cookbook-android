@@ -25,6 +25,7 @@ import kotlin.coroutines.suspendCoroutine
 class UserRepository @Inject constructor(
     private val apolloClient: ApolloClient
 ) {
+
     suspend fun login(username: String, password: String): Result<String> =
         apolloClient.mutate(LoginMutation(username, password))
             .await()

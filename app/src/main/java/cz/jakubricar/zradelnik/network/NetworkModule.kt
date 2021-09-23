@@ -29,7 +29,9 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
+
     object RecipeCacheKeyResolver : CacheKeyResolver() {
+
         fun getCacheKey(typename: Any?, id: Any?) =
             CacheKey.from("$typename.$id")
 
