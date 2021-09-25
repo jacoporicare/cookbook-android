@@ -1,7 +1,9 @@
 package cz.jakubricar.zradelnik.repository
 
-// import com.bumptech.glide.Glide
 import android.content.Context
+import coil.imageLoader
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
@@ -46,7 +48,7 @@ class SyncDataRepository @Inject constructor(
                 .await()
                 .toResult()
                 .map { data ->
-//                    val glide = Glide.with(context)
+                    val imageLoader = context.imageLoader
 
                     withContext(Dispatchers.IO) {
                         val addedOrUpdatedRecipes = data.recipes
@@ -120,18 +122,21 @@ class SyncDataRepository @Inject constructor(
                                     )
                                     .await()
 
-                                // TODO: images
-//                                recipe.fragments.recipeFragment.thumbImageUrl?.let {
-//                                    launch {
-//                                        glide.load(it).preload()
-//                                    }
-//                                }
-//
-//                                recipe.fragments.recipeFragment.fullImageUrl?.let {
-//                                    launch {
-//                                        glide.load(it).preload()
-//                                    }
-//                                }
+                                recipe.fragments.recipeFragment.thumbImageUrl?.let {
+                                    val request = ImageRequest.Builder(context)
+                                        .data(it)
+                                        .memoryCachePolicy(CachePolicy.DISABLED)
+                                        .build()
+                                    imageLoader.enqueue(request)
+                                }
+
+                                recipe.fragments.recipeFragment.fullImageUrl?.let {
+                                    val request = ImageRequest.Builder(context)
+                                        .data(it)
+                                        .memoryCachePolicy(CachePolicy.DISABLED)
+                                        .build()
+                                    imageLoader.enqueue(request)
+                                }
                             } catch (e: Exception) {
                                 Timber.e(e)
                             }

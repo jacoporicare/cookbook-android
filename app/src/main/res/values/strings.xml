@@ -24,6 +24,7 @@
     <!-- Recipe List -->
     <string name="recipe_image">Fotka receptu</string>
     <string name="no_recipes">Žádné výsledky.</string>
+    <string name="image_failure">Chyba při načítání fotky</string>
 
     <!-- Recipe -->
     <string name="preparation_time_title">Doba přípravy:</string>

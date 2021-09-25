@@ -11,14 +11,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun RecipeScreen(
     slug: String,
-    viewModel: RecipeViewModel = viewModel(),
+    viewModel: RecipeViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
     LaunchedEffect(slug) { viewModel.getRecipe(slug) }
