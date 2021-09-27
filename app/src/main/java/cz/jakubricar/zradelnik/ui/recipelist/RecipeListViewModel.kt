@@ -25,7 +25,13 @@ import javax.inject.Inject
 data class RecipeListUiState(
     val loadingState: LoadingState = LoadingState.NONE,
     val recipes: List<Recipe> = emptyList()
-)
+) {
+    /**
+     * True if this represents a first load
+     */
+    val initialLoad: Boolean
+        get() = recipes.isEmpty() && loadingState == LoadingState.LOADING
+}
 
 @HiltViewModel
 class RecipeListViewModel @Inject constructor(

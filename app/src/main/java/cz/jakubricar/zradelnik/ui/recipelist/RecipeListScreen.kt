@@ -12,11 +12,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +42,12 @@ import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.Recipe
+import cz.jakubricar.zradelnik.ui.LoadingState
+import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
+import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
+import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
+import cz.jakubricar.zradelnik.utils.isScrolled
 
 @Composable
 fun RecipeListScreen(
@@ -49,31 +60,77 @@ fun RecipeListScreen(
         filterRecipes(uiState.recipes, searchQuery).chunked(2)
     }
 
-    Surface(
-        color = MaterialTheme.colors.background,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        RecipeList(
-            recipes = recipes,
-            navigateToRecipe = navigateToRecipe
-        )
+    RecipeListScreen(
+        uiState = uiState,
+        recipes = recipes,
+        navigateToRecipe = navigateToRecipe,
+        onRefreshRecipes = { viewModel.refreshRecipes() }
+    )
+}
+
+@Composable
+fun RecipeListScreen(
+    uiState: RecipeListUiState,
+    recipes: List<List<Recipe>>,
+    navigateToRecipe: (String) -> Unit,
+    onRefreshRecipes: () -> Unit
+) {
+    val scrollState = rememberLazyListState()
+
+    Scaffold(
+        topBar = {
+            InsetAwareTopAppBar(
+                title = {
+                    Text(text = stringResource(R.string.app_name))
+                },
+                actions = {
+                    IconButton(onClick = { /* TODO: Open search */ }) {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = stringResource(R.string.action_search)
+                        )
+                    }
+                },
+                backgroundColor = MaterialTheme.colors.surface,
+                elevation = if (!scrollState.isScrolled) 0.dp else 4.dp
+            )
+        }
+    ) { innerPadding ->
+        LoadingContent(
+            empty = uiState.initialLoad,
+            emptyContent = { FullScreenLoading() },
+            loading = uiState.loadingState == LoadingState.LOADING,
+            onRefresh = onRefreshRecipes
+        ) {
+            // TODO: Display errors, like [HomeScreenErrorAndContent]
+            RecipeList(
+                recipes = recipes,
+                navigateToRecipe = navigateToRecipe,
+                modifier = Modifier.padding(innerPadding),
+                scrollState = scrollState
+            )
+        }
     }
 }
 
 @Composable
 fun RecipeList(
     recipes: List<List<Recipe>>,
-    navigateToRecipe: (String) -> Unit
+    navigateToRecipe: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    scrollState: LazyListState
 ) {
     LazyColumn(
         contentPadding = rememberInsetsPaddingValues(
             insets = LocalWindowInsets.current.systemBars,
-            applyTop = true,
-            applyBottom = true,
+            applyTop = false,
+            additionalTop = 16.dp,
             additionalBottom = 16.dp,
             additionalStart = 12.dp,
             additionalEnd = 12.dp
         ),
+        modifier = modifier,
+        state = scrollState,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         items(
