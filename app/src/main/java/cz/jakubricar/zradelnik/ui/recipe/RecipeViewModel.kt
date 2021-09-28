@@ -23,7 +23,7 @@ data class RecipeUiState(
 ) {
 
     val failedLoading: Boolean
-        get() = !loading && recipe == null
+        get() = recipe == null && !loading
 }
 
 @HiltViewModel
@@ -48,13 +48,10 @@ class RecipeViewModel @Inject constructor(
                 _uiState.update { it.copy(loading = false) }
             }
             .onEach { recipe ->
-                if (syncDataRepository.initialSync(app)) {
-                    // TODO: Fetch recipes
-                    return@onEach
-                }
-
                 _uiState.update { it.copy(recipe = recipe, loading = false) }
             }
             .launchIn(viewModelScope)
     }
+
+    fun initialSync() = syncDataRepository.initialSync(app)
 }

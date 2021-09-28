@@ -84,8 +84,8 @@ class RecipeListViewModel @Inject constructor(
 
             _uiState.update { uiState ->
                 result.fold(
-                    { uiState.copy(loading = false) },
-                    {
+                    onSuccess = { uiState.copy(loading = false) },
+                    onFailure = {
                         val errorMessages = uiState.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.connection_error

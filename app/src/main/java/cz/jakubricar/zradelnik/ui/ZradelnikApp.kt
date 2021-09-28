@@ -17,7 +17,7 @@ fun ZradelnikApp() {
 
             SideEffect {
                 systemUiController.setSystemBarsColor(
-                    Color.Transparent,
+                    color = Color.Transparent,
                     darkIcons = darkIcons
                 )
             }

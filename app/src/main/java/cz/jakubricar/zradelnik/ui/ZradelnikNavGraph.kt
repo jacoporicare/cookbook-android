@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
 import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_SLUG_KEY
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
@@ -17,6 +18,8 @@ object MainDestinations {
     const val RECIPE_LIST_ROUTE = "recipelist"
     const val RECIPE_ROUTE = "recipe"
 }
+
+const val WEB_URI = "https://www.zradelnik.eu"
 
 @Composable
 fun ZradelnikNavGraph(
@@ -29,14 +32,20 @@ fun ZradelnikNavGraph(
         navController = navController,
         startDestination = startDestination
     ) {
-        composable(MainDestinations.RECIPE_LIST_ROUTE) {
+        composable(
+            route = MainDestinations.RECIPE_LIST_ROUTE,
+            deepLinks = listOf(navDeepLink { uriPattern = WEB_URI })
+        ) {
             RecipeListScreen(
                 navigateToRecipe = actions.navigateToRecipe
             )
         }
         composable(
             route = "${MainDestinations.RECIPE_ROUTE}/{$RECIPE_SLUG_KEY}",
-            arguments = listOf(navArgument(RECIPE_SLUG_KEY) { type = NavType.StringType })
+            arguments = listOf(navArgument(RECIPE_SLUG_KEY) { type = NavType.StringType }),
+            deepLinks = listOf(
+                navDeepLink { uriPattern = "$WEB_URI/recept/{$RECIPE_SLUG_KEY}" }
+            )
         ) { backStackEntry ->
             val slug = backStackEntry.arguments?.getString(RECIPE_SLUG_KEY)!!
 

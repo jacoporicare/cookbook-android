@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.statusBarsPadding
+import cz.jakubricar.zradelnik.model.RecipeDetail
 
 @Composable
 fun RecipeScreen(
@@ -21,10 +22,36 @@ fun RecipeScreen(
     slug: String,
     onBack: () -> Unit
 ) {
-    LaunchedEffect(slug) { viewModel.getRecipe(slug) }
+    LaunchedEffect(slug) {
+        // The app opened for the first time, navigate to the list to fetch recipes
+        if (viewModel.initialSync()) {
+            onBack()
+        } else {
+            viewModel.getRecipe(slug)
+        }
+    }
 
     val uiState by viewModel.uiState.collectAsState()
 
+    if (uiState.recipe != null) {
+        RecipeScreen(
+            recipe = uiState.recipe!!,
+            onBack = onBack
+        )
+    }
+
+    LaunchedEffect(uiState) {
+        if (uiState.failedLoading) {
+            onBack()
+        }
+    }
+}
+
+@Composable
+fun RecipeScreen(
+    recipe: RecipeDetail,
+    onBack: () -> Unit
+) {
     Surface(
         color = MaterialTheme.colors.background,
         modifier = Modifier.fillMaxSize()
@@ -34,7 +61,7 @@ fun RecipeScreen(
                 .statusBarsPadding()
                 .navigationBarsPadding()
         ) {
-            Text(text = uiState.recipe?.title ?: "Loading")
+            Text(text = recipe.title)
             Button(onClick = onBack) {
                 Text(text = "< Back")
             }
