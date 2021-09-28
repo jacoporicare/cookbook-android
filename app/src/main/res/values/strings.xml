@@ -5,9 +5,9 @@
     <string name="generic_error">Něco se pokazilo…</string>
 
     <!-- Labels -->
-    <string name="fragment_recipe_list_label">Žrádelník</string>
-    <string name="fragment_side_dishes_label">Přílohy</string>
-    <string name="fragment_settings_label">Nastavení</string>
+    <string name="screen_recipe_list_label">Žrádelník</string>
+    <string name="screen_side_dishes_label">Přílohy</string>
+    <string name="screen_settings_label">Nastavení</string>
     <string name="activity_login_label">Přihlášení</string>
 
     <!-- Toolbar -->
@@ -17,12 +17,11 @@
     <string name="action_settings">Nastavení</string>
 
     <!-- Connection -->
-    <string name="connection_error_image_description">Chyba spojení</string>
-    <string name="connection_error_text">Nastal problém s připojením.</string>
-    <string name="connection_error_try_again_button">Zkusit znovu</string>
+    <string name="connection_error">Nastal problém s připojením.</string>
+    <string name="try_again">Zkusit znovu</string>
 
     <!-- Recipe List -->
-    <string name="recipe_image">Fotka receptu</string>
+    <string name="recipe_image">Fotka receptu %1$s</string>
     <string name="no_recipes">Žádné výsledky.</string>
     <string name="image_failure">Chyba při načítání fotky</string>
 

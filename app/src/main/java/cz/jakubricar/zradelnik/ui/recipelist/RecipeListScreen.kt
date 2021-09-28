@@ -15,19 +15,26 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,11 +45,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.systemBarsPadding
 import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.Recipe
-import cz.jakubricar.zradelnik.ui.LoadingState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.LoadingContent
@@ -51,8 +58,9 @@ import cz.jakubricar.zradelnik.utils.isScrolled
 
 @Composable
 fun RecipeListScreen(
+    viewModel: RecipeListViewModel = hiltViewModel(),
     navigateToRecipe: (String) -> Unit,
-    viewModel: RecipeListViewModel = hiltViewModel()
+    scaffoldState: ScaffoldState = rememberScaffoldState()
 ) {
     var searchQuery by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
@@ -64,7 +72,9 @@ fun RecipeListScreen(
         uiState = uiState,
         recipes = recipes,
         navigateToRecipe = navigateToRecipe,
-        onRefreshRecipes = { viewModel.refreshRecipes() }
+        onRefreshRecipes = { viewModel.refreshRecipes() },
+        onErrorDismiss = { viewModel.errorShown(it) },
+        scaffoldState = scaffoldState
     )
 }
 
@@ -73,11 +83,15 @@ fun RecipeListScreen(
     uiState: RecipeListUiState,
     recipes: List<List<Recipe>>,
     navigateToRecipe: (String) -> Unit,
-    onRefreshRecipes: () -> Unit
+    onRefreshRecipes: () -> Unit,
+    onErrorDismiss: (Long) -> Unit,
+    scaffoldState: ScaffoldState
 ) {
     val scrollState = rememberLazyListState()
 
     Scaffold(
+        scaffoldState = scaffoldState,
+        snackbarHost = { SnackbarHost(hostState = it, modifier = Modifier.systemBarsPadding()) },
         topBar = {
             InsetAwareTopAppBar(
                 title = {
@@ -91,7 +105,11 @@ fun RecipeListScreen(
                         )
                     }
                 },
-                backgroundColor = MaterialTheme.colors.surface,
+                backgroundColor = if (!scrollState.isScrolled) {
+                    MaterialTheme.colors.background
+                } else {
+                    MaterialTheme.colors.surface
+                },
                 elevation = if (!scrollState.isScrolled) 0.dp else 4.dp
             )
         }
@@ -99,17 +117,83 @@ fun RecipeListScreen(
         LoadingContent(
             empty = uiState.initialLoad,
             emptyContent = { FullScreenLoading() },
-            loading = uiState.loadingState == LoadingState.LOADING,
+            loading = uiState.loading,
             onRefresh = onRefreshRecipes
         ) {
-            // TODO: Display errors, like [HomeScreenErrorAndContent]
-            RecipeList(
+            RecipeListScreenErrorAndContent(
                 recipes = recipes,
+                isShowingErrors = uiState.errorMessages.isNotEmpty(),
+                onRefresh = onRefreshRecipes,
                 navigateToRecipe = navigateToRecipe,
                 modifier = Modifier.padding(innerPadding),
                 scrollState = scrollState
             )
         }
+    }
+
+    // Process one error message at a time and show them as Snackbars in the UI
+    if (uiState.errorMessages.isNotEmpty()) {
+        // Remember the errorMessage to display on the screen
+        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
+
+        // Get the text to show on the message from resources
+        val errorMessageText = stringResource(errorMessage.messageId)
+        val retryMessageText = stringResource(R.string.try_again)
+
+        // If onRefreshRecipesState or onErrorDismiss change while the LaunchedEffect is running,
+        // don't restart the effect and use the latest lambda values.
+        val onRefreshRecipesState by rememberUpdatedState(onRefreshRecipes)
+        val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
+
+        LaunchedEffect(errorMessage.id, scaffoldState) {
+            val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessageText,
+                actionLabel = retryMessageText
+            )
+            if (snackbarResult == SnackbarResult.ActionPerformed) {
+                onRefreshRecipesState()
+            }
+            // Once the message is displayed and dismissed, notify the ViewModel
+            onErrorDismissState(errorMessage.id)
+        }
+    }
+}
+
+@Composable
+private fun RecipeListScreenErrorAndContent(
+    recipes: List<List<Recipe>>,
+    isShowingErrors: Boolean,
+    onRefresh: () -> Unit,
+    navigateToRecipe: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    scrollState: LazyListState
+) {
+    if (recipes.isNotEmpty()) {
+        RecipeList(
+            recipes = recipes,
+            navigateToRecipe = navigateToRecipe,
+            modifier = modifier,
+            scrollState = scrollState
+        )
+    } else if (!isShowingErrors) {
+        // if there are no posts, and no error, let the user refresh manually
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.no_recipes),
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.h5
+            )
+            Button(onClick = onRefresh) {
+                Text(text = stringResource(R.string.try_again))
+            }
+        }
+    } else {
+        // there's currently an error showing, don't show any content
+        Spacer(modifier.fillMaxSize())
     }
 }
 
@@ -174,8 +258,9 @@ fun Recipe(
         Column {
             CoilImage(
                 imageModel = recipe.imageUrl ?: R.drawable.ic_food_placeholder,
-                alignment = Alignment.TopCenter,
                 modifier = Modifier.height(150.dp),
+                alignment = Alignment.TopCenter,
+                contentDescription = stringResource(R.string.recipe_image, recipe.title),
                 shimmerParams = ShimmerParams(
                     baseColor = MaterialTheme.colors.background,
                     highlightColor = MaterialTheme.colors.onBackground,

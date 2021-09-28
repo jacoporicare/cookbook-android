@@ -25,15 +25,7 @@ class SyncDataRepository @Inject constructor(
     private val apolloClient: ApolloClient
 ) {
 
-    suspend fun initialFetch(context: Context): Boolean {
-        if (context.getAppSharedPreferences().lastSyncDate > 0) {
-            return false
-        }
-
-        fetchAllRecipeDetails(context)
-
-        return true
-    }
+    fun initialSync(context: Context) = context.getAppSharedPreferences().lastSyncDate == 0L
 
     suspend fun fetchAllRecipeDetails(context: Context): Result<Unit> {
         val prefs = context.getAppSharedPreferences()

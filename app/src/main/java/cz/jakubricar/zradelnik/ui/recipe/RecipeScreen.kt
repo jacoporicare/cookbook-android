@@ -17,8 +17,8 @@ import com.google.accompanist.insets.statusBarsPadding
 
 @Composable
 fun RecipeScreen(
-    slug: String,
     viewModel: RecipeViewModel = hiltViewModel(),
+    slug: String,
     onBack: () -> Unit
 ) {
     LaunchedEffect(slug) { viewModel.getRecipe(slug) }

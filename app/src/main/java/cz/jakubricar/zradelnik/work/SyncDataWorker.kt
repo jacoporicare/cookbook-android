@@ -17,7 +17,7 @@ import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_INTERVAL
 import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_INTERVAL_DAILY
 import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_INTERVAL_WEEKLY
 import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_ON
-import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_WIFI
+import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.SYNC_WIFI_ONLY
 import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.WORK_NAME
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -41,17 +41,13 @@ class SyncDataWorker @AssistedInject constructor(
         const val SYNC_INTERVAL = "sync"
         const val SYNC_INTERVAL_DAILY = "daily"
         const val SYNC_INTERVAL_WEEKLY = "weekly"
-        const val SYNC_WIFI = "sync_wifi"
+        const val SYNC_WIFI_ONLY = "sync_wifi"
     }
 
     override suspend fun doWork(): Result {
         val result = syncDataRepository.fetchAllRecipeDetails(applicationContext)
 
-        return if (result.isSuccess) {
-            Result.success()
-        } else {
-            Result.retry()
-        }
+        return if (result.isSuccess) Result.success() else Result.retry()
     }
 }
 
@@ -62,26 +58,20 @@ fun Context.setupPeriodicSyncDataWork(
 ) {
     val appPreferences = getAppSharedPreferences()
     val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-
-    val enabled = newEnabled
-        ?: preferences.getBoolean(SYNC_ON, true)
+    val enabled = newEnabled ?: preferences.getBoolean(SYNC_ON, true)
 
     if (!enabled) {
         WorkManager.getInstance(this).cancelUniqueWork(WORK_NAME)
         return
     }
 
-    val intervalType = newIntervalType
-        ?: preferences.getString(SYNC_INTERVAL, SYNC_INTERVAL_DAILY)
-    val unMeteredOnly = newUnMeteredOnly
-        ?: preferences.getBoolean(SYNC_WIFI, true)
+    val intervalType = newIntervalType ?: preferences.getString(SYNC_INTERVAL, SYNC_INTERVAL_DAILY)
+    val unMeteredOnly = newUnMeteredOnly ?: preferences.getBoolean(SYNC_WIFI_ONLY, true)
 
     val (interval, intervalUnit) = when (intervalType) {
         SYNC_INTERVAL_DAILY -> Pair(1L, TimeUnit.DAYS)
         SYNC_INTERVAL_WEEKLY -> Pair(7L, TimeUnit.DAYS)
-        else -> {
-            throw IllegalArgumentException("Invalid interval type")
-        }
+        else -> throw IllegalArgumentException("Invalid interval type")
     }
 
     val request = PeriodicWorkRequestBuilder<SyncDataWorker>(interval, intervalUnit)
@@ -99,8 +89,7 @@ fun Context.setupPeriodicSyncDataWork(
         .build()
 
     val replace = newIntervalType != null || newUnMeteredOnly != null
-    val versionChanged =
-        appPreferences.periodicSyncDataVersion < PERIODIC_SYNC_DATA_VERSION
+    val versionChanged = appPreferences.periodicSyncDataVersion < PERIODIC_SYNC_DATA_VERSION
 
     val existingPeriodicWorkPolicy =
         if (!replace && !versionChanged) ExistingPeriodicWorkPolicy.KEEP
@@ -110,9 +99,6 @@ fun Context.setupPeriodicSyncDataWork(
         appPreferences.periodicSyncDataVersion = PERIODIC_SYNC_DATA_VERSION
     }
 
-    WorkManager.getInstance(this).enqueueUniquePeriodicWork(
-        WORK_NAME,
-        existingPeriodicWorkPolicy,
-        request
-    )
+    WorkManager.getInstance(this)
+        .enqueueUniquePeriodicWork(WORK_NAME, existingPeriodicWorkPolicy, request)
 }
