@@ -2,6 +2,7 @@ package cz.jakubricar.zradelnik.ui.recipe
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,14 +11,17 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -25,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsHeight
@@ -142,6 +147,17 @@ fun Recipe(
                 }
             )
         }
+        if (!recipe.preparationTime.isNullOrEmpty() ||
+            !recipe.servingCount.isNullOrEmpty() ||
+            !recipe.sideDish.isNullOrEmpty()
+        ) {
+            Details(
+                modifier = Modifier.padding(top = 16.dp),
+                preparationTime = recipe.preparationTime,
+                servingCount = recipe.servingCount,
+                sideDish = recipe.sideDish
+            )
+        }
         Column(modifier = Modifier.padding(16.dp)) {
             if (recipe.ingredients.isNotEmpty()) {
                 Text(
@@ -167,33 +183,92 @@ fun Recipe(
 }
 
 @Composable
+private fun Details(
+    modifier: Modifier = Modifier,
+    preparationTime: String? = null,
+    servingCount: String? = null,
+    sideDish: String? = null,
+) {
+    Row(
+        modifier = modifier
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp)
+    ) {
+        preparationTime?.let {
+            DetailItem(
+                label = stringResource(R.string.preparation_time),
+                value = it
+            )
+        }
+        servingCount?.let {
+            DetailItem(
+                label = stringResource(R.string.serving_count),
+                value = it
+            )
+        }
+        sideDish?.let {
+            DetailItem(
+                label = stringResource(R.string.side_dish),
+                value = it
+            )
+        }
+    }
+}
+
+@Composable
+private fun DetailItem(
+    label: String,
+    value: String
+) {
+    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.body2
+        )
+    }
+    Text(
+        text = value,
+        modifier = Modifier.padding(start = 8.dp, end = 24.dp),
+        style = MaterialTheme.typography.body2
+    )
+}
+
+
+@Composable
 private fun Ingredients(
     ingredients: List<RecipeDetail.Ingredient>,
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier) {
-        Column(horizontalAlignment = Alignment.End) {
-            for (ingredient in ingredients) {
-                Text(
-                    text = ingredient.amount ?: "",
-                    style = MaterialTheme.typography.body2
-                )
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Column(horizontalAlignment = Alignment.End) {
+                for (ingredient in ingredients) {
+                    Text(
+                        text = ingredient.amount ?: "",
+                        style = MaterialTheme.typography.body2
+                    )
+                }
             }
-        }
-        Column(modifier = Modifier.padding(start = 8.dp)) {
-            for (ingredient in ingredients) {
-                Text(
-                    text = ingredient.amountUnit ?: "",
-                    style = MaterialTheme.typography.body2
-                )
+            Column(modifier = Modifier.padding(start = 8.dp)) {
+                for (ingredient in ingredients) {
+                    Text(
+                        text = ingredient.amountUnit ?: "",
+                        style = MaterialTheme.typography.body2
+                    )
+                }
             }
         }
         Column(modifier = Modifier.padding(start = 16.dp)) {
             for (ingredient in ingredients) {
-                Text(
-                    text = ingredient.name,
-                    style = MaterialTheme.typography.body2
-                )
+                val alpha = if (ingredient.isGroup) ContentAlpha.medium else ContentAlpha.high
+
+                CompositionLocalProvider(LocalContentAlpha provides alpha) {
+                    Text(
+                        text = ingredient.name,
+                        fontWeight = if (ingredient.isGroup) FontWeight.Bold else FontWeight.Normal,
+                        style = MaterialTheme.typography.body2
+                    )
+                }
             }
         }
     }
