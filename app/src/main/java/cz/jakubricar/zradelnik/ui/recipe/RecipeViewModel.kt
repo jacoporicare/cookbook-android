@@ -41,6 +41,9 @@ class RecipeViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(RecipeUiState(loading = true))
     val uiState: StateFlow<RecipeUiState> = _uiState.asStateFlow()
 
+    val initialSync
+        get() = syncDataRepository.initialSync(app)
+
     fun getRecipe(slug: String) {
         recipeRepository.getRecipe(slug)
             .catch { error ->
@@ -52,6 +55,4 @@ class RecipeViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
     }
-
-    fun initialSync() = syncDataRepository.initialSync(app)
 }

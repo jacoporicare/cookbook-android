@@ -3,6 +3,7 @@
     <string name="app_name">Žrádelník</string>
 
     <string name="generic_error">Něco se pokazilo…</string>
+    <string name="back">Zpět</string>
 
     <!-- Labels -->
     <string name="screen_recipe_list_label">Žrádelník</string>
