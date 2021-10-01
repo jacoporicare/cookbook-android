@@ -205,23 +205,26 @@ fun RecipeList(
     scrollState: LazyListState
 ) {
     LazyColumn(
+        modifier = modifier,
+        state = scrollState,
         contentPadding = rememberInsetsPaddingValues(
             insets = LocalWindowInsets.current.systemBars,
             applyTop = false,
+            additionalStart = 16.dp,
             additionalTop = 16.dp,
-            additionalBottom = 16.dp,
-            additionalStart = 12.dp,
-            additionalEnd = 12.dp
+            additionalEnd = 16.dp,
+            additionalBottom = 16.dp
         ),
-        modifier = modifier,
-        state = scrollState,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(
             items = recipes,
             key = { it[0].id }
         ) { row ->
-            Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            Row(
+                modifier = Modifier.height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
                 Recipe(
                     modifier = Modifier.weight(1f),
                     recipe = row[0],
@@ -250,7 +253,6 @@ fun Recipe(
 ) {
     Card(
         modifier = modifier
-            .padding(horizontal = 4.dp)
             .clickable { navigateToRecipe(recipe.slug) }
             .fillMaxHeight(),
         elevation = 4.dp
