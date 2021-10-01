@@ -3,6 +3,7 @@ package cz.jakubricar.zradelnik.ui.recipe
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -141,10 +142,59 @@ fun Recipe(
                 }
             )
         }
-        MarkdownText(
-            markdown = recipe.directions ?: stringResource(R.string.no_directions),
-            modifier = Modifier.padding(16.dp)
-        )
+        Column(modifier = Modifier.padding(16.dp)) {
+            if (recipe.ingredients.isNotEmpty()) {
+                Text(
+                    text = stringResource(R.string.ingredients),
+                    modifier = Modifier.padding(bottom = 8.dp),
+                    style = MaterialTheme.typography.h6
+                )
+                Ingredients(
+                    ingredients = recipe.ingredients,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+            }
+
+            Text(
+                text = stringResource(R.string.directions),
+                modifier = Modifier.padding(bottom = 8.dp),
+                style = MaterialTheme.typography.h6
+            )
+            MarkdownText(markdown = recipe.directions ?: stringResource(R.string.no_directions))
+        }
         Spacer(modifier = Modifier.navigationBarsHeight())
+    }
+}
+
+@Composable
+private fun Ingredients(
+    ingredients: List<RecipeDetail.Ingredient>,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        Column(horizontalAlignment = Alignment.End) {
+            for (ingredient in ingredients) {
+                Text(
+                    text = ingredient.amount ?: "",
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        }
+        Column(modifier = Modifier.padding(start = 8.dp)) {
+            for (ingredient in ingredients) {
+                Text(
+                    text = ingredient.amountUnit ?: "",
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        }
+        Column(modifier = Modifier.padding(start = 16.dp)) {
+            for (ingredient in ingredients) {
+                Text(
+                    text = ingredient.name,
+                    style = MaterialTheme.typography.body2
+                )
+            }
+        }
     }
 }
