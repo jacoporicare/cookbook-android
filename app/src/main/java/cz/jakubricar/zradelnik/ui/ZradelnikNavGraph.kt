@@ -37,7 +37,7 @@ fun ZradelnikNavGraph(
             deepLinks = listOf(navDeepLink { uriPattern = WEB_URI })
         ) {
             RecipeListScreen(
-                navigateToRecipe = actions.navigateToRecipe
+                onNavigateToRecipe = actions.navigateToRecipe
             )
         }
         composable(

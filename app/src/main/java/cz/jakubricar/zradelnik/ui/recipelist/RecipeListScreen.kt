@@ -35,7 +35,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -54,38 +53,44 @@ import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
+import cz.jakubricar.zradelnik.utils.ErrorMessage
 import cz.jakubricar.zradelnik.utils.isScrolled
 
 @Composable
 fun RecipeListScreen(
     viewModel: RecipeListViewModel = hiltViewModel(),
-    navigateToRecipe: (String) -> Unit,
-    scaffoldState: ScaffoldState = rememberScaffoldState()
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    onNavigateToRecipe: (String) -> Unit
 ) {
-    var searchQuery by remember { mutableStateOf("") }
+    // TODO: Change to var when implemented
+    val searchQuery by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val recipes = remember(uiState.recipes, searchQuery) {
-        filterRecipes(uiState.recipes, searchQuery).chunked(2)
+        filterRecipes(uiState.recipes, searchQuery)
     }
 
     RecipeListScreen(
-        uiState = uiState,
         recipes = recipes,
-        navigateToRecipe = navigateToRecipe,
+        initialLoad = uiState.initialLoad,
+        loading = uiState.loading,
+        errorMessages = uiState.errorMessages,
+        scaffoldState = scaffoldState,
+        onNavigateToRecipe = onNavigateToRecipe,
         onRefreshRecipes = { viewModel.refreshRecipes() },
-        onErrorDismiss = { viewModel.errorShown(it) },
-        scaffoldState = scaffoldState
+        onErrorDismiss = { viewModel.errorShown(it) }
     )
 }
 
 @Composable
 fun RecipeListScreen(
-    uiState: RecipeListUiState,
-    recipes: List<List<Recipe>>,
-    navigateToRecipe: (String) -> Unit,
+    recipes: List<Recipe>,
+    initialLoad: Boolean,
+    loading: Boolean,
+    errorMessages: List<ErrorMessage>,
+    scaffoldState: ScaffoldState,
+    onNavigateToRecipe: (String) -> Unit,
     onRefreshRecipes: () -> Unit,
-    onErrorDismiss: (Long) -> Unit,
-    scaffoldState: ScaffoldState
+    onErrorDismiss: (Long) -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
@@ -115,26 +120,26 @@ fun RecipeListScreen(
         }
     ) { innerPadding ->
         LoadingContent(
-            empty = uiState.initialLoad,
+            empty = initialLoad,
             emptyContent = { FullScreenLoading() },
-            loading = uiState.loading,
+            loading = loading,
             onRefresh = onRefreshRecipes
         ) {
             RecipeListScreenErrorAndContent(
                 recipes = recipes,
-                isShowingErrors = uiState.errorMessages.isNotEmpty(),
-                onRefresh = onRefreshRecipes,
-                navigateToRecipe = navigateToRecipe,
                 modifier = Modifier.padding(innerPadding),
-                scrollState = scrollState
+                isShowingErrors = errorMessages.isNotEmpty(),
+                scrollState = scrollState,
+                onNavigateToRecipe = onNavigateToRecipe,
+                onRefresh = onRefreshRecipes
             )
         }
     }
 
     // Process one error message at a time and show them as Snackbars in the UI
-    if (uiState.errorMessages.isNotEmpty()) {
+    if (errorMessages.isNotEmpty()) {
         // Remember the errorMessage to display on the screen
-        val errorMessage = remember(uiState) { uiState.errorMessages[0] }
+        val errorMessage = remember(errorMessages) { errorMessages[0] }
 
         // Get the text to show on the message from resources
         val errorMessageText = stringResource(errorMessage.messageId)
@@ -161,19 +166,19 @@ fun RecipeListScreen(
 
 @Composable
 private fun RecipeListScreenErrorAndContent(
-    recipes: List<List<Recipe>>,
-    isShowingErrors: Boolean,
-    onRefresh: () -> Unit,
-    navigateToRecipe: (String) -> Unit,
+    recipes: List<Recipe>,
     modifier: Modifier = Modifier,
-    scrollState: LazyListState
+    isShowingErrors: Boolean,
+    scrollState: LazyListState,
+    onNavigateToRecipe: (String) -> Unit,
+    onRefresh: () -> Unit
 ) {
     if (recipes.isNotEmpty()) {
         RecipeList(
             recipes = recipes,
-            navigateToRecipe = navigateToRecipe,
             modifier = modifier,
-            scrollState = scrollState
+            scrollState = scrollState,
+            onNavigateToRecipe = onNavigateToRecipe
         )
     } else if (!isShowingErrors) {
         // if there are no posts, and no error, let the user refresh manually
@@ -199,11 +204,13 @@ private fun RecipeListScreenErrorAndContent(
 
 @Composable
 fun RecipeList(
-    recipes: List<List<Recipe>>,
-    navigateToRecipe: (String) -> Unit,
+    recipes: List<Recipe>,
     modifier: Modifier = Modifier,
-    scrollState: LazyListState
+    scrollState: LazyListState,
+    onNavigateToRecipe: (String) -> Unit
 ) {
+    val chunkedRecipes = remember(recipes) { recipes.chunked(2) }
+
     LazyColumn(
         modifier = modifier,
         state = scrollState,
@@ -218,7 +225,7 @@ fun RecipeList(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(
-            items = recipes,
+            items = chunkedRecipes,
             key = { it[0].id }
         ) { row ->
             Row(
@@ -226,16 +233,16 @@ fun RecipeList(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Recipe(
-                    modifier = Modifier.weight(1f),
                     recipe = row[0],
-                    navigateToRecipe = navigateToRecipe
+                    modifier = Modifier.weight(1f),
+                    onNavigateToRecipe = onNavigateToRecipe
                 )
 
                 if (row.size > 1) {
                     Recipe(
-                        modifier = Modifier.weight(1f),
                         recipe = row[1],
-                        navigateToRecipe = navigateToRecipe
+                        modifier = Modifier.weight(1f),
+                        onNavigateToRecipe = onNavigateToRecipe
                     )
                 } else {
                     Spacer(modifier = Modifier.weight(1f))
@@ -247,13 +254,13 @@ fun RecipeList(
 
 @Composable
 fun Recipe(
-    modifier: Modifier = Modifier,
     recipe: Recipe,
-    navigateToRecipe: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onNavigateToRecipe: (String) -> Unit
 ) {
     Card(
         modifier = modifier
-            .clickable { navigateToRecipe(recipe.slug) }
+            .clickable { onNavigateToRecipe(recipe.slug) }
             .fillMaxHeight(),
         elevation = 4.dp
     ) {
@@ -266,9 +273,9 @@ fun Recipe(
                 shimmerParams = ShimmerParams(
                     baseColor = MaterialTheme.colors.background,
                     highlightColor = MaterialTheme.colors.onBackground,
-                    durationMillis = 700,
                     dropOff = 0.65f,
-                    tilt = 20f
+                    tilt = 20f,
+                    durationMillis = 700
                 ),
                 failure = {
                     Image(
@@ -280,8 +287,8 @@ fun Recipe(
             )
             Text(
                 text = recipe.title,
-                style = MaterialTheme.typography.subtitle1,
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier.padding(8.dp),
+                style = MaterialTheme.typography.subtitle1
             )
         }
     }
@@ -298,7 +305,7 @@ fun DefaultPreview() {
                 title = "Koprovka",
                 imageUrl = "https://develop.api.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=640x640&format=webp"
             ),
-            navigateToRecipe = {}
+            onNavigateToRecipe = {}
         )
     }
 }
