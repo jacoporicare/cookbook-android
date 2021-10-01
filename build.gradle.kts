@@ -19,6 +19,7 @@ subprojects {
     repositories {
         google()
         mavenCentral()
+        maven { url = uri("https://jitpack.io") }
     }
 
     apply(plugin = "com.diffplug.spotless")

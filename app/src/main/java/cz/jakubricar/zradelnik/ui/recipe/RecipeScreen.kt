@@ -1,7 +1,14 @@
 package cz.jakubricar.zradelnik.ui.recipe
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -13,15 +20,20 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.insets.navigationBarsHeight
+import com.skydoves.landscapist.ShimmerParams
+import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
-import cz.jakubricar.zradelnik.utils.isScrolled
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun RecipeScreen(
@@ -59,13 +71,13 @@ fun RecipeScreen(
     loading: Boolean,
     onBack: () -> Unit
 ) {
-    val scrollState = rememberLazyListState()
+    val scrollState = rememberScrollState()
 
     Scaffold(
         topBar = {
             InsetAwareTopAppBar(
                 title = {
-                    Text(text = recipe?.title ?: stringResource(R.string.app_name))
+                    Text(text = recipe?.title ?: stringResource(R.string.recipe_screen_title))
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -75,12 +87,12 @@ fun RecipeScreen(
                         )
                     }
                 },
-                backgroundColor = if (!scrollState.isScrolled) {
+                backgroundColor = if (scrollState.value == 0) {
                     MaterialTheme.colors.background
                 } else {
                     MaterialTheme.colors.surface
                 },
-                elevation = if (!scrollState.isScrolled) 0.dp else 4.dp
+                elevation = if (scrollState.value == 0) 0.dp else 4.dp
             )
         }
     ) { innerPadding ->
@@ -89,19 +101,50 @@ fun RecipeScreen(
         } else {
             Recipe(
                 recipe = recipe,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding),
+                scrollState = scrollState
             )
         }
     }
 }
 
+private val imageHeight = 300.dp
+
 @Composable
 fun Recipe(
     recipe: RecipeDetail,
     modifier: Modifier = Modifier,
+    scrollState: ScrollState
 ) {
-    Text(
-        text = recipe.directions ?: "",
-        modifier = modifier
-    )
+    Column(modifier = modifier.verticalScroll(scrollState)) {
+        recipe.imageUrl?.let { imageUrl ->
+            CoilImage(
+                imageModel = imageUrl,
+                modifier = Modifier.height(imageHeight),
+                alignment = Alignment.TopCenter,
+                contentDescription = stringResource(R.string.recipe_image, recipe.title),
+                shimmerParams = ShimmerParams(
+                    baseColor = MaterialTheme.colors.background,
+                    highlightColor = MaterialTheme.colors.onBackground,
+                    dropOff = 0.65f,
+                    tilt = 20f,
+                    durationMillis = 700
+                ),
+                failure = {
+                    Image(
+                        painter = painterResource(R.drawable.ic_broken_image),
+                        contentDescription = stringResource(R.string.image_failure),
+                        modifier = Modifier
+                            .height(imageHeight)
+                            .fillMaxWidth()
+                    )
+                }
+            )
+        }
+        MarkdownText(
+            markdown = recipe.directions ?: stringResource(R.string.no_directions),
+            modifier = Modifier.padding(16.dp)
+        )
+        Spacer(modifier = Modifier.navigationBarsHeight())
+    }
 }

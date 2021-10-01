@@ -106,7 +106,7 @@ fun RecipeListScreen(
                     IconButton(onClick = { /* TODO: Open search */ }) {
                         Icon(
                             imageVector = Icons.Filled.Search,
-                            contentDescription = stringResource(R.string.action_search)
+                            contentDescription = stringResource(R.string.search_placeholder)
                         )
                     }
                 },
@@ -198,7 +198,7 @@ private fun RecipeListScreenErrorAndContent(
         }
     } else {
         // there's currently an error showing, don't show any content
-        Spacer(modifier.fillMaxSize())
+        Spacer(modifier = modifier.fillMaxSize())
     }
 }
 
