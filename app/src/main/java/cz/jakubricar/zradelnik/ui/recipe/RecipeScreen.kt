@@ -86,7 +86,7 @@ fun RecipeScreen(
         topBar = {
             InsetAwareTopAppBar(
                 title = {
-                    Text(text = recipe?.title ?: stringResource(R.string.recipe_screen_title))
+                    Text(text = recipe?.title ?: stringResource(R.string.recipe))
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {

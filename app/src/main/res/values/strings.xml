@@ -9,9 +9,9 @@
 
     <!-- Toolbar -->
     <string name="search_placeholder">Hledat…</string>
-<!--    <string name="action_refresh">Synchronizovat</string>-->
+    <string name="sync">Synchronizovat</string>
 <!--    <string name="action_side_dishes">Přílohy</string>-->
-<!--    <string name="action_settings">Nastavení</string>-->
+    <string name="settings">Nastavení</string>
 
     <!-- Recipe List -->
     <string name="recipe_image">Fotka receptu %1$s</string>
@@ -19,7 +19,7 @@
     <string name="image_failure">Chyba při načítání fotky</string>
 
     <!-- Recipe -->
-    <string name="recipe_screen_title">Recept</string>
+    <string name="recipe">Recept</string>
     <string name="preparation_time">Doba přípravy:</string>
     <string name="serving_count">Počet porcí:</string>
     <string name="side_dish">Příloha:</string>
