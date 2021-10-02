@@ -126,7 +126,12 @@ fun RecipeListScreen(
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false }
                         ) {
-                            DropdownMenuItem(onClick = { /* TODO: Handle sync! */ }) {
+                            DropdownMenuItem(
+                                onClick = {
+                                    onRefreshRecipes()
+                                    menuExpanded = false
+                                }
+                            ) {
                                 Text(text = stringResource(R.string.sync))
                             }
                             DropdownMenuItem(onClick = { /* TODO: Handle settings! */ }) {
