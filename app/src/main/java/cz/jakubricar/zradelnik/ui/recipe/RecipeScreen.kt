@@ -3,6 +3,7 @@ package cz.jakubricar.zradelnik.ui.recipe
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -161,7 +162,7 @@ fun Recipe(
                 sideDish = recipe.sideDish
             )
         }
-        
+
         Column(modifier = Modifier.padding(16.dp)) {
             if (recipe.ingredients.isNotEmpty()) {
                 Text(
@@ -211,7 +212,8 @@ private fun Details(
     Row(
         modifier = modifier
             .horizontalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp)
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         preparationTime?.let {
             DetailItem(
@@ -239,17 +241,18 @@ private fun DetailItem(
     label: String,
     value: String
 ) {
-    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.body2
+            )
+        }
         Text(
-            text = label,
+            text = value,
             style = MaterialTheme.typography.body2
         )
     }
-    Text(
-        text = value,
-        modifier = Modifier.padding(start = 8.dp, end = 24.dp),
-        style = MaterialTheme.typography.body2
-    )
 }
 
 
