@@ -262,7 +262,7 @@ fun Recipe(
         modifier = modifier
             .clickable { onNavigateToRecipe(recipe.slug) }
             .fillMaxHeight(),
-        elevation = 4.dp
+        elevation = 2.dp
     ) {
         Column {
             CoilImage(

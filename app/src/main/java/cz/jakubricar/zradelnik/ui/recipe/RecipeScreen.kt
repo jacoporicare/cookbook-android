@@ -3,6 +3,7 @@ package cz.jakubricar.zradelnik.ui.recipe
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -147,6 +149,7 @@ fun Recipe(
                 }
             )
         }
+
         if (!recipe.preparationTime.isNullOrEmpty() ||
             !recipe.servingCount.isNullOrEmpty() ||
             !recipe.sideDish.isNullOrEmpty()
@@ -158,6 +161,7 @@ fun Recipe(
                 sideDish = recipe.sideDish
             )
         }
+        
         Column(modifier = Modifier.padding(16.dp)) {
             if (recipe.ingredients.isNotEmpty()) {
                 Text(
@@ -165,10 +169,16 @@ fun Recipe(
                     modifier = Modifier.padding(bottom = 8.dp),
                     style = MaterialTheme.typography.h6
                 )
-                Ingredients(
-                    ingredients = recipe.ingredients,
-                    modifier = Modifier.padding(bottom = 16.dp)
-                )
+                Card(
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .fillMaxWidth(),
+                    elevation = 2.dp
+                ) {
+                    Box(modifier = Modifier.padding(8.dp)) {
+                        Ingredients(ingredients = recipe.ingredients)
+                    }
+                }
             }
 
             Text(
@@ -176,7 +186,16 @@ fun Recipe(
                 modifier = Modifier.padding(bottom = 8.dp),
                 style = MaterialTheme.typography.h6
             )
-            MarkdownText(markdown = recipe.directions ?: stringResource(R.string.no_directions))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                elevation = 2.dp
+            ) {
+                Box(modifier = Modifier.padding(8.dp)) {
+                    MarkdownText(
+                        markdown = recipe.directions ?: stringResource(R.string.no_directions)
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.navigationBarsHeight())
     }
@@ -236,10 +255,9 @@ private fun DetailItem(
 
 @Composable
 private fun Ingredients(
-    ingredients: List<RecipeDetail.Ingredient>,
-    modifier: Modifier = Modifier
+    ingredients: List<RecipeDetail.Ingredient>
 ) {
-    Row(modifier = modifier) {
+    Row {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Column(horizontalAlignment = Alignment.End) {
                 for (ingredient in ingredients) {
