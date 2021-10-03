@@ -76,7 +76,8 @@ import cz.jakubricar.zradelnik.utils.isScrolled
 fun RecipeListScreen(
     viewModel: RecipeListViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
-    onNavigateToRecipe: (String) -> Unit
+    onNavigateToRecipe: (String) -> Unit,
+    onNavigateToSettings: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val recipes = uiState.rememberFilteredRecipes()
@@ -94,6 +95,7 @@ fun RecipeListScreen(
         searchQuery = uiState.searchQuery,
         scaffoldState = scaffoldState,
         onNavigateToRecipe = onNavigateToRecipe,
+        onNavigateToSettings = onNavigateToSettings,
         onRefreshRecipes = { viewModel.refreshRecipes() },
         onErrorDismiss = { viewModel.errorShown(it) },
         onSearchShow = { viewModel.showSearch() },
@@ -112,6 +114,7 @@ fun RecipeListScreen(
     searchQuery: String?,
     scaffoldState: ScaffoldState,
     onNavigateToRecipe: (String) -> Unit,
+    onNavigateToSettings: () -> Unit,
     onRefreshRecipes: () -> Unit,
     onErrorDismiss: (Long) -> Unit,
     onSearchShow: () -> Unit,
@@ -128,10 +131,11 @@ fun RecipeListScreen(
                 searchVisible = searchVisible,
                 searchQuery = searchQuery,
                 scrollState = scrollState,
+                onNavigateToSettings = onNavigateToSettings,
                 onRefreshRecipes = onRefreshRecipes,
                 onSearchHide = onSearchHide,
                 onSearchShow = onSearchShow,
-                onSearchQueryChange = onSearchQueryChange,
+                onSearchQueryChange = onSearchQueryChange
             )
         }
     ) { innerPadding ->
@@ -185,10 +189,11 @@ private fun TopBarContent(
     searchVisible: Boolean,
     searchQuery: String?,
     scrollState: LazyListState,
+    onNavigateToSettings: () -> Unit,
     onRefreshRecipes: () -> Unit,
     onSearchHide: () -> Unit,
     onSearchShow: () -> Unit,
-    onSearchQueryChange: (String?) -> Unit,
+    onSearchQueryChange: (String?) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -279,7 +284,7 @@ private fun TopBarContent(
                     ) {
                         Text(text = stringResource(R.string.sync))
                     }
-                    DropdownMenuItem(onClick = { /* TODO: Handle settings! */ }) {
+                    DropdownMenuItem(onClick = onNavigateToSettings) {
                         Text(text = stringResource(R.string.settings))
                     }
                 }

@@ -12,11 +12,13 @@ import androidx.navigation.navDeepLink
 import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
 import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_SLUG_KEY
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
+import cz.jakubricar.zradelnik.ui.settings.SettingsScreen
 
 object MainDestinations {
 
     const val RECIPE_LIST_ROUTE = "recipelist"
     const val RECIPE_ROUTE = "recipe"
+    const val SETTINGS_ROUTE = "settings"
 }
 
 const val WEB_URI = "https://www.zradelnik.eu"
@@ -37,7 +39,8 @@ fun ZradelnikNavGraph(
             deepLinks = listOf(navDeepLink { uriPattern = WEB_URI })
         ) {
             RecipeListScreen(
-                onNavigateToRecipe = actions.navigateToRecipe
+                onNavigateToRecipe = actions.navigateToRecipe,
+                onNavigateToSettings = actions.navigateToSettings
             )
         }
         composable(
@@ -54,6 +57,13 @@ fun ZradelnikNavGraph(
                 onBack = actions.upPress
             )
         }
+        composable(
+            route = MainDestinations.SETTINGS_ROUTE
+        ) {
+            SettingsScreen(
+                onBack = actions.upPress
+            )
+        }
     }
 }
 
@@ -61,6 +71,10 @@ class MainActions(navController: NavHostController) {
 
     val navigateToRecipe: (String) -> Unit = { slug: String ->
         navController.navigate("${MainDestinations.RECIPE_ROUTE}/$slug")
+    }
+
+    val navigateToSettings: () -> Unit = {
+        navController.navigate(MainDestinations.SETTINGS_ROUTE)
     }
 
     val upPress: () -> Unit = {
