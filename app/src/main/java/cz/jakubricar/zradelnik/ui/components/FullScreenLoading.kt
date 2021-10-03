@@ -7,6 +7,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import com.google.accompanist.insets.navigationBarsPadding
 
 /**
  * Full screen circular progress indicator
@@ -16,6 +17,7 @@ fun FullScreenLoading() {
     Box(
         modifier = Modifier
             .fillMaxSize()
+            .navigationBarsPadding()
             .wrapContentSize(Alignment.Center)
     ) {
         CircularProgressIndicator()
