@@ -9,6 +9,7 @@
 
     <!-- Toolbar -->
     <string name="search_placeholder">Hledat…</string>
+    <string name="search_clear">Vymazat hledání</string>
     <string name="sync">Synchronizovat</string>
 <!--    <string name="action_side_dishes">Přílohy</string>-->
     <string name="settings">Nastavení</string>

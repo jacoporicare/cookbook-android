@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Card
@@ -27,14 +26,16 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
@@ -48,6 +49,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -112,7 +114,7 @@ fun RecipeListScreen(
     onErrorDismiss: (Long) -> Unit,
     onSearchShow: () -> Unit,
     onSearchHide: () -> Unit,
-    onSearchQueryChange: (String) -> Unit
+    onSearchQueryChange: (String?) -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
@@ -184,7 +186,7 @@ private fun TopBarContent(
     onRefreshRecipes: () -> Unit,
     onSearchHide: () -> Unit,
     onSearchShow: () -> Unit,
-    onSearchQueryChange: (String) -> Unit,
+    onSearchQueryChange: (String?) -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -193,7 +195,7 @@ private fun TopBarContent(
             if (!searchVisible) {
                 Text(text = stringResource(R.string.app_name))
             } else {
-                OutlinedTextField(
+                TextField(
                     value = searchQuery ?: "",
                     onValueChange = onSearchQueryChange,
                     modifier = Modifier
@@ -208,12 +210,22 @@ private fun TopBarContent(
                             contentDescription = stringResource(R.string.search_placeholder)
                         )
                     },
+                    trailingIcon = if (!searchQuery.isNullOrEmpty()) {
+                        {
+                            Icon(imageVector = Icons.Filled.Clear,
+                                contentDescription = stringResource(R.string.search_clear),
+                                modifier = Modifier.clickable { onSearchQueryChange(null) }
+                            )
+                        }
+                    } else {
+                        null
+                    },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         autoCorrect = false,
                         imeAction = ImeAction.Search
                     ),
-                    shape = RoundedCornerShape(50)
+                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent)
                 )
             }
         },
