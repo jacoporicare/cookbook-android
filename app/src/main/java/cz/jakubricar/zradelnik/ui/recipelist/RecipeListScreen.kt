@@ -1,5 +1,6 @@
 package cz.jakubricar.zradelnik.ui.recipelist
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,12 +11,15 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
@@ -23,12 +27,14 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
@@ -44,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -67,11 +74,11 @@ fun RecipeListScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onNavigateToRecipe: (String) -> Unit
 ) {
-    // TODO: Change to var when implemented
-    val searchQuery by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
-    val recipes = remember(uiState.recipes, searchQuery) {
-        filterRecipes(uiState.recipes, searchQuery)
+    val recipes = uiState.rememberFilteredRecipes()
+
+    BackHandler(uiState.searchVisible) {
+        viewModel.hideSearch()
     }
 
     RecipeListScreen(
@@ -79,10 +86,15 @@ fun RecipeListScreen(
         initialLoad = uiState.initialLoad,
         loading = uiState.loading,
         errorMessages = uiState.errorMessages,
+        searchVisible = uiState.searchVisible,
+        searchQuery = uiState.searchQuery,
         scaffoldState = scaffoldState,
         onNavigateToRecipe = onNavigateToRecipe,
         onRefreshRecipes = { viewModel.refreshRecipes() },
-        onErrorDismiss = { viewModel.errorShown(it) }
+        onErrorDismiss = { viewModel.errorShown(it) },
+        onSearchShow = { viewModel.showSearch() },
+        onSearchHide = { viewModel.hideSearch() },
+        onSearchQueryChange = { viewModel.setSearchQuery(it) }
     )
 }
 
@@ -92,60 +104,30 @@ fun RecipeListScreen(
     initialLoad: Boolean,
     loading: Boolean,
     errorMessages: List<ErrorMessage>,
+    searchVisible: Boolean,
+    searchQuery: String?,
     scaffoldState: ScaffoldState,
     onNavigateToRecipe: (String) -> Unit,
     onRefreshRecipes: () -> Unit,
-    onErrorDismiss: (Long) -> Unit
+    onErrorDismiss: (Long) -> Unit,
+    onSearchShow: () -> Unit,
+    onSearchHide: () -> Unit,
+    onSearchQueryChange: (String) -> Unit
 ) {
     val scrollState = rememberLazyListState()
-    var menuExpanded by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = { SnackbarHost(hostState = it, modifier = Modifier.systemBarsPadding()) },
         topBar = {
-            InsetAwareTopAppBar(
-                title = {
-                    Text(text = stringResource(R.string.app_name))
-                },
-                actions = {
-                    IconButton(onClick = { /* TODO: Open search */ }) {
-                        Icon(
-                            imageVector = Icons.Filled.Search,
-                            contentDescription = stringResource(R.string.search_placeholder)
-                        )
-                    }
-                    Box {
-                        IconButton(onClick = { menuExpanded = true }) {
-                            Icon(
-                                imageVector = Icons.Default.MoreVert,
-                                contentDescription = null
-                            )
-                        }
-                        DropdownMenu(
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false }
-                        ) {
-                            DropdownMenuItem(
-                                onClick = {
-                                    onRefreshRecipes()
-                                    menuExpanded = false
-                                }
-                            ) {
-                                Text(text = stringResource(R.string.sync))
-                            }
-                            DropdownMenuItem(onClick = { /* TODO: Handle settings! */ }) {
-                                Text(text = stringResource(R.string.settings))
-                            }
-                        }
-                    }
-                },
-                backgroundColor = if (!scrollState.isScrolled) {
-                    MaterialTheme.colors.background
-                } else {
-                    MaterialTheme.colors.surface
-                },
-                elevation = if (!scrollState.isScrolled) 0.dp else 4.dp
+            TopBarContent(
+                searchVisible = searchVisible,
+                searchQuery = searchQuery,
+                scrollState = scrollState,
+                onRefreshRecipes = onRefreshRecipes,
+                onSearchHide = onSearchHide,
+                onSearchShow = onSearchShow,
+                onSearchQueryChange = onSearchQueryChange,
             )
         }
     ) { innerPadding ->
@@ -192,6 +174,104 @@ fun RecipeListScreen(
             onErrorDismissState(errorMessage.id)
         }
     }
+}
+
+@Composable
+private fun TopBarContent(
+    searchVisible: Boolean,
+    searchQuery: String?,
+    scrollState: LazyListState,
+    onRefreshRecipes: () -> Unit,
+    onSearchHide: () -> Unit,
+    onSearchShow: () -> Unit,
+    onSearchQueryChange: (String) -> Unit,
+) {
+    var menuExpanded by remember { mutableStateOf(false) }
+
+    InsetAwareTopAppBar(
+        title = {
+            if (!searchVisible) {
+                Text(text = stringResource(R.string.app_name))
+            } else {
+                OutlinedTextField(
+                    value = searchQuery ?: "",
+                    onValueChange = onSearchQueryChange,
+                    modifier = Modifier
+                        .padding(end = 12.dp)
+                        .fillMaxWidth(),
+                    placeholder = {
+                        Text(text = stringResource(R.string.search_placeholder))
+                    },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Search,
+                            contentDescription = stringResource(R.string.search_placeholder)
+                        )
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        autoCorrect = false,
+                        imeAction = ImeAction.Search
+                    ),
+                    shape = RoundedCornerShape(50)
+                )
+            }
+        },
+        navigationIcon = if (searchVisible) {
+            {
+                IconButton(onClick = onSearchHide) {
+                    Icon(
+                        imageVector = Icons.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.back)
+                    )
+                }
+            }
+        } else {
+            null
+        },
+        actions = {
+            if (searchVisible) {
+                return@InsetAwareTopAppBar
+            }
+
+            IconButton(onClick = onSearchShow) {
+                Icon(
+                    imageVector = Icons.Filled.Search,
+                    contentDescription = stringResource(R.string.search_placeholder)
+                )
+            }
+            Box {
+                IconButton(onClick = { menuExpanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = null
+                    )
+                }
+                DropdownMenu(
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false }
+                ) {
+                    DropdownMenuItem(
+                        onClick = {
+                            onRefreshRecipes()
+                            menuExpanded = false
+                        }
+                    ) {
+                        Text(text = stringResource(R.string.sync))
+                    }
+                    DropdownMenuItem(onClick = { /* TODO: Handle settings! */ }) {
+                        Text(text = stringResource(R.string.settings))
+                    }
+                }
+            }
+        },
+        backgroundColor = if (!scrollState.isScrolled) {
+            MaterialTheme.colors.background
+        } else {
+            MaterialTheme.colors.surface
+        },
+        elevation = if (!scrollState.isScrolled) 0.dp else 4.dp
+    )
 }
 
 @Composable
@@ -245,7 +325,7 @@ fun RecipeList(
         modifier = modifier,
         state = scrollState,
         contentPadding = rememberInsetsPaddingValues(
-            insets = LocalWindowInsets.current.systemBars,
+            insets = LocalWindowInsets.current.systemBars + LocalWindowInsets.current.ime,
             applyTop = false,
             additionalStart = 16.dp,
             additionalTop = 16.dp,

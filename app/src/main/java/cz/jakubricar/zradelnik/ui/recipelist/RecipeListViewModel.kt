@@ -1,6 +1,8 @@
 package cz.jakubricar.zradelnik.ui.recipelist
 
 import android.app.Application
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.R
@@ -26,11 +28,28 @@ import javax.inject.Inject
 data class RecipeListUiState(
     val recipes: List<Recipe> = emptyList(),
     val loading: Boolean = false,
-    val errorMessages: List<ErrorMessage> = emptyList()
+    val errorMessages: List<ErrorMessage> = emptyList(),
+    val searchQuery: String? = null,
+    val searchVisible: Boolean = false
 ) {
 
     val initialLoad: Boolean
         get() = recipes.isEmpty() && loading
+
+    @Composable
+    fun rememberFilteredRecipes(): List<Recipe> {
+        return remember(recipes, searchQuery) {
+            if (searchQuery.isNullOrBlank()) {
+                recipes
+            } else {
+                recipes.filter {
+                    it.title
+                        .unaccent()
+                        .contains(searchQuery.unaccent(), true)
+                }
+            }
+        }
+    }
 }
 
 @HiltViewModel
@@ -103,12 +122,16 @@ class RecipeListViewModel @Inject constructor(
             currentUiState.copy(errorMessages = errorMessages)
         }
     }
-}
 
-fun filterRecipes(recipes: List<Recipe>, query: String?): List<Recipe> {
-    return if (query.isNullOrBlank()) {
-        recipes
-    } else {
-        recipes.filter { it.title.unaccent().contains(query.unaccent(), true) }
+    fun showSearch() {
+        _uiState.update { it.copy(searchVisible = true) }
+    }
+
+    fun hideSearch() {
+        _uiState.update { it.copy(searchVisible = false, searchQuery = null) }
+    }
+
+    fun setSearchQuery(query: String?) {
+        _uiState.update { it.copy(searchQuery = query) }
     }
 }
