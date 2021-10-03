@@ -2,6 +2,7 @@ package cz.jakubricar.zradelnik.ui.recipelist
 
 import android.app.Application
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
@@ -25,6 +26,7 @@ import java.text.Collator
 import java.util.UUID
 import javax.inject.Inject
 
+@Immutable
 data class RecipeListUiState(
     val recipes: List<Recipe> = emptyList(),
     val loading: Boolean = false,

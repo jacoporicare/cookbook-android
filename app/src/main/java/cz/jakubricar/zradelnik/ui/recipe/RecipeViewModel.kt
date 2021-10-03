@@ -1,6 +1,7 @@
 package cz.jakubricar.zradelnik.ui.recipe
 
 import android.app.Application
+import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.model.RecipeDetail
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.update
 import timber.log.Timber
 import javax.inject.Inject
 
+@Immutable
 data class RecipeUiState(
     val recipe: RecipeDetail? = null,
     val loading: Boolean = false

@@ -49,6 +49,8 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -189,6 +191,7 @@ private fun TopBarContent(
     onSearchQueryChange: (String?) -> Unit,
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
+    val focusRequester = remember { FocusRequester() }
 
     InsetAwareTopAppBar(
         title = {
@@ -200,7 +203,8 @@ private fun TopBarContent(
                     onValueChange = onSearchQueryChange,
                     modifier = Modifier
                         .padding(end = 12.dp)
-                        .fillMaxWidth(),
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
                     placeholder = {
                         Text(text = stringResource(R.string.search_placeholder))
                     },
@@ -227,6 +231,10 @@ private fun TopBarContent(
                     ),
                     colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent)
                 )
+
+                LaunchedEffect(true) {
+                    focusRequester.requestFocus()
+                }
             }
         },
         navigationIcon = if (searchVisible) {
