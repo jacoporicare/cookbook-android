@@ -79,9 +79,7 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
         freeCompilerArgs =
             freeCompilerArgs + listOf(
-                "-Xopt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-Xopt-in=kotlinx.coroutines.FlowPreview",
-                "-Xallow-result-return-type"
+                "-Xopt-in=kotlin.RequiresOptIn"
             )
     }
 

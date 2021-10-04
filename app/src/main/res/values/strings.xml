@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">Žrádelník</string>
 
-<!--    <string name="generic_error">Něco se pokazilo…</string>-->
+    <!--    <string name="generic_error">Něco se pokazilo…</string>-->
     <string name="back">Zpět</string>
     <string name="try_again">Zkusit znovu</string>
     <string name="connection_error">Nastal problém s připojením.</string>
@@ -11,7 +11,7 @@
     <string name="search_placeholder">Hledat…</string>
     <string name="search_clear">Vymazat hledání</string>
     <string name="sync">Synchronizovat</string>
-<!--    <string name="action_side_dishes">Přílohy</string>-->
+    <!--    <string name="action_side_dishes">Přílohy</string>-->
     <string name="settings">Nastavení</string>
 
     <!-- Recipe List -->
@@ -28,43 +28,38 @@
     <string name="directions">Postup</string>
     <string name="no_directions">Kde nic tu nic.</string>
 
-    <!-- Preferences -->
-<!--    <string name="action_login">Přihlásit</string>-->
-<!--    <string name="action_logout">Odhlásit</string>-->
+    <!-- Settings -->
+    <!--    <string name="action_login">Přihlásit</string>-->
+    <!--    <string name="action_logout">Odhlásit</string>-->
 
     <!-- Theme -->
-<!--    <string name="preference_theme_title">Motiv</string>-->
-    <!--    <string name="preference_theme_key">theme</string>-->
-<!--    <string name="preference_theme_entries_light">Světlý</string>-->
-<!--    <string name="preference_theme_entries_dark">Tmavý</string>-->
-<!--    <string name="preference_theme_entries_default">Výchozí nastavení systému</string>-->
-<!--    <string name="preference_theme_values_light">light</string>-->
-<!--    <string name="preference_theme_values_dark">dark</string>-->
-<!--    <string name="preference_theme_values_default">default</string>-->
+    <string name="settings_theme">Motiv</string>
+    <string name="settings_theme_light">Světlý</string>
+    <string name="settings_theme_dark">Tmavý</string>
+    <string name="settings_theme_default">Výchozí nastavení systému</string>
 
     <!-- Data Category -->
-<!--    <string name="preference_category_data_title">Využití dat</string>-->
+    <string name="settings_data_usage">Využití dat</string>
 
-    <!-- Sync On -->
-<!--    <string name="preference_sync_on_title">Synchronizace</string>-->
-<!--    <string name="preference_sync_on_summary">Naposledy: %1$s</string>-->
+    <!-- Sync -->
+    <string name="settings_sync">Synchronizace</string>
+    <string name="settings_sync_last_date">Naposledy: %1$s</string>
 
-    <!-- Sync Freq -->
-<!--    <string name="preference_sync_title">Frekvence synchronizace</string>-->
-<!--    <string name="preference_sync_entries_never">Nikdy</string>-->
-<!--    <string name="preference_sync_entries_daily">Denně</string>-->
-<!--    <string name="preference_sync_entries_weekly">Týdně</string>-->
+    <!-- Sync Frequency -->
+    <string name="settings_sync_frequency">Frekvence synchronizace</string>
+    <string name="settings_sync_frequency_daily">Denně</string>
+    <string name="settings_sync_frequency_weekly">Týdně</string>
 
-    <!-- Sync Mobile Data -->
-<!--    <string name="preference_sync_wifi_title">Synchronizovat pouze přes Wi-Fi</string>-->
-<!--    <string name="preference_sync_wifi_summary">Není-li připojení Wi-Fi k dispozici, bude synchronizace pozastavena.</string>-->
+    <!-- Sync Wifi Only -->
+    <string name="settings_sync_wifi_only">Synchronizovat pouze přes Wi-Fi</string>
+    <string name="settings_sync_wifi_only_summary">Není-li připojení Wi-Fi k dispozici, bude synchronizace pozastavena.</string>
 
     <!-- Login -->
-<!--    <string name="login_hint_username">Uživatelské jméno</string>-->
-<!--    <string name="login_hint_password">Heslo</string>-->
-<!--    <string name="login_action_sign_in">Přihlásit</string>-->
+    <!--    <string name="login_hint_username">Uživatelské jméno</string>-->
+    <!--    <string name="login_hint_password">Heslo</string>-->
+    <!--    <string name="login_action_sign_in">Přihlásit</string>-->
     <string name="login_invalid_username">Uživatelské jméno je povinné</string>
     <string name="login_invalid_password">Heslo je povinné</string>
-<!--    <string name="login_failed">Neplatné uživatelské jméno nebo heslo.</string>-->
+    <!--    <string name="login_failed">Neplatné uživatelské jméno nebo heslo.</string>-->
     <string name="login_account_already_exists">Účet pro Žrádelník již existuje.</string>
 </resources>
