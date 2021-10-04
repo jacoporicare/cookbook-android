@@ -1,28 +1,42 @@
 package cz.jakubricar.zradelnik.ui.settings
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,7 +60,11 @@ fun SettingsScreen(
     SettingsScreen(
         settings = uiState.settings,
         loading = uiState.loading,
-        onBack = onBack
+        onBack = onBack,
+        onThemeChange = { viewModel.setTheme(it) },
+        onSyncChange = { viewModel.setSync(it) },
+        onSyncFrequencyChange = { viewModel.setSyncFrequency(it) },
+        onSyncWifiOnlyChange = { viewModel.setSyncWifiOnly(it) }
     )
 }
 
@@ -54,7 +72,11 @@ fun SettingsScreen(
 fun SettingsScreen(
     settings: Settings?,
     loading: Boolean,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onThemeChange: (Settings.Theme) -> Unit,
+    onSyncChange: (Boolean) -> Unit,
+    onSyncFrequencyChange: (Settings.SyncFrequency) -> Unit,
+    onSyncWifiOnlyChange: (Boolean) -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -87,7 +109,11 @@ fun SettingsScreen(
             Settings(
                 settings = settings,
                 modifier = Modifier.padding(innerPadding),
-                scrollState = scrollState
+                scrollState = scrollState,
+                onThemeChange = onThemeChange,
+                onSyncChange = onSyncChange,
+                onSyncFrequencyChange = onSyncFrequencyChange,
+                onSyncWifiOnlyChange = onSyncWifiOnlyChange
             )
         }
     }
@@ -99,8 +125,15 @@ fun Settings(
     // TODO: use settings
     settings: Settings,
     modifier: Modifier = Modifier,
-    scrollState: ScrollState = rememberScrollState()
+    scrollState: ScrollState = rememberScrollState(),
+    onThemeChange: (Settings.Theme) -> Unit,
+    onSyncChange: (Boolean) -> Unit,
+    onSyncFrequencyChange: (Settings.SyncFrequency) -> Unit,
+    onSyncWifiOnlyChange: (Boolean) -> Unit
 ) {
+    var themeDialogOpened by remember { mutableStateOf(false) }
+    var syncFrequencyDialogOpened by remember { mutableStateOf(false) }
+
     val dateFormat = DateFormat.getDateTimeInstance(
         DateFormat.DEFAULT,
         DateFormat.SHORT,
@@ -111,8 +144,21 @@ fun Settings(
 
     Column(modifier = modifier.verticalScroll(scrollState)) {
         ListItem(
-            text = { Text(text = stringResource(R.string.settings_theme)) },
-            secondaryText = { Text(text = stringResource(R.string.settings_theme_default)) }
+            text = {
+                Text(text = stringResource(R.string.settings_theme))
+            },
+            secondaryText = {
+                Text(
+                    text = stringResource(
+                        when (settings.theme) {
+                            Settings.Theme.LIGHT -> R.string.settings_theme_light
+                            Settings.Theme.DARK -> R.string.settings_theme_dark
+                            Settings.Theme.DEFAULT -> R.string.settings_theme_default
+                        }
+                    )
+                )
+            },
+            modifier = Modifier.clickable { themeDialogOpened = true }
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
@@ -122,29 +168,168 @@ fun Settings(
             style = MaterialTheme.typography.body2
         )
         ListItem(
-            text = { Text(text = stringResource(R.string.settings_sync)) },
+            text = {
+                Text(text = stringResource(R.string.settings_sync))
+            },
             secondaryText = {
                 Text(text = stringResource(R.string.settings_sync_last_date, lastSync))
             },
-            trailing = { Switch(checked = true, onCheckedChange = {}) }
+            trailing = {
+                Switch(
+                    checked = settings.sync,
+                    onCheckedChange = onSyncChange
+                )
+            },
+            modifier = Modifier.clickable { onSyncChange(!settings.sync) }
         )
         Divider()
         ListItem(
-            text = { Text(text = stringResource(R.string.settings_sync_frequency)) },
+            text = {
+                Text(text = stringResource(R.string.settings_sync_frequency))
+            },
             secondaryText = {
-                Text(text = stringResource(R.string.settings_sync_frequency_daily))
-            }
+                Text(
+                    text = stringResource(
+                        when (settings.syncFrequency) {
+                            Settings.SyncFrequency.DAILY -> R.string.settings_sync_frequency_daily
+                            Settings.SyncFrequency.WEEKLY -> R.string.settings_sync_frequency_weekly
+                        }
+                    )
+                )
+            },
+            modifier = Modifier.clickable { syncFrequencyDialogOpened = true }
         )
         Divider()
         ListItem(
-            text = { Text(text = stringResource(R.string.settings_sync_wifi_only)) },
+            text = {
+                Text(text = stringResource(R.string.settings_sync_wifi_only))
+            },
             secondaryText = {
                 Text(text = stringResource(R.string.settings_sync_wifi_only_summary))
             },
-            trailing = { Switch(checked = true, onCheckedChange = {}) }
+            trailing = {
+                Switch(
+                    checked = settings.syncWifiOnly,
+                    onCheckedChange = onSyncWifiOnlyChange
+                )
+            },
+            modifier = Modifier.clickable { onSyncWifiOnlyChange(!settings.syncWifiOnly) }
         )
         Spacer(modifier = Modifier.navigationBarsHeight())
     }
+
+    if (themeDialogOpened) {
+        ListSettingsDialog(
+            title = stringResource(R.string.settings_theme),
+            options = listOf(
+                ListOption(
+                    label = stringResource(R.string.settings_theme_light),
+                    value = Settings.Theme.LIGHT
+                ),
+                ListOption(
+                    label = stringResource(R.string.settings_theme_dark),
+                    value = Settings.Theme.DARK
+                ),
+                ListOption(
+                    label = stringResource(R.string.settings_theme_default),
+                    value = Settings.Theme.DEFAULT
+                )
+            ),
+            selectedValue = settings.theme,
+            onSelect = {
+                themeDialogOpened = false
+                onThemeChange(it)
+            },
+            onDismiss = { themeDialogOpened = false }
+        )
+    }
+
+    if (syncFrequencyDialogOpened) {
+        ListSettingsDialog(
+            title = stringResource(R.string.settings_sync_frequency),
+            options = listOf(
+                ListOption(
+                    label = stringResource(R.string.settings_sync_frequency_daily),
+                    value = Settings.SyncFrequency.DAILY
+                ),
+                ListOption(
+                    label = stringResource(R.string.settings_sync_frequency_weekly),
+                    value = Settings.SyncFrequency.WEEKLY
+                )
+            ),
+            selectedValue = settings.syncFrequency,
+            onSelect = {
+                syncFrequencyDialogOpened = false
+                onSyncFrequencyChange(it)
+            },
+            onDismiss = { syncFrequencyDialogOpened = false }
+        )
+    }
+}
+
+data class ListOption<T>(
+    val label: String,
+    val value: T
+)
+
+@Composable
+fun <T> ListSettingsDialog(
+    title: String,
+    options: List<ListOption<T>>,
+    selectedValue: T,
+    onSelect: (T) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.h6
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.selectableGroup(),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                for (option in options) {
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = option.value == selectedValue,
+                                onClick = { onSelect(option.value) },
+                                role = Role.RadioButton
+                            ),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = option.value == selectedValue,
+                            onClick = null
+                        )
+                        Text(
+                            text = option.label,
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                }
+            }
+        },
+        buttons = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 16.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(onClick = onDismiss) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            }
+        }
+    )
 }
 
 @Preview(showBackground = true)
@@ -157,7 +342,11 @@ fun SettingsPreview() {
                 sync = true,
                 syncFrequency = Settings.SyncFrequency.DAILY,
                 syncWifiOnly = true
-            )
+            ),
+            onThemeChange = { },
+            onSyncChange = { },
+            onSyncFrequencyChange = { },
+            onSyncWifiOnlyChange = { }
         )
     }
 }
