@@ -10,6 +10,7 @@ import cz.jakubricar.zradelnik.getSyncFrequency
 import cz.jakubricar.zradelnik.getSyncWifiOnly
 import cz.jakubricar.zradelnik.getTheme
 import cz.jakubricar.zradelnik.model.Settings
+import cz.jakubricar.zradelnik.work.setupPeriodicSyncDataWork
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,7 +26,7 @@ data class SettingsUiState(
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    app: Application
+    private val app: Application
 ) : AndroidViewModel(app) {
 
     private val _uiState = MutableStateFlow(SettingsUiState(loading = true))
@@ -34,7 +35,6 @@ class SettingsViewModel @Inject constructor(
     private val prefManager = PreferenceManager.getDefaultSharedPreferences(app)
 
     init {
-
         _uiState.update { uiState ->
             uiState.copy(
                 settings = Settings(
@@ -56,15 +56,18 @@ class SettingsViewModel @Inject constructor(
     fun setSync(sync: Boolean) {
         prefManager.edit { putBoolean(Settings.Keys.SYNC, sync) }
         _uiState.update { it.copy(settings = it.settings?.copy(sync = sync)) }
+        app.setupPeriodicSyncDataWork(newEnabled = sync)
     }
 
     fun setSyncFrequency(syncFrequency: Settings.SyncFrequency) {
         prefManager.edit { putString(Settings.Keys.SYNC_FREQUENCY, syncFrequency.name.lowercase()) }
         _uiState.update { it.copy(settings = it.settings?.copy(syncFrequency = syncFrequency)) }
+        app.setupPeriodicSyncDataWork(newSyncFrequency = syncFrequency)
     }
 
     fun setSyncWifiOnly(syncWifiOnly: Boolean) {
         prefManager.edit { putBoolean(Settings.Keys.SYNC_WIFI_ONLY, syncWifiOnly) }
         _uiState.update { it.copy(settings = it.settings?.copy(syncWifiOnly = syncWifiOnly)) }
+        app.setupPeriodicSyncDataWork(newWifiOnly = syncWifiOnly)
     }
 }
