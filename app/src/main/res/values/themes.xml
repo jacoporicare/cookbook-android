@@ -5,9 +5,7 @@
      don't affect the Composable functions, just the color of the Status Bar.
      For the colors used by the Composable functions, see Theme.kt -->
     <style name="Theme.Zradelnik" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimary">@color/blue_400</item>
-        <item name="colorPrimaryDark">@color/blue_gray_600</item>
-        <item name="android:statusBarColor">@color/blue_gray_900</item>
+        <item name="android:statusBarColor">@color/gray_50</item>
     </style>
 
 </resources>

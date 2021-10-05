@@ -152,7 +152,7 @@ fun Settings(
         Text(
             text = stringResource(R.string.settings_data_usage),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = MaterialTheme.colors.secondary,
+            color = MaterialTheme.colors.secondaryVariant,
             style = MaterialTheme.typography.body2
         )
         ListItem(
