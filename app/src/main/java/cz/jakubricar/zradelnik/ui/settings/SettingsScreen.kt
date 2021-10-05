@@ -46,9 +46,6 @@ import cz.jakubricar.zradelnik.model.Settings
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
-import java.text.DateFormat
-import java.time.Instant
-import java.util.Locale
 
 @Composable
 fun SettingsScreen(
@@ -122,7 +119,6 @@ fun SettingsScreen(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Settings(
-    // TODO: use settings
     settings: Settings,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
@@ -133,14 +129,6 @@ fun Settings(
 ) {
     var themeDialogOpened by remember { mutableStateOf(false) }
     var syncFrequencyDialogOpened by remember { mutableStateOf(false) }
-
-    val dateFormat = DateFormat.getDateTimeInstance(
-        DateFormat.DEFAULT,
-        DateFormat.SHORT,
-        Locale.getDefault()
-    )
-    // TODO: use settings
-    val lastSync = dateFormat.format(Instant.now().epochSecond * 1000)
 
     Column(modifier = modifier.verticalScroll(scrollState)) {
         ListItem(
@@ -172,7 +160,7 @@ fun Settings(
                 Text(text = stringResource(R.string.settings_sync))
             },
             secondaryText = {
-                Text(text = stringResource(R.string.settings_sync_last_date, lastSync))
+                Text(text = stringResource(R.string.settings_sync_last_date, settings.lastSyncDate))
             },
             trailing = {
                 Switch(
@@ -341,7 +329,8 @@ fun SettingsPreview() {
                 theme = Settings.Theme.DEFAULT,
                 sync = true,
                 syncFrequency = Settings.SyncFrequency.DAILY,
-                syncWifiOnly = true
+                syncWifiOnly = true,
+                lastSyncDate = "5. 10. 2021 12:56"
             ),
             onThemeChange = { },
             onSyncChange = { },

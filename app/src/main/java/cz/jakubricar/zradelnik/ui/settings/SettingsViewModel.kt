@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.AndroidViewModel
 import androidx.preference.PreferenceManager
+import cz.jakubricar.zradelnik.getAppSharedPreferences
 import cz.jakubricar.zradelnik.getSync
 import cz.jakubricar.zradelnik.getSyncFrequency
 import cz.jakubricar.zradelnik.getSyncWifiOnly
@@ -19,6 +20,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 
 @Immutable
@@ -44,7 +50,15 @@ class SettingsViewModel @Inject constructor(
                     theme = prefManager.getTheme(),
                     sync = prefManager.getSync(),
                     syncFrequency = prefManager.getSyncFrequency(),
-                    syncWifiOnly = prefManager.getSyncWifiOnly()
+                    syncWifiOnly = prefManager.getSyncWifiOnly(),
+                    lastSyncDate = DateTimeFormatter
+                        .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+                        .format(
+                            LocalDateTime.ofInstant(
+                                Instant.ofEpochMilli(app.getAppSharedPreferences().lastSyncDate),
+                                ZoneId.systemDefault()
+                            )
+                        )
                 ),
                 loading = false
             )
