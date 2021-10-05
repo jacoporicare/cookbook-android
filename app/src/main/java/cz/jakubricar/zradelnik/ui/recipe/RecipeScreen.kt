@@ -263,7 +263,7 @@ private fun Ingredients(
     Row {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Column(horizontalAlignment = Alignment.End) {
-                for (ingredient in ingredients) {
+                ingredients.forEach { ingredient ->
                     Text(
                         text = ingredient.amount ?: "",
                         style = MaterialTheme.typography.body2
@@ -271,7 +271,7 @@ private fun Ingredients(
                 }
             }
             Column(modifier = Modifier.padding(start = 8.dp)) {
-                for (ingredient in ingredients) {
+                ingredients.forEach { ingredient ->
                     Text(
                         text = ingredient.amountUnit ?: "",
                         style = MaterialTheme.typography.body2
@@ -280,7 +280,7 @@ private fun Ingredients(
             }
         }
         Column(modifier = Modifier.padding(start = 16.dp)) {
-            for (ingredient in ingredients) {
+            ingredients.forEach { ingredient ->
                 val alpha = if (ingredient.isGroup) ContentAlpha.medium else ContentAlpha.high
 
                 CompositionLocalProvider(LocalContentAlpha provides alpha) {

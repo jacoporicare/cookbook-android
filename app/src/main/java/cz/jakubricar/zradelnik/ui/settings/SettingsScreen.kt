@@ -13,7 +13,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.AlertDialog
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -22,6 +21,7 @@ import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -39,6 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsHeight
 import cz.jakubricar.zradelnik.R
@@ -268,56 +269,62 @@ fun <T> ListSettingsDialog(
     onSelect: (T) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.h6
-            )
-        },
-        text = {
-            Column(
-                modifier = Modifier.selectableGroup(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                for (option in options) {
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                            .selectable(
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(shape = MaterialTheme.shapes.medium) {
+            Column {
+                Text(
+                    text = title,
+                    modifier = Modifier.padding(
+                        start = 24.dp,
+                        top = 16.dp,
+                        end = 24.dp,
+                        bottom = 12.dp
+                    ),
+                    style = MaterialTheme.typography.h6
+                )
+                Column(
+                    modifier = Modifier
+                        .selectableGroup()
+                        .padding(bottom = 8.dp)
+                ) {
+                    options.forEach { option ->
+                        Row(
+                            Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = option.value == selectedValue,
+                                    onClick = { onSelect(option.value) },
+                                    role = Role.RadioButton
+                                )
+                                .padding(horizontal = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(24.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(
                                 selected = option.value == selectedValue,
-                                onClick = { onSelect(option.value) },
-                                role = Role.RadioButton
-                            ),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(
-                            selected = option.value == selectedValue,
-                            onClick = null
-                        )
-                        Text(
-                            text = option.label,
-                            style = MaterialTheme.typography.body1
-                        )
+                                onClick = null,
+                                modifier = Modifier.padding(vertical = 12.dp),
+                            )
+                            Text(
+                                text = option.label,
+                                style = MaterialTheme.typography.body1
+                            )
+                        }
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(end = 24.dp, bottom = 16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text(text = stringResource(R.string.cancel))
                     }
                 }
             }
-        },
-        buttons = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(end = 16.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                TextButton(onClick = onDismiss) {
-                    Text(text = stringResource(R.string.cancel))
-                }
-            }
         }
-    )
+    }
 }
 
 @Preview(showBackground = true)
