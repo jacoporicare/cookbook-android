@@ -7,10 +7,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -63,7 +61,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.insets.systemBarsPadding
-import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.Recipe
@@ -369,10 +366,7 @@ fun RecipeList(
             items = chunkedRecipes,
             key = { it[0].id }
         ) { row ->
-            Row(
-                modifier = Modifier.height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                 row.forEach { recipe ->
                     Recipe(
                         recipe = recipe,
@@ -398,9 +392,7 @@ fun Recipe(
     onNavigateToRecipe: (String) -> Unit
 ) {
     Card(
-        modifier = modifier
-            .clickable { onNavigateToRecipe(recipe.slug) }
-            .fillMaxHeight(),
+        modifier = modifier.clickable { onNavigateToRecipe(recipe.slug) },
         elevation = 2.dp
     ) {
         Column {
@@ -409,13 +401,6 @@ fun Recipe(
                 modifier = Modifier.height(150.dp),
                 alignment = Alignment.TopCenter,
                 contentDescription = stringResource(R.string.recipe_image, recipe.title),
-                shimmerParams = ShimmerParams(
-                    baseColor = MaterialTheme.colors.background,
-                    highlightColor = MaterialTheme.colors.onBackground,
-                    dropOff = 0.65f,
-                    tilt = 20f,
-                    durationMillis = 700
-                ),
                 failure = {
                     Image(
                         painter = painterResource(R.drawable.ic_broken_image),
