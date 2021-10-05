@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -315,10 +316,15 @@ fun <T> ListSettingsDialog(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 24.dp, bottom = 16.dp),
+                        .padding(end = 8.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    TextButton(onClick = onDismiss) {
+                    TextButton(
+                        onClick = onDismiss,
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colors.secondary
+                        )
+                    ) {
                         Text(text = stringResource(R.string.cancel))
                     }
                 }
