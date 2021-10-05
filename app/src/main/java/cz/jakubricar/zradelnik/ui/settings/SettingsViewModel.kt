@@ -2,7 +2,6 @@ package cz.jakubricar.zradelnik.ui.settings
 
 import android.app.Application
 import androidx.compose.runtime.Immutable
-import androidx.core.content.edit
 import androidx.lifecycle.AndroidViewModel
 import androidx.preference.PreferenceManager
 import cz.jakubricar.zradelnik.getSync
@@ -10,6 +9,10 @@ import cz.jakubricar.zradelnik.getSyncFrequency
 import cz.jakubricar.zradelnik.getSyncWifiOnly
 import cz.jakubricar.zradelnik.getTheme
 import cz.jakubricar.zradelnik.model.Settings
+import cz.jakubricar.zradelnik.setSync
+import cz.jakubricar.zradelnik.setSyncFrequency
+import cz.jakubricar.zradelnik.setSyncWifiOnly
+import cz.jakubricar.zradelnik.setTheme
 import cz.jakubricar.zradelnik.work.setupPeriodicSyncDataWork
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,25 +52,25 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setTheme(theme: Settings.Theme) {
-        prefManager.edit { putString(Settings.Keys.THEME, theme.name.lowercase()) }
         _uiState.update { it.copy(settings = it.settings?.copy(theme = theme)) }
+        prefManager.setTheme(theme)
     }
 
     fun setSync(sync: Boolean) {
-        prefManager.edit { putBoolean(Settings.Keys.SYNC, sync) }
         _uiState.update { it.copy(settings = it.settings?.copy(sync = sync)) }
-        app.setupPeriodicSyncDataWork(newEnabled = sync)
+        prefManager.setSync(sync)
+        app.setupPeriodicSyncDataWork(newSync = sync)
     }
 
     fun setSyncFrequency(syncFrequency: Settings.SyncFrequency) {
-        prefManager.edit { putString(Settings.Keys.SYNC_FREQUENCY, syncFrequency.name.lowercase()) }
         _uiState.update { it.copy(settings = it.settings?.copy(syncFrequency = syncFrequency)) }
+        prefManager.setSyncFrequency(syncFrequency)
         app.setupPeriodicSyncDataWork(newSyncFrequency = syncFrequency)
     }
 
     fun setSyncWifiOnly(syncWifiOnly: Boolean) {
-        prefManager.edit { putBoolean(Settings.Keys.SYNC_WIFI_ONLY, syncWifiOnly) }
         _uiState.update { it.copy(settings = it.settings?.copy(syncWifiOnly = syncWifiOnly)) }
+        prefManager.setSyncWifiOnly(syncWifiOnly)
         app.setupPeriodicSyncDataWork(newWifiOnly = syncWifiOnly)
     }
 }

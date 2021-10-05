@@ -45,15 +45,15 @@ class SyncDataWorker @AssistedInject constructor(
 }
 
 fun Context.setupPeriodicSyncDataWork(
-    newEnabled: Boolean? = null,
+    newSync: Boolean? = null,
     newSyncFrequency: Settings.SyncFrequency? = null,
     newWifiOnly: Boolean? = null
 ) {
     val appPreferences = getAppSharedPreferences()
     val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-    val enabled = newEnabled ?: preferences.getSync()
+    val sync = newSync ?: preferences.getSync()
 
-    if (!enabled) {
+    if (!sync) {
         WorkManager.getInstance(this).cancelUniqueWork(WORK_NAME)
         return
     }
