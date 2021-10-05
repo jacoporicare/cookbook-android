@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -36,7 +37,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsHeight
-import com.skydoves.landscapist.ShimmerParams
 import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.RecipeDetail
@@ -132,20 +132,11 @@ fun Recipe(
                 modifier = Modifier.height(imageHeight),
                 alignment = Alignment.TopCenter,
                 contentDescription = stringResource(R.string.recipe_image, recipe.title),
-                shimmerParams = ShimmerParams(
-                    baseColor = MaterialTheme.colors.background,
-                    highlightColor = MaterialTheme.colors.onBackground,
-                    dropOff = 0.65f,
-                    tilt = 20f,
-                    durationMillis = 700
-                ),
                 failure = {
                     Image(
                         painter = painterResource(R.drawable.ic_broken_image),
                         contentDescription = stringResource(R.string.image_failure),
-                        modifier = Modifier
-                            .height(imageHeight)
-                            .fillMaxWidth()
+                        modifier = Modifier.fillMaxSize()
                     )
                 }
             )
