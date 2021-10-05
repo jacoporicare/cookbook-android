@@ -1,5 +1,6 @@
 package cz.jakubricar.zradelnik.ui.recipelist
 
+import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -52,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -344,7 +346,11 @@ fun RecipeList(
     scrollState: LazyListState,
     onNavigateToRecipe: (String) -> Unit
 ) {
-    val chunkedRecipes = remember(recipes) { recipes.chunked(2) }
+    val columnsPerRow = when (LocalConfiguration.current.orientation) {
+        Configuration.ORIENTATION_LANDSCAPE -> 4
+        else -> 2
+    }
+    val chunkedRecipes = remember(recipes) { recipes.chunked(columnsPerRow) }
 
     LazyColumn(
         modifier = modifier,
@@ -367,20 +373,18 @@ fun RecipeList(
                 modifier = Modifier.height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Recipe(
-                    recipe = row[0],
-                    modifier = Modifier.weight(1f),
-                    onNavigateToRecipe = onNavigateToRecipe
-                )
-
-                if (row.size > 1) {
+                row.forEach { recipe ->
                     Recipe(
-                        recipe = row[1],
+                        recipe = recipe,
                         modifier = Modifier.weight(1f),
                         onNavigateToRecipe = onNavigateToRecipe
                     )
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                if (row.size != columnsPerRow) {
+                    for (col in 0 until columnsPerRow - row.size) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
                 }
             }
         }
