@@ -8,6 +8,7 @@ import cz.jakubricar.zradelnik.RecipeListQuery
 import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.network.mapToData
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.text.NumberFormat
@@ -18,6 +19,7 @@ class RecipeRepository @Inject constructor(
     private val apolloClient: ApolloClient
 ) {
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getRecipes(): Flow<List<Recipe>> =
         apolloClient.query(RecipeListQuery())
             .toBuilder()
@@ -39,6 +41,7 @@ class RecipeRepository @Inject constructor(
                 }
             }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getRecipe(slug: String): Flow<RecipeDetail?> =
         apolloClient.query(RecipeDetailQuery(slug))
             .toBuilder()

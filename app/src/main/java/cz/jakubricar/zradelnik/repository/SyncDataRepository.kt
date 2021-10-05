@@ -1,6 +1,6 @@
 package cz.jakubricar.zradelnik.repository
 
-import android.content.Context
+import android.app.Application
 import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -22,13 +22,14 @@ import java.time.ZoneOffset
 import javax.inject.Inject
 
 class SyncDataRepository @Inject constructor(
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
+    private val app: Application
 ) {
 
-    fun initialSync(context: Context) = context.getAppSharedPreferences().lastSyncDate == 0L
+    fun initialSync() = app.getAppSharedPreferences().lastSyncDate == 0L
 
-    suspend fun fetchAllRecipeDetails(context: Context): Result<Unit> {
-        val prefs = context.getAppSharedPreferences()
+    suspend fun fetchAllRecipeDetails(): Result<Unit> {
+        val prefs = app.getAppSharedPreferences()
         val since = Instant.ofEpochMilli(prefs.lastSyncDate).atOffset(ZoneOffset.UTC)
         val initialLoad = prefs.lastSyncDate == 0L
 
@@ -40,7 +41,7 @@ class SyncDataRepository @Inject constructor(
                 .await()
                 .toResult()
                 .map { data ->
-                    val imageLoader = context.imageLoader
+                    val imageLoader = app.imageLoader
 
                     withContext(Dispatchers.IO) {
                         val addedOrUpdatedRecipes = data.recipes
@@ -75,7 +76,7 @@ class SyncDataRepository @Inject constructor(
                                             .filter { recipe ->
                                                 !data.recipes.any { oldRecipe ->
                                                     recipe.fragments.recipeFragment.id ==
-                                                        oldRecipe.fragments.recipeFragment.id
+                                                            oldRecipe.fragments.recipeFragment.id
                                                 }
                                             }
                                             .plus(addedOrUpdatedRecipes)
@@ -115,7 +116,7 @@ class SyncDataRepository @Inject constructor(
                                     .await()
 
                                 recipe.fragments.recipeFragment.thumbImageUrl?.let {
-                                    val request = ImageRequest.Builder(context)
+                                    val request = ImageRequest.Builder(app)
                                         .data(it)
                                         .memoryCachePolicy(CachePolicy.DISABLED)
                                         .build()
@@ -123,7 +124,7 @@ class SyncDataRepository @Inject constructor(
                                 }
 
                                 recipe.fragments.recipeFragment.fullImageUrl?.let {
-                                    val request = ImageRequest.Builder(context)
+                                    val request = ImageRequest.Builder(app)
                                         .data(it)
                                         .memoryCachePolicy(CachePolicy.DISABLED)
                                         .build()

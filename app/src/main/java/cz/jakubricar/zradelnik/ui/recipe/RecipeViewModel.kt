@@ -1,8 +1,7 @@
 package cz.jakubricar.zradelnik.ui.recipe
 
-import android.app.Application
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.repository.RecipeRepository
@@ -30,10 +29,9 @@ data class RecipeUiState(
 
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
-    private val app: Application,
     private val recipeRepository: RecipeRepository,
     private val syncDataRepository: SyncDataRepository
-) : AndroidViewModel(app) {
+) : ViewModel() {
 
     companion object {
 
@@ -44,7 +42,7 @@ class RecipeViewModel @Inject constructor(
     val uiState: StateFlow<RecipeUiState> = _uiState.asStateFlow()
 
     val initialSync
-        get() = syncDataRepository.initialSync(app)
+        get() = syncDataRepository.initialSync()
 
     fun getRecipe(slug: String) {
         recipeRepository.getRecipe(slug)

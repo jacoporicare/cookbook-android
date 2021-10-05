@@ -1,10 +1,9 @@
 package cz.jakubricar.zradelnik.ui.recipelist
 
-import android.app.Application
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.remember
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.Recipe
@@ -56,10 +55,9 @@ data class RecipeListUiState(
 
 @HiltViewModel
 class RecipeListViewModel @Inject constructor(
-    private val app: Application,
     private val recipeRepository: RecipeRepository,
     private val syncDataRepository: SyncDataRepository
-) : AndroidViewModel(app) {
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(RecipeListUiState(loading = true))
     val uiState: StateFlow<RecipeListUiState> = _uiState.asStateFlow()
@@ -85,7 +83,7 @@ class RecipeListViewModel @Inject constructor(
                 }
             }
             .onEach { recipes ->
-                if (syncDataRepository.initialSync(app)) {
+                if (syncDataRepository.initialSync()) {
                     refreshRecipes()
                     return@onEach
                 }
@@ -101,7 +99,7 @@ class RecipeListViewModel @Inject constructor(
         _uiState.update { it.copy(loading = true) }
 
         viewModelScope.launch {
-            val result = syncDataRepository.fetchAllRecipeDetails(app)
+            val result = syncDataRepository.fetchAllRecipeDetails()
 
             _uiState.update { uiState ->
                 result.fold(
