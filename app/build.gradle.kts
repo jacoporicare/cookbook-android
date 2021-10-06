@@ -123,9 +123,6 @@ dependencies {
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha09")
 
-    // Preference
-    implementation("androidx.preference:preference-ktx:1.1.1")
-
     // Work
     implementation("androidx.work:work-runtime-ktx:2.7.0-beta01")
 

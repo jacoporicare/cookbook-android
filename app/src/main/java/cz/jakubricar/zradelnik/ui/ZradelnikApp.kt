@@ -11,33 +11,29 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.preference.PreferenceManager
 import com.google.accompanist.insets.ProvideWindowInsets
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import cz.jakubricar.zradelnik.getTheme
-import cz.jakubricar.zradelnik.model.Settings
+import cz.jakubricar.zradelnik.SettingsSharedPreferences
+import cz.jakubricar.zradelnik.getSettingsSharedPreferences
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 
 @Composable
 fun ZradelnikApp() {
     val context = LocalContext.current
-    var theme by remember {
-        mutableStateOf(PreferenceManager.getDefaultSharedPreferences(context).getTheme())
-    }
+    val prefs = remember(context) { context.getSettingsSharedPreferences() }
+    var theme by remember { mutableStateOf(prefs.theme) }
 
-    DisposableEffect(context) {
-        val listener = SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
-            if (key == Settings.Keys.THEME) {
-                theme = prefs.getTheme()
+    DisposableEffect(prefs) {
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+            if (key == SettingsSharedPreferences.Keys.THEME) {
+                theme = prefs.theme
             }
         }
 
-        val prefManager = PreferenceManager.getDefaultSharedPreferences(context).apply {
-            registerOnSharedPreferenceChangeListener(listener)
-        }
+        prefs.registerOnChangeListener(listener)
 
         onDispose {
-            prefManager.unregisterOnSharedPreferenceChangeListener(listener)
+            prefs.unregisterOnChangeListener(listener)
         }
     }
 

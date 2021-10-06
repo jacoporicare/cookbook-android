@@ -1,7 +1,6 @@
 package cz.jakubricar.zradelnik
 
 import android.content.Context
-import android.content.Context.MODE_PRIVATE
 import androidx.core.content.edit
 
 class AppSharedPreferences(context: Context) {
@@ -21,7 +20,7 @@ class AppSharedPreferences(context: Context) {
     }
 
     private val preferences =
-        context.getSharedPreferences(Keys.APP_SHARED_PREFERENCES, MODE_PRIVATE)
+        context.getSharedPreferences(Keys.APP_SHARED_PREFERENCES, Context.MODE_PRIVATE)
 
     var dataVersion: Int
         get() = preferences.getInt(Keys.DATA_VERSION, 0)

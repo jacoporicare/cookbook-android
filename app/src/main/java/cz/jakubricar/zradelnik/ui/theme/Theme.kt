@@ -6,7 +6,7 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import cz.jakubricar.zradelnik.model.Settings
+import cz.jakubricar.zradelnik.model.Theme
 
 private val LightColorPalette = lightColors(
     primary = Blue700,
@@ -31,13 +31,13 @@ private val DarkColorPalette = darkColors(
 
 @Composable
 fun ZradelnikTheme(
-    theme: Settings.Theme = Settings.Theme.DEFAULT,
+    theme: Theme = Theme.DEFAULT,
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (theme) {
-        Settings.Theme.LIGHT -> false
-        Settings.Theme.DARK -> true
-        Settings.Theme.DEFAULT -> isSystemInDarkTheme()
+        Theme.LIGHT -> false
+        Theme.DARK -> true
+        Theme.DEFAULT -> isSystemInDarkTheme()
     }
 
     MaterialTheme(

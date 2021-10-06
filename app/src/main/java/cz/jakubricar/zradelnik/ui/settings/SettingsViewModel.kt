@@ -3,6 +3,8 @@ package cz.jakubricar.zradelnik.ui.settings
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import cz.jakubricar.zradelnik.model.Settings
+import cz.jakubricar.zradelnik.model.SyncFrequency
+import cz.jakubricar.zradelnik.model.Theme
 import cz.jakubricar.zradelnik.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,7 +36,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun setTheme(theme: Settings.Theme) {
+    fun setTheme(theme: Theme) {
         _uiState.update { it.copy(settings = it.settings?.copy(theme = theme)) }
         settingsRepository.setTheme(theme)
     }
@@ -44,7 +46,7 @@ class SettingsViewModel @Inject constructor(
         settingsRepository.setSync(sync)
     }
 
-    fun setSyncFrequency(syncFrequency: Settings.SyncFrequency) {
+    fun setSyncFrequency(syncFrequency: SyncFrequency) {
         _uiState.update { it.copy(settings = it.settings?.copy(syncFrequency = syncFrequency)) }
         settingsRepository.setSyncFrequency(syncFrequency)
     }

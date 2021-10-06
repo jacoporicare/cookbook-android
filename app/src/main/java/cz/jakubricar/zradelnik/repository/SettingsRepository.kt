@@ -1,17 +1,11 @@
 package cz.jakubricar.zradelnik.repository
 
 import android.app.Application
-import androidx.preference.PreferenceManager
 import cz.jakubricar.zradelnik.getAppSharedPreferences
-import cz.jakubricar.zradelnik.getSync
-import cz.jakubricar.zradelnik.getSyncFrequency
-import cz.jakubricar.zradelnik.getSyncWifiOnly
-import cz.jakubricar.zradelnik.getTheme
+import cz.jakubricar.zradelnik.getSettingsSharedPreferences
 import cz.jakubricar.zradelnik.model.Settings
-import cz.jakubricar.zradelnik.setSync
-import cz.jakubricar.zradelnik.setSyncFrequency
-import cz.jakubricar.zradelnik.setSyncWifiOnly
-import cz.jakubricar.zradelnik.setTheme
+import cz.jakubricar.zradelnik.model.SyncFrequency
+import cz.jakubricar.zradelnik.model.Theme
 import cz.jakubricar.zradelnik.work.setupPeriodicSyncDataWork
 import java.time.Instant
 import java.time.LocalDateTime
@@ -24,14 +18,14 @@ class SettingsRepository @Inject constructor(
     private val app: Application
 ) {
 
-    private val prefManager = PreferenceManager.getDefaultSharedPreferences(app)
+    private val prefManager = app.getSettingsSharedPreferences()
 
     fun getSettings() =
         Settings(
-            theme = prefManager.getTheme(),
-            sync = prefManager.getSync(),
-            syncFrequency = prefManager.getSyncFrequency(),
-            syncWifiOnly = prefManager.getSyncWifiOnly(),
+            theme = prefManager.theme,
+            sync = prefManager.sync,
+            syncFrequency = prefManager.syncFrequency,
+            syncWifiOnly = prefManager.syncWifiOnly,
             lastSyncDate = DateTimeFormatter
                 .ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
                 .format(
@@ -42,22 +36,22 @@ class SettingsRepository @Inject constructor(
                 )
         )
 
-    fun setTheme(theme: Settings.Theme) {
-        prefManager.setTheme(theme)
+    fun setTheme(theme: Theme) {
+        prefManager.theme = theme
     }
 
     fun setSync(sync: Boolean) {
-        prefManager.setSync(sync)
+        prefManager.sync = sync
         app.setupPeriodicSyncDataWork(newSync = sync)
     }
 
-    fun setSyncFrequency(syncFrequency: Settings.SyncFrequency) {
-        prefManager.setSyncFrequency(syncFrequency)
+    fun setSyncFrequency(syncFrequency: SyncFrequency) {
+        prefManager.syncFrequency = syncFrequency
         app.setupPeriodicSyncDataWork(newSyncFrequency = syncFrequency)
     }
 
     fun setSyncWifiOnly(syncWifiOnly: Boolean) {
-        prefManager.setSyncWifiOnly(syncWifiOnly)
+        prefManager.syncWifiOnly = syncWifiOnly
         app.setupPeriodicSyncDataWork(newWifiOnly = syncWifiOnly)
     }
 }

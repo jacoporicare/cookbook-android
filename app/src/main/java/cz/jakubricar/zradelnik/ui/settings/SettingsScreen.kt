@@ -45,6 +45,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsHeight
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.Settings
+import cz.jakubricar.zradelnik.model.SyncFrequency
+import cz.jakubricar.zradelnik.model.Theme
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
@@ -72,9 +74,9 @@ fun SettingsScreen(
     settings: Settings?,
     loading: Boolean,
     onBack: () -> Unit,
-    onThemeChange: (Settings.Theme) -> Unit,
+    onThemeChange: (Theme) -> Unit,
     onSyncChange: (Boolean) -> Unit,
-    onSyncFrequencyChange: (Settings.SyncFrequency) -> Unit,
+    onSyncFrequencyChange: (SyncFrequency) -> Unit,
     onSyncWifiOnlyChange: (Boolean) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -124,9 +126,9 @@ fun Settings(
     settings: Settings,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
-    onThemeChange: (Settings.Theme) -> Unit,
+    onThemeChange: (Theme) -> Unit,
     onSyncChange: (Boolean) -> Unit,
-    onSyncFrequencyChange: (Settings.SyncFrequency) -> Unit,
+    onSyncFrequencyChange: (SyncFrequency) -> Unit,
     onSyncWifiOnlyChange: (Boolean) -> Unit
 ) {
     var themeDialogOpened by remember { mutableStateOf(false) }
@@ -141,9 +143,9 @@ fun Settings(
                 Text(
                     text = stringResource(
                         when (settings.theme) {
-                            Settings.Theme.LIGHT -> R.string.settings_theme_light
-                            Settings.Theme.DARK -> R.string.settings_theme_dark
-                            Settings.Theme.DEFAULT -> R.string.settings_theme_default
+                            Theme.LIGHT -> R.string.settings_theme_light
+                            Theme.DARK -> R.string.settings_theme_dark
+                            Theme.DEFAULT -> R.string.settings_theme_default
                         }
                     )
                 )
@@ -181,8 +183,8 @@ fun Settings(
                 Text(
                     text = stringResource(
                         when (settings.syncFrequency) {
-                            Settings.SyncFrequency.DAILY -> R.string.settings_sync_frequency_daily
-                            Settings.SyncFrequency.WEEKLY -> R.string.settings_sync_frequency_weekly
+                            SyncFrequency.DAILY -> R.string.settings_sync_frequency_daily
+                            SyncFrequency.WEEKLY -> R.string.settings_sync_frequency_weekly
                         }
                     )
                 )
@@ -214,15 +216,15 @@ fun Settings(
             options = listOf(
                 ListOption(
                     label = stringResource(R.string.settings_theme_light),
-                    value = Settings.Theme.LIGHT
+                    value = Theme.LIGHT
                 ),
                 ListOption(
                     label = stringResource(R.string.settings_theme_dark),
-                    value = Settings.Theme.DARK
+                    value = Theme.DARK
                 ),
                 ListOption(
                     label = stringResource(R.string.settings_theme_default),
-                    value = Settings.Theme.DEFAULT
+                    value = Theme.DEFAULT
                 )
             ),
             selectedValue = settings.theme,
@@ -240,11 +242,11 @@ fun Settings(
             options = listOf(
                 ListOption(
                     label = stringResource(R.string.settings_sync_frequency_daily),
-                    value = Settings.SyncFrequency.DAILY
+                    value = SyncFrequency.DAILY
                 ),
                 ListOption(
                     label = stringResource(R.string.settings_sync_frequency_weekly),
-                    value = Settings.SyncFrequency.WEEKLY
+                    value = SyncFrequency.WEEKLY
                 )
             ),
             selectedValue = settings.syncFrequency,
@@ -339,9 +341,9 @@ fun SettingsPreview() {
     ZradelnikTheme {
         Settings(
             settings = Settings(
-                theme = Settings.Theme.DEFAULT,
+                theme = Theme.DEFAULT,
                 sync = true,
-                syncFrequency = Settings.SyncFrequency.DAILY,
+                syncFrequency = SyncFrequency.DAILY,
                 syncWifiOnly = true,
                 lastSyncDate = "5. 10. 2021 12:56"
             ),

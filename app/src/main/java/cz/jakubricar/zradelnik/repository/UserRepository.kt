@@ -15,6 +15,7 @@ import cz.jakubricar.zradelnik.auth.AccountAuthenticator.Companion.AUTH_TOKEN_TY
 import cz.jakubricar.zradelnik.model.LoggedInUser
 import cz.jakubricar.zradelnik.network.mapToData
 import cz.jakubricar.zradelnik.network.toResult
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import timber.log.Timber
@@ -39,6 +40,7 @@ class UserRepository @Inject constructor(
         accountManager.removeAccountExplicitly(account)
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getLoggedInUser(token: String): Flow<LoggedInUser> =
         apolloClient.query(MeQuery())
             .toBuilder()

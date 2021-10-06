@@ -2,7 +2,6 @@ package cz.jakubricar.zradelnik.work
 
 import android.content.Context
 import androidx.hilt.work.HiltWorker
-import androidx.preference.PreferenceManager
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -11,10 +10,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import cz.jakubricar.zradelnik.getAppSharedPreferences
-import cz.jakubricar.zradelnik.getSync
-import cz.jakubricar.zradelnik.getSyncFrequency
-import cz.jakubricar.zradelnik.getSyncWifiOnly
-import cz.jakubricar.zradelnik.model.Settings
+import cz.jakubricar.zradelnik.getSettingsSharedPreferences
+import cz.jakubricar.zradelnik.model.SyncFrequency
 import cz.jakubricar.zradelnik.repository.SyncDataRepository
 import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.PERIODIC_SYNC_DATA_VERSION
 import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.WORK_NAME
@@ -46,24 +43,24 @@ class SyncDataWorker @AssistedInject constructor(
 
 fun Context.setupPeriodicSyncDataWork(
     newSync: Boolean? = null,
-    newSyncFrequency: Settings.SyncFrequency? = null,
+    newSyncFrequency: SyncFrequency? = null,
     newWifiOnly: Boolean? = null
 ) {
     val appPreferences = getAppSharedPreferences()
-    val preferences = PreferenceManager.getDefaultSharedPreferences(this)
-    val sync = newSync ?: preferences.getSync()
+    val preferences = getSettingsSharedPreferences()
+    val sync = newSync ?: preferences.sync
 
     if (!sync) {
         WorkManager.getInstance(this).cancelUniqueWork(WORK_NAME)
         return
     }
 
-    val frequency = newSyncFrequency ?: preferences.getSyncFrequency()
-    val wifiOnly = newWifiOnly ?: preferences.getSyncWifiOnly()
+    val frequency = newSyncFrequency ?: preferences.syncFrequency
+    val wifiOnly = newWifiOnly ?: preferences.syncWifiOnly
 
     val (interval, intervalUnit) = when (frequency) {
-        Settings.SyncFrequency.DAILY -> Pair(1L, TimeUnit.DAYS)
-        Settings.SyncFrequency.WEEKLY -> Pair(7L, TimeUnit.DAYS)
+        SyncFrequency.DAILY -> Pair(1L, TimeUnit.DAYS)
+        SyncFrequency.WEEKLY -> Pair(7L, TimeUnit.DAYS)
     }
 
     val request = PeriodicWorkRequestBuilder<SyncDataWorker>(interval, intervalUnit)
