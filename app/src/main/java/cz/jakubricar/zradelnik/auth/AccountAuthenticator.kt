@@ -28,7 +28,7 @@ class AccountAuthenticator(
         const val AUTH_TOKEN_TYPE = "jwt"
     }
 
-    @DelicateCoroutinesApi
+    @OptIn(DelicateCoroutinesApi::class)
     override fun addAccount(
         response: AccountAuthenticatorResponse,
         accountType: String,

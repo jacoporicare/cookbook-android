@@ -117,14 +117,14 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.3.1")
 
     // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0-beta01")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0-rc01")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.4.0-alpha09")
+    implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
 
     // Work
-    implementation("androidx.work:work-runtime-ktx:2.7.0-beta01")
+    implementation("androidx.work:work-runtime-ktx:2.7.0-rc01")
 
     // Apollo
     implementation("com.apollographql.apollo:apollo-runtime:${Versions.apollo}")
@@ -141,7 +141,7 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Landscapist Coil
-    implementation("com.github.skydoves:landscapist-coil:1.3.6")
+    implementation("com.github.skydoves:landscapist-coil:1.3.7")
 
     // Markdown
     implementation("com.github.jeziellago:compose-markdown:0.2.6")
