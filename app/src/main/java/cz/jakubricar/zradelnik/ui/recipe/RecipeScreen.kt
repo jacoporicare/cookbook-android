@@ -59,16 +59,15 @@ fun RecipeScreen(
         }
     }
 
-    val uiState by viewModel.uiState.collectAsState()
+    val viewState by viewModel.state.collectAsState()
 
     RecipeScreen(
-        recipe = uiState.recipe,
-        loading = uiState.loading,
+        viewState = viewState,
         onBack = onBack
     )
 
-    LaunchedEffect(uiState) {
-        if (uiState.failedLoading) {
+    LaunchedEffect(viewState) {
+        if (viewState.failedLoading) {
             onBack()
         }
     }
@@ -76,8 +75,7 @@ fun RecipeScreen(
 
 @Composable
 fun RecipeScreen(
-    recipe: RecipeDetail?,
-    loading: Boolean,
+    viewState: RecipeViewState,
     onBack: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -86,7 +84,7 @@ fun RecipeScreen(
         topBar = {
             InsetAwareTopAppBar(
                 title = {
-                    Text(text = recipe?.title ?: stringResource(R.string.recipe))
+                    Text(text = viewState.recipe?.title ?: stringResource(R.string.recipe))
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -105,11 +103,11 @@ fun RecipeScreen(
             )
         }
     ) { innerPadding ->
-        if (loading || recipe == null) {
+        if (viewState.loading || viewState.recipe == null) {
             FullScreenLoading()
         } else {
             Recipe(
-                recipe = recipe,
+                recipe = viewState.recipe,
                 modifier = Modifier.padding(innerPadding),
                 scrollState = scrollState
             )

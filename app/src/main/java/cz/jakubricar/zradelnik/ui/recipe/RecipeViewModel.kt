@@ -18,7 +18,7 @@ import timber.log.Timber
 import javax.inject.Inject
 
 @Immutable
-data class RecipeUiState(
+data class RecipeViewState(
     val recipe: RecipeDetail? = null,
     val loading: Boolean = false
 ) {
@@ -38,8 +38,8 @@ class RecipeViewModel @Inject constructor(
         const val RECIPE_SLUG_KEY = "slug"
     }
 
-    private val _uiState = MutableStateFlow(RecipeUiState(loading = true))
-    val uiState: StateFlow<RecipeUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(RecipeViewState(loading = true))
+    val state: StateFlow<RecipeViewState> = _state.asStateFlow()
 
     val initialSync
         get() = syncDataRepository.initialSync()
@@ -48,10 +48,10 @@ class RecipeViewModel @Inject constructor(
         recipeRepository.getRecipe(slug)
             .catch { error ->
                 Timber.e(error)
-                _uiState.update { it.copy(loading = false) }
+                _state.update { it.copy(loading = false) }
             }
             .onEach { recipe ->
-                _uiState.update { it.copy(recipe = recipe, loading = false) }
+                _state.update { it.copy(recipe = recipe, loading = false) }
             }
             .launchIn(viewModelScope)
     }

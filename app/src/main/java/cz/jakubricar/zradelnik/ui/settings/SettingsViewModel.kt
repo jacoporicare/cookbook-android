@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @Immutable
-data class SettingsUiState(
+data class SettingsViewState(
     val settings: Settings? = null,
     val loading: Boolean = false
 )
@@ -24,11 +24,11 @@ class SettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(SettingsUiState(loading = true))
-    val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(SettingsViewState(loading = true))
+    val state: StateFlow<SettingsViewState> = _state.asStateFlow()
 
     init {
-        _uiState.update { uiState ->
+        _state.update { uiState ->
             uiState.copy(
                 settings = settingsRepository.getSettings(),
                 loading = false
@@ -37,22 +37,22 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun setTheme(theme: Theme) {
-        _uiState.update { it.copy(settings = it.settings?.copy(theme = theme)) }
+        _state.update { it.copy(settings = it.settings?.copy(theme = theme)) }
         settingsRepository.setTheme(theme)
     }
 
     fun setSync(sync: Boolean) {
-        _uiState.update { it.copy(settings = it.settings?.copy(sync = sync)) }
+        _state.update { it.copy(settings = it.settings?.copy(sync = sync)) }
         settingsRepository.setSync(sync)
     }
 
     fun setSyncFrequency(syncFrequency: SyncFrequency) {
-        _uiState.update { it.copy(settings = it.settings?.copy(syncFrequency = syncFrequency)) }
+        _state.update { it.copy(settings = it.settings?.copy(syncFrequency = syncFrequency)) }
         settingsRepository.setSyncFrequency(syncFrequency)
     }
 
     fun setSyncWifiOnly(syncWifiOnly: Boolean) {
-        _uiState.update { it.copy(settings = it.settings?.copy(syncWifiOnly = syncWifiOnly)) }
+        _state.update { it.copy(settings = it.settings?.copy(syncWifiOnly = syncWifiOnly)) }
         settingsRepository.setSyncWifiOnly(syncWifiOnly)
     }
 }

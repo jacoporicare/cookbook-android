@@ -56,11 +56,10 @@ fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val viewState by viewModel.state.collectAsState()
 
     SettingsScreen(
-        settings = uiState.settings,
-        loading = uiState.loading,
+        viewState = viewState,
         onBack = onBack,
         onThemeChange = { viewModel.setTheme(it) },
         onSyncChange = { viewModel.setSync(it) },
@@ -71,8 +70,7 @@ fun SettingsScreen(
 
 @Composable
 fun SettingsScreen(
-    settings: Settings?,
-    loading: Boolean,
+    viewState: SettingsViewState,
     onBack: () -> Unit,
     onThemeChange: (Theme) -> Unit,
     onSyncChange: (Boolean) -> Unit,
@@ -104,11 +102,11 @@ fun SettingsScreen(
             )
         }
     ) { innerPadding ->
-        if (loading || settings == null) {
+        if (viewState.loading || viewState.settings == null) {
             FullScreenLoading()
         } else {
             Settings(
-                settings = settings,
+                settings = viewState.settings,
                 modifier = Modifier.padding(innerPadding),
                 scrollState = scrollState,
                 onThemeChange = onThemeChange,

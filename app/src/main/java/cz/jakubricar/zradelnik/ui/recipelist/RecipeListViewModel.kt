@@ -26,28 +26,28 @@ import java.util.UUID
 import javax.inject.Inject
 
 @Immutable
-data class RecipeListUiState(
+data class RecipeListViewState(
     val recipes: List<Recipe> = emptyList(),
     val loading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
-    val searchQuery: String? = null,
+    val searchQuery: String = "",
     val searchVisible: Boolean = false
 ) {
 
     val initialLoad: Boolean
         get() = recipes.isEmpty() && loading
+}
 
-    @Composable
-    fun rememberFilteredRecipes(): List<Recipe> {
-        return remember(recipes, searchQuery) {
-            if (searchQuery.isNullOrBlank()) {
-                recipes
-            } else {
-                recipes.filter {
-                    it.title
-                        .unaccent()
-                        .contains(searchQuery.unaccent(), true)
-                }
+@Composable
+fun rememberFilteredRecipes(recipes: List<Recipe>, searchQuery: String): List<Recipe> {
+    return remember(recipes, searchQuery) {
+        if (searchQuery.isBlank()) {
+            recipes
+        } else {
+            recipes.filter {
+                it.title
+                    .unaccent()
+                    .contains(searchQuery.unaccent(), true)
             }
         }
     }
@@ -59,8 +59,8 @@ class RecipeListViewModel @Inject constructor(
     private val syncDataRepository: SyncDataRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(RecipeListUiState(loading = true))
-    val uiState: StateFlow<RecipeListUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(RecipeListViewState(loading = true))
+    val state: StateFlow<RecipeListViewState> = _state.asStateFlow()
 
     private val collator = Collator.getInstance()
     private val recipeComparator =
@@ -74,7 +74,7 @@ class RecipeListViewModel @Inject constructor(
         recipeRepository.getRecipes()
             .catch { error ->
                 Timber.e(error)
-                _uiState.update {
+                _state.update {
                     val errorMessages = it.errorMessages + ErrorMessage(
                         id = UUID.randomUUID().mostSignificantBits,
                         messageId = R.string.connection_error
@@ -88,7 +88,7 @@ class RecipeListViewModel @Inject constructor(
                     return@onEach
                 }
 
-                _uiState.update {
+                _state.update {
                     it.copy(recipes = recipes.sortedWith(recipeComparator), loading = false)
                 }
             }
@@ -96,20 +96,20 @@ class RecipeListViewModel @Inject constructor(
     }
 
     fun refreshRecipes() {
-        _uiState.update { it.copy(loading = true) }
+        _state.update { it.copy(loading = true) }
 
         viewModelScope.launch {
             val result = syncDataRepository.fetchAllRecipeDetails()
 
-            _uiState.update { uiState ->
+            _state.update { viewState ->
                 result.fold(
-                    onSuccess = { uiState.copy(loading = false) },
+                    onSuccess = { viewState.copy(loading = false) },
                     onFailure = {
-                        val errorMessages = uiState.errorMessages + ErrorMessage(
+                        val errorMessages = viewState.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.connection_error
                         )
-                        uiState.copy(errorMessages = errorMessages, loading = false)
+                        viewState.copy(errorMessages = errorMessages, loading = false)
                     }
                 )
             }
@@ -117,21 +117,21 @@ class RecipeListViewModel @Inject constructor(
     }
 
     fun errorShown(errorId: Long) {
-        _uiState.update { currentUiState ->
-            val errorMessages = currentUiState.errorMessages.filterNot { it.id == errorId }
-            currentUiState.copy(errorMessages = errorMessages)
+        _state.update { viewState ->
+            val errorMessages = viewState.errorMessages.filterNot { it.id == errorId }
+            viewState.copy(errorMessages = errorMessages)
         }
     }
 
     fun showSearch() {
-        _uiState.update { it.copy(searchVisible = true) }
+        _state.update { it.copy(searchVisible = true) }
     }
 
     fun hideSearch() {
-        _uiState.update { it.copy(searchVisible = false, searchQuery = null) }
+        _state.update { it.copy(searchVisible = false, searchQuery = "") }
     }
 
-    fun setSearchQuery(query: String?) {
-        _uiState.update { it.copy(searchQuery = query) }
+    fun setSearchQuery(query: String) {
+        _state.update { it.copy(searchQuery = query) }
     }
 }

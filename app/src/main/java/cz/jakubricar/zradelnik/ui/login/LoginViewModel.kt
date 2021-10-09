@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-data class LoginUiState(
+data class LoginViewState(
     val loginResult: Result<String>? = null,
     val loading: Boolean = false
 )
@@ -21,16 +21,16 @@ class LoginViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+    private val _state = MutableStateFlow(LoginViewState())
+    val state: StateFlow<LoginViewState> = _state.asStateFlow()
 
     fun login(username: String, password: String) {
-        _uiState.update { it.copy(loading = true) }
+        _state.update { it.copy(loading = true) }
 
         viewModelScope.launch {
             val result = userRepository.login(username, password)
 
-            _uiState.update { it.copy(loginResult = result, loading = false) }
+            _state.update { it.copy(loginResult = result, loading = false) }
         }
     }
 }

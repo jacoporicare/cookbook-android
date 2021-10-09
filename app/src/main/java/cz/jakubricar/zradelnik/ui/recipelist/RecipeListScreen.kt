@@ -68,7 +68,6 @@ import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
-import cz.jakubricar.zradelnik.utils.ErrorMessage
 import cz.jakubricar.zradelnik.utils.isScrolled
 
 @Composable
@@ -78,20 +77,14 @@ fun RecipeListScreen(
     onNavigateToRecipe: (String) -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val recipes = uiState.rememberFilteredRecipes()
+    val viewState by viewModel.state.collectAsState()
 
-    BackHandler(uiState.searchVisible) {
+    BackHandler(viewState.searchVisible) {
         viewModel.hideSearch()
     }
 
     RecipeListScreen(
-        recipes = recipes,
-        initialLoad = uiState.initialLoad,
-        loading = uiState.loading,
-        errorMessages = uiState.errorMessages,
-        searchVisible = uiState.searchVisible,
-        searchQuery = uiState.searchQuery,
+        viewState = viewState,
         scaffoldState = scaffoldState,
         onNavigateToRecipe = onNavigateToRecipe,
         onNavigateToSettings = onNavigateToSettings,
@@ -105,12 +98,7 @@ fun RecipeListScreen(
 
 @Composable
 fun RecipeListScreen(
-    recipes: List<Recipe>,
-    initialLoad: Boolean,
-    loading: Boolean,
-    errorMessages: List<ErrorMessage>,
-    searchVisible: Boolean,
-    searchQuery: String?,
+    viewState: RecipeListViewState,
     scaffoldState: ScaffoldState,
     onNavigateToRecipe: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -118,8 +106,9 @@ fun RecipeListScreen(
     onErrorDismiss: (Long) -> Unit,
     onSearchShow: () -> Unit,
     onSearchHide: () -> Unit,
-    onSearchQueryChange: (String?) -> Unit
+    onSearchQueryChange: (String) -> Unit
 ) {
+    val recipes = rememberFilteredRecipes(viewState.recipes, viewState.searchQuery)
     val scrollState = rememberLazyListState()
 
     Scaffold(
@@ -127,8 +116,8 @@ fun RecipeListScreen(
         snackbarHost = { SnackbarHost(hostState = it, modifier = Modifier.systemBarsPadding()) },
         topBar = {
             TopBarContent(
-                searchVisible = searchVisible,
-                searchQuery = searchQuery,
+                searchVisible = viewState.searchVisible,
+                searchQuery = viewState.searchQuery,
                 scrollState = scrollState,
                 onNavigateToSettings = onNavigateToSettings,
                 onRefreshRecipes = onRefreshRecipes,
@@ -139,15 +128,15 @@ fun RecipeListScreen(
         }
     ) { innerPadding ->
         LoadingContent(
-            empty = initialLoad,
+            empty = viewState.initialLoad,
             emptyContent = { FullScreenLoading() },
-            loading = loading,
+            loading = viewState.loading,
             onRefresh = onRefreshRecipes
         ) {
             RecipeListScreenErrorAndContent(
                 recipes = recipes,
                 modifier = Modifier.padding(innerPadding),
-                isShowingErrors = errorMessages.isNotEmpty(),
+                isShowingErrors = viewState.errorMessages.isNotEmpty(),
                 scrollState = scrollState,
                 onNavigateToRecipe = onNavigateToRecipe,
                 onRefresh = onRefreshRecipes
@@ -156,9 +145,9 @@ fun RecipeListScreen(
     }
 
     // Process one error message at a time and show them as Snackbars in the UI
-    if (errorMessages.isNotEmpty()) {
+    if (viewState.errorMessages.isNotEmpty()) {
         // Remember the errorMessage to display on the screen
-        val errorMessage = remember(errorMessages) { errorMessages[0] }
+        val errorMessage = remember(viewState.errorMessages) { viewState.errorMessages[0] }
 
         // Get the text to show on the message from resources
         val errorMessageText = stringResource(errorMessage.messageId)
@@ -186,13 +175,13 @@ fun RecipeListScreen(
 @Composable
 private fun TopBarContent(
     searchVisible: Boolean,
-    searchQuery: String?,
+    searchQuery: String,
     scrollState: LazyListState,
     onNavigateToSettings: () -> Unit,
     onRefreshRecipes: () -> Unit,
     onSearchHide: () -> Unit,
     onSearchShow: () -> Unit,
-    onSearchQueryChange: (String?) -> Unit
+    onSearchQueryChange: (String) -> Unit
 ) {
     var menuExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
@@ -203,7 +192,7 @@ private fun TopBarContent(
                 Text(text = stringResource(R.string.app_name))
             } else {
                 TextField(
-                    value = searchQuery ?: "",
+                    value = searchQuery,
                     onValueChange = onSearchQueryChange,
                     modifier = Modifier
                         .padding(end = 12.dp)
@@ -218,11 +207,11 @@ private fun TopBarContent(
                             contentDescription = stringResource(R.string.search_placeholder)
                         )
                     },
-                    trailingIcon = if (!searchQuery.isNullOrEmpty()) {
+                    trailingIcon = if (searchQuery.isNotEmpty()) {
                         {
                             Icon(imageVector = Icons.Filled.Clear,
                                 contentDescription = stringResource(R.string.search_clear),
-                                modifier = Modifier.clickable { onSearchQueryChange(null) }
+                                modifier = Modifier.clickable { onSearchQueryChange("") }
                             )
                         }
                     } else {
