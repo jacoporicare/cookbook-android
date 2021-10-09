@@ -41,6 +41,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -63,12 +64,12 @@ import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.insets.systemBarsPadding
 import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
+import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
-import cz.jakubricar.zradelnik.utils.isScrolled
 
 @Composable
 fun RecipeListScreen(
@@ -77,6 +78,7 @@ fun RecipeListScreen(
     onNavigateToRecipe: (String) -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
+    LogCompositions("RecipeListScreen")
     val viewState by viewModel.state.collectAsState()
 
     BackHandler(viewState.searchVisible) {
@@ -108,6 +110,7 @@ fun RecipeListScreen(
     onSearchHide: () -> Unit,
     onSearchQueryChange: (String) -> Unit
 ) {
+    LogCompositions("RecipeListScreenStateless")
     val recipes = rememberFilteredRecipes(viewState.recipes, viewState.searchQuery)
     val scrollState = rememberLazyListState()
 
@@ -183,8 +186,14 @@ private fun TopBarContent(
     onSearchShow: () -> Unit,
     onSearchQueryChange: (String) -> Unit
 ) {
+    LogCompositions("TopBarContent")
     var menuExpanded by remember { mutableStateOf(false) }
     val focusRequester = remember { FocusRequester() }
+    val isScrolled by remember {
+        derivedStateOf {
+            scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 0
+        }
+    }
 
     InsetAwareTopAppBar(
         title = {
@@ -281,12 +290,12 @@ private fun TopBarContent(
                 }
             }
         },
-        backgroundColor = if (!scrollState.isScrolled) {
+        backgroundColor = if (!isScrolled) {
             MaterialTheme.colors.background
         } else {
             MaterialTheme.colors.surface
         },
-        elevation = if (!scrollState.isScrolled) 0.dp else 4.dp
+        elevation = if (!isScrolled) 0.dp else 4.dp
     )
 }
 
@@ -299,6 +308,7 @@ private fun RecipeListScreenErrorAndContent(
     onNavigateToRecipe: (String) -> Unit,
     onRefresh: () -> Unit
 ) {
+    LogCompositions("RecipeListScreenErrorAndContent")
     if (recipes.isNotEmpty()) {
         RecipeList(
             recipes = recipes,
@@ -335,6 +345,7 @@ fun RecipeList(
     scrollState: LazyListState,
     onNavigateToRecipe: (String) -> Unit
 ) {
+    LogCompositions("RecipeList")
     val columnsPerRow = when (LocalConfiguration.current.orientation) {
         Configuration.ORIENTATION_LANDSCAPE -> 4
         else -> 2
