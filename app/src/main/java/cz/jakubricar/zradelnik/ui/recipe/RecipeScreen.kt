@@ -1,18 +1,20 @@
 package cz.jakubricar.zradelnik.ui.recipe
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
@@ -77,7 +79,7 @@ fun RecipeScreen(
     viewState: RecipeViewState,
     onBack: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
+    val scrollState = rememberLazyListState()
 
     Scaffold(
         topBar = {
@@ -93,12 +95,12 @@ fun RecipeScreen(
                         )
                     }
                 },
-                backgroundColor = if (scrollState.value == 0) {
+                backgroundColor = if (scrollState.firstVisibleItemScrollOffset == 0) {
                     MaterialTheme.colors.background
                 } else {
                     MaterialTheme.colors.surface
                 },
-                elevation = if (scrollState.value == 0) 0.dp else 4.dp
+                elevation = if (scrollState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
             )
         }
     ) { innerPadding ->
@@ -107,7 +109,7 @@ fun RecipeScreen(
         } else {
             Recipe(
                 recipe = viewState.recipe,
-                modifier = Modifier.padding(innerPadding),
+                contentPadding = innerPadding,
                 scrollState = scrollState
             )
         }
@@ -117,76 +119,90 @@ fun RecipeScreen(
 @Composable
 fun Recipe(
     recipe: RecipeDetail,
-    modifier: Modifier = Modifier,
-    scrollState: ScrollState
+    contentPadding: PaddingValues,
+    scrollState: LazyListState
 ) {
-    Column(modifier = modifier.verticalScroll(scrollState)) {
+    LazyColumn(
+        state = scrollState,
+        contentPadding = contentPadding
+    ) {
         recipe.imageUrl?.let { imageUrl ->
-            Image(
-                painter = rememberImagePainter(
-                    data = imageUrl,
-                    builder = {
-                        crossfade(200)
-                        error(R.drawable.ic_broken_image)
-                    }
-                ),
-                contentDescription = stringResource(R.string.recipe_image, recipe.title),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(400.dp),
-                alignment = Alignment.TopCenter,
-                contentScale = ContentScale.Crop
-            )
+            item {
+                Image(
+                    painter = rememberImagePainter(
+                        data = imageUrl,
+                        builder = {
+                            crossfade(200)
+                            error(R.drawable.ic_broken_image)
+                        }
+                    ),
+                    contentDescription = stringResource(R.string.recipe_image, recipe.title),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp),
+                    alignment = Alignment.TopCenter,
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
 
         if (!recipe.preparationTime.isNullOrEmpty() ||
             !recipe.servingCount.isNullOrEmpty() ||
             !recipe.sideDish.isNullOrEmpty()
         ) {
-            Details(
-                modifier = Modifier.padding(top = 16.dp),
-                preparationTime = recipe.preparationTime,
-                servingCount = recipe.servingCount,
-                sideDish = recipe.sideDish
-            )
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Details(
+                    preparationTime = recipe.preparationTime,
+                    servingCount = recipe.servingCount,
+                    sideDish = recipe.sideDish
+                )
+            }
         }
 
-        Column(modifier = Modifier.padding(16.dp)) {
-            if (recipe.ingredients.isNotEmpty()) {
-                Text(
-                    text = stringResource(R.string.ingredients),
-                    modifier = Modifier.padding(bottom = 8.dp),
-                    style = MaterialTheme.typography.h6
-                )
-                Card(
-                    modifier = Modifier
-                        .padding(bottom = 16.dp)
-                        .fillMaxWidth(),
-                    elevation = 2.dp
-                ) {
-                    Box(modifier = Modifier.padding(8.dp)) {
-                        Ingredients(ingredients = recipe.ingredients)
+
+        if (recipe.ingredients.isNotEmpty()) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                    Text(
+                        text = stringResource(R.string.ingredients),
+                        style = MaterialTheme.typography.h6
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        elevation = 2.dp
+                    ) {
+                        Box(modifier = Modifier.padding(8.dp)) {
+                            Ingredients(ingredients = recipe.ingredients)
+                        }
                     }
                 }
             }
+        }
 
-            Text(
-                text = stringResource(R.string.directions),
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.h6
-            )
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = 2.dp
-            ) {
-                Box(modifier = Modifier.padding(8.dp)) {
-                    MarkdownText(
-                        markdown = recipe.directions ?: stringResource(R.string.no_directions)
-                    )
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    text = stringResource(R.string.directions),
+                    style = MaterialTheme.typography.h6
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    elevation = 2.dp
+                ) {
+                    Box(modifier = Modifier.padding(8.dp)) {
+                        MarkdownText(
+                            markdown = recipe.directions ?: stringResource(R.string.no_directions)
+                        )
+                    }
                 }
             }
+            Spacer(modifier = Modifier.navigationBarsHeight(16.dp))
         }
-        Spacer(modifier = Modifier.navigationBarsHeight())
     }
 }
 
