@@ -140,8 +140,8 @@ dependencies {
     // Logging
     implementation("com.jakewharton.timber:timber:5.0.1")
 
-    // Landscapist Coil
-    implementation("com.github.skydoves:landscapist-coil:1.3.7")
+    // Coil
+    implementation("io.coil-kt:coil-compose:${Versions.coil}")
 
     // Markdown
     implementation("com.github.jeziellago:compose-markdown:0.2.6")

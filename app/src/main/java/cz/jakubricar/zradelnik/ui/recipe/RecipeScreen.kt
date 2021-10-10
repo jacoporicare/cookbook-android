@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,13 +30,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.navigationBarsHeight
-import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
@@ -115,8 +114,6 @@ fun RecipeScreen(
     }
 }
 
-private val imageHeight = 300.dp
-
 @Composable
 fun Recipe(
     recipe: RecipeDetail,
@@ -125,18 +122,20 @@ fun Recipe(
 ) {
     Column(modifier = modifier.verticalScroll(scrollState)) {
         recipe.imageUrl?.let { imageUrl ->
-            CoilImage(
-                imageModel = imageUrl,
-                modifier = Modifier.height(imageHeight),
-                alignment = Alignment.TopCenter,
+            Image(
+                painter = rememberImagePainter(
+                    data = imageUrl,
+                    builder = {
+                        crossfade(200)
+                        error(R.drawable.ic_broken_image)
+                    }
+                ),
                 contentDescription = stringResource(R.string.recipe_image, recipe.title),
-                failure = {
-                    Image(
-                        painter = painterResource(R.drawable.ic_broken_image),
-                        contentDescription = stringResource(R.string.image_failure),
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp),
+                alignment = Alignment.TopCenter,
+                contentScale = ContentScale.Crop
             )
         }
 

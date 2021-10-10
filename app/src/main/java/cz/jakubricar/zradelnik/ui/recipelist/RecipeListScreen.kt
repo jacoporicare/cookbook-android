@@ -52,17 +52,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.insets.systemBarsPadding
-import com.skydoves.landscapist.coil.CoilImage
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
@@ -399,18 +399,27 @@ fun Recipe(
         elevation = 2.dp
     ) {
         Column {
-            CoilImage(
-                imageModel = recipe.imageUrl ?: R.drawable.ic_food_placeholder,
-                modifier = Modifier.height(150.dp),
-                alignment = Alignment.TopCenter,
+            Image(
+                painter = rememberImagePainter(
+                    data = recipe.imageUrl ?: R.drawable.ic_food_placeholder,
+                    builder = {
+                        crossfade(200)
+                        error(R.drawable.ic_broken_image)
+                    }
+                ),
                 contentDescription = stringResource(R.string.recipe_image, recipe.title),
-                failure = {
-                    Image(
-                        painter = painterResource(R.drawable.ic_broken_image),
-                        contentDescription = stringResource(R.string.image_failure),
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(150.dp)
+                    .let {
+                        if (recipe.imageUrl == null) {
+                            it.padding(16.dp)
+                        } else {
+                            it
+                        }
+                    },
+                alignment = Alignment.TopCenter,
+                contentScale = if (recipe.imageUrl != null) ContentScale.Crop else ContentScale.Fit
             )
             Text(
                 text = recipe.title,
