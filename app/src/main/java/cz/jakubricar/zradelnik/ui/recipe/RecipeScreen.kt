@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
@@ -267,34 +268,50 @@ private fun Ingredients(
     Row {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Column(horizontalAlignment = Alignment.End) {
-                ingredients.forEach { ingredient ->
+                ingredients.forEachIndexed { index, ingredient ->
                     Text(
                         text = ingredient.amount ?: "",
+                        modifier = Modifier.ingredientGroupPadding(index, ingredient),
                         style = MaterialTheme.typography.body2
                     )
                 }
             }
             Column(modifier = Modifier.padding(start = 8.dp)) {
-                ingredients.forEach { ingredient ->
+                ingredients.forEachIndexed { index, ingredient ->
                     Text(
                         text = ingredient.amountUnit ?: "",
+                        modifier = Modifier.ingredientGroupPadding(index, ingredient),
                         style = MaterialTheme.typography.body2
                     )
                 }
             }
         }
         Column(modifier = Modifier.padding(start = 16.dp)) {
-            ingredients.forEach { ingredient ->
+            ingredients.forEachIndexed { index, ingredient ->
                 val alpha = if (ingredient.isGroup) ContentAlpha.medium else ContentAlpha.high
 
                 CompositionLocalProvider(LocalContentAlpha provides alpha) {
                     Text(
                         text = ingredient.name,
+                        modifier = Modifier.ingredientGroupPadding(index, ingredient),
                         fontWeight = if (ingredient.isGroup) FontWeight.Bold else FontWeight.Normal,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
                         style = MaterialTheme.typography.body2
                     )
                 }
             }
         }
     }
+}
+
+private fun Modifier.ingredientGroupPadding(
+    index: Int,
+    ingredient: RecipeDetail.Ingredient
+): Modifier {
+    if (ingredient.isGroup && index > 0) {
+        return padding(top = 16.dp)
+    }
+
+    return this
 }
