@@ -15,6 +15,7 @@
     <!--    <string name="action_side_dishes">Přílohy</string>-->
     <string name="settings">Nastavení</string>
     <string name="keep_awake">Nevypínat displej</string>
+    <string name="keep_awake_snackbar_message">Displej zůstane stále zapnutý.</string>
 
     <!-- Recipe List -->
     <string name="recipe_image">Fotka receptu %1$s</string>

@@ -23,9 +23,12 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
+import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -44,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.navigationBarsHeight
+import com.google.accompanist.insets.systemBarsPadding
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
@@ -55,6 +59,7 @@ import dev.jeziellago.compose.markdowntext.MarkdownText
 fun RecipeScreen(
     viewModel: RecipeViewModel = hiltViewModel(),
     slug: String,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit
 ) {
     LaunchedEffect(slug) {
@@ -79,10 +84,19 @@ fun RecipeScreen(
                 window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         }
+
+        val message = stringResource(R.string.keep_awake_snackbar_message)
+
+        LaunchedEffect(true) {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = message
+            )
+        }
     }
 
     RecipeScreen(
         viewState = viewState,
+        scaffoldState = scaffoldState,
         onBack = onBack,
         onKeepAwake = { viewModel.toggleKeepAwake() }
     )
@@ -97,12 +111,15 @@ fun RecipeScreen(
 @Composable
 fun RecipeScreen(
     viewState: RecipeViewState,
+    scaffoldState: ScaffoldState,
     onBack: () -> Unit,
     onKeepAwake: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
     Scaffold(
+        scaffoldState = scaffoldState,
+        snackbarHost = { SnackbarHost(hostState = it, modifier = Modifier.systemBarsPadding()) },
         topBar = {
             InsetAwareTopAppBar(
                 title = {
