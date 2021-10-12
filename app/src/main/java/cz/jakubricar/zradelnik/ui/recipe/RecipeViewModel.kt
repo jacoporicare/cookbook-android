@@ -20,7 +20,8 @@ import javax.inject.Inject
 @Immutable
 data class RecipeViewState(
     val recipe: RecipeDetail? = null,
-    val loading: Boolean = false
+    val loading: Boolean = false,
+    val keepAwake: Boolean = false
 ) {
 
     val failedLoading: Boolean
@@ -54,5 +55,9 @@ class RecipeViewModel @Inject constructor(
                 _state.update { it.copy(recipe = recipe, loading = false) }
             }
             .launchIn(viewModelScope)
+    }
+
+    fun toggleKeepAwake() {
+        _state.update { it.copy(keepAwake = !it.keepAwake) }
     }
 }

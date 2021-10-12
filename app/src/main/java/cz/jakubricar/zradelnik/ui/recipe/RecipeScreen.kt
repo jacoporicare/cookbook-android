@@ -1,5 +1,6 @@
 package cz.jakubricar.zradelnik.ui.recipe
 
+import android.view.WindowManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -27,12 +28,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +45,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.navigationBarsHeight
 import cz.jakubricar.zradelnik.R
+import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
@@ -63,9 +68,23 @@ fun RecipeScreen(
 
     val viewState by viewModel.state.collectAsState()
 
+    if (viewState.keepAwake) {
+        val context = LocalContext.current
+
+        DisposableEffect(true) {
+            val window = context.findActivity()?.window
+            window?.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+
+            onDispose {
+                window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+        }
+    }
+
     RecipeScreen(
         viewState = viewState,
-        onBack = onBack
+        onBack = onBack,
+        onKeepAwake = { viewModel.toggleKeepAwake() }
     )
 
     LaunchedEffect(viewState) {
@@ -78,7 +97,8 @@ fun RecipeScreen(
 @Composable
 fun RecipeScreen(
     viewState: RecipeViewState,
-    onBack: () -> Unit
+    onBack: () -> Unit,
+    onKeepAwake: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
 
@@ -93,6 +113,20 @@ fun RecipeScreen(
                         Icon(
                             imageVector = Icons.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onKeepAwake) {
+                        Icon(
+                            painter = painterResource(
+                                if (viewState.keepAwake) {
+                                    R.drawable.baseline_light_mode_24
+                                } else {
+                                    R.drawable.outline_light_mode_24
+                                }
+                            ),
+                            contentDescription = stringResource(R.string.keep_awake)
                         )
                     }
                 },

@@ -14,6 +14,7 @@
     <string name="sync">Synchronizovat</string>
     <!--    <string name="action_side_dishes">Přílohy</string>-->
     <string name="settings">Nastavení</string>
+    <string name="keep_awake">Nevypínat displej</string>
 
     <!-- Recipe List -->
     <string name="recipe_image">Fotka receptu %1$s</string>

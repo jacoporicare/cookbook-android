@@ -218,7 +218,8 @@ private fun TopBarContent(
                     },
                     trailingIcon = if (searchQuery.isNotEmpty()) {
                         {
-                            Icon(imageVector = Icons.Filled.Clear,
+                            Icon(
+                                imageVector = Icons.Filled.Clear,
                                 contentDescription = stringResource(R.string.search_clear),
                                 modifier = Modifier.clickable { onSearchQueryChange("") }
                             )
