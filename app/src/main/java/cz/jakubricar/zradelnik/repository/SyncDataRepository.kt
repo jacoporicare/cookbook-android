@@ -76,7 +76,7 @@ class SyncDataRepository @Inject constructor(
                                             .filter { recipe ->
                                                 !data.recipes.any { oldRecipe ->
                                                     recipe.fragments.recipeFragment.id ==
-                                                            oldRecipe.fragments.recipeFragment.id
+                                                        oldRecipe.fragments.recipeFragment.id
                                                 }
                                             }
                                             .plus(addedOrUpdatedRecipes)

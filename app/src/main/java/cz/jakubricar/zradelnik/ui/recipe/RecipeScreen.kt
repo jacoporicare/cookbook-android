@@ -212,7 +212,6 @@ fun Recipe(
             }
         }
 
-
         if (recipe.ingredients.isNotEmpty()) {
             item {
                 Spacer(modifier = Modifier.height(16.dp))
@@ -310,7 +309,6 @@ private fun DetailItem(
         )
     }
 }
-
 
 @Composable
 private fun Ingredients(

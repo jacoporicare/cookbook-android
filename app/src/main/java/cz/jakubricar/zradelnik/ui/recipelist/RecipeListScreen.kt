@@ -282,10 +282,12 @@ private fun TopBarContent(
                     ) {
                         Text(text = stringResource(R.string.sync))
                     }
-                    DropdownMenuItem(onClick = {
-                        menuExpanded = false
-                        onNavigateToSettings()
-                    }) {
+                    DropdownMenuItem(
+                        onClick = {
+                            menuExpanded = false
+                            onNavigateToSettings()
+                        }
+                    ) {
                         Text(text = stringResource(R.string.settings))
                     }
                 }
