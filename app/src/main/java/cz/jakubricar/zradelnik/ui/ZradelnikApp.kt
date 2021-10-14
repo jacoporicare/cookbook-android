@@ -18,7 +18,9 @@ import cz.jakubricar.zradelnik.getSettingsSharedPreferences
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 
 @Composable
-fun ZradelnikApp() {
+fun ZradelnikApp(
+    content: @Composable () -> Unit
+) {
     val context = LocalContext.current
     val prefs = remember(context) { context.getSettingsSharedPreferences() }
     var theme by remember { mutableStateOf(prefs.theme) }
@@ -49,7 +51,7 @@ fun ZradelnikApp() {
                 )
             }
 
-            ZradelnikNavGraph()
+            content()
         }
     }
 }

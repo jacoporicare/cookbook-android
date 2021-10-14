@@ -33,4 +33,8 @@ class LoginViewModel @Inject constructor(
             _state.update { it.copy(loginResult = result, loading = false) }
         }
     }
+
+    fun resetLoginResult() {
+        _state.update { it.copy(loginResult = null, loading = false) }
+    }
 }

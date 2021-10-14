@@ -58,11 +58,14 @@
     <string name="settings_sync_wifi_only_summary">Není-li připojení Wi-Fi k dispozici, bude synchronizace pozastavena.</string>
 
     <!-- Login -->
-    <!--    <string name="login_hint_username">Uživatelské jméno</string>-->
-    <!--    <string name="login_hint_password">Heslo</string>-->
-    <!--    <string name="login_action_sign_in">Přihlásit</string>-->
+    <string name="login">Přihlášení</string>
+    <string name="login_username">Uživatelské jméno</string>
+    <string name="login_password">Heslo</string>
+    <string name="login_sign_in">Přihlásit</string>
+    <string name="login_password_show">Ukázat heslo</string>
+    <string name="login_password_hide">Schovat heslo</string>
     <string name="login_invalid_username">Uživatelské jméno je povinné</string>
     <string name="login_invalid_password">Heslo je povinné</string>
-    <!--    <string name="login_failed">Neplatné uživatelské jméno nebo heslo.</string>-->
+    <string name="login_failed">Neplatné uživatelské jméno nebo heslo.</string>
     <string name="login_account_already_exists">Účet pro Žrádelník již existuje.</string>
 </resources>

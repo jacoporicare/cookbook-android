@@ -16,9 +16,6 @@
         android:theme="@style/Theme.Zradelnik"
         android:usesCleartextTraffic="@string/uses_cleartext_traffic">
         <activity
-            android:name=".ui.login.LoginActivity"
-            android:exported="true" />
-        <activity
             android:name=".ui.MainActivity"
             android:exported="true">
             <intent-filter>
@@ -37,6 +34,21 @@
                     android:scheme="https" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".ui.login.LoginActivity"
+            android:parentActivityName=".ui.MainActivity" />
+
+        <service
+            android:name=".auth.AuthenticatorService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
 
         <provider
             android:name="androidx.startup.InitializationProvider"

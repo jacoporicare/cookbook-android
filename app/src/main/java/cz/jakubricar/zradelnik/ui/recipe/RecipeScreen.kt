@@ -28,6 +28,8 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -40,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,7 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.navigationBarsHeight
-import com.google.accompanist.insets.systemBarsPadding
+import com.google.accompanist.insets.navigationBarsWithImePadding
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
@@ -64,8 +65,6 @@ fun RecipeScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-
     LaunchedEffect(slug) {
         // The app opened for the first time, navigate to the list to fetch recipes
         if (viewModel.initialSync) {
@@ -90,6 +89,7 @@ fun RecipeScreen(
         }
     }
 
+    val scope = rememberCoroutineScope()
     val snackbarKeepAwakeMessage = stringResource(R.string.keep_awake_snackbar_message)
 
     RecipeScreen(
@@ -101,9 +101,7 @@ fun RecipeScreen(
 
             if (!viewState.keepAwake) {
                 scope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar(
-                        message = snackbarKeepAwakeMessage
-                    )
+                    scaffoldState.snackbarHostState.showSnackbar(snackbarKeepAwakeMessage)
                 }
             }
         }
@@ -127,7 +125,12 @@ fun RecipeScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        snackbarHost = { SnackbarHost(hostState = it, modifier = Modifier.systemBarsPadding()) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = it,
+                modifier = Modifier.navigationBarsWithImePadding()
+            )
+        },
         topBar = {
             InsetAwareTopAppBar(
                 title = {
@@ -144,13 +147,11 @@ fun RecipeScreen(
                 actions = {
                     IconButton(onClick = onKeepAwake) {
                         Icon(
-                            painter = painterResource(
-                                if (viewState.keepAwake) {
-                                    R.drawable.baseline_light_mode_24
-                                } else {
-                                    R.drawable.outline_light_mode_24
-                                }
-                            ),
+                            imageVector = if (viewState.keepAwake) {
+                                Icons.Filled.LightMode
+                            } else {
+                                Icons.Outlined.LightMode
+                            },
                             contentDescription = stringResource(R.string.keep_awake)
                         )
                     }

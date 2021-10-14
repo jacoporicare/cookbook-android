@@ -61,8 +61,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.systemBarsPadding
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
@@ -116,7 +116,12 @@ fun RecipeListScreen(
 
     Scaffold(
         scaffoldState = scaffoldState,
-        snackbarHost = { SnackbarHost(hostState = it, modifier = Modifier.systemBarsPadding()) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = it,
+                modifier = Modifier.navigationBarsWithImePadding()
+            )
+        },
         topBar = {
             TopBarContent(
                 searchVisible = viewState.searchVisible,
