@@ -35,6 +35,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -54,6 +55,7 @@ import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import dev.jeziellago.compose.markdowntext.MarkdownText
+import kotlinx.coroutines.launch
 
 @Composable
 fun RecipeScreen(
@@ -62,6 +64,8 @@ fun RecipeScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit
 ) {
+    val scope = rememberCoroutineScope()
+
     LaunchedEffect(slug) {
         // The app opened for the first time, navigate to the list to fetch recipes
         if (viewModel.initialSync) {
@@ -84,21 +88,25 @@ fun RecipeScreen(
                 window?.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             }
         }
-
-        val message = stringResource(R.string.keep_awake_snackbar_message)
-
-        LaunchedEffect(true) {
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = message
-            )
-        }
     }
+
+    val snackbarKeepAwakeMessage = stringResource(R.string.keep_awake_snackbar_message)
 
     RecipeScreen(
         viewState = viewState,
         scaffoldState = scaffoldState,
         onBack = onBack,
-        onKeepAwake = { viewModel.toggleKeepAwake() }
+        onKeepAwake = {
+            viewModel.toggleKeepAwake()
+
+            if (!viewState.keepAwake) {
+                scope.launch {
+                    scaffoldState.snackbarHostState.showSnackbar(
+                        message = snackbarKeepAwakeMessage
+                    )
+                }
+            }
+        }
     )
 
     LaunchedEffect(viewState) {
