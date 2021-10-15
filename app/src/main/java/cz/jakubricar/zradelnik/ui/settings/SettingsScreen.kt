@@ -1,5 +1,9 @@
 package cz.jakubricar.zradelnik.ui.settings
 
+import android.content.Context
+import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContract
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +18,7 @@ import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
@@ -44,11 +49,13 @@ import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.navigationBarsHeight
 import cz.jakubricar.zradelnik.R
+import cz.jakubricar.zradelnik.model.LoggedInUser
 import cz.jakubricar.zradelnik.model.Settings
 import cz.jakubricar.zradelnik.model.SyncFrequency
 import cz.jakubricar.zradelnik.model.Theme
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
+import cz.jakubricar.zradelnik.ui.login.LoginActivity
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 
 @Composable
@@ -57,6 +64,9 @@ fun SettingsScreen(
     onBack: () -> Unit
 ) {
     val viewState by viewModel.state.collectAsState()
+    val launcher = rememberLauncherForActivityResult(LoginActivityResultContract) {
+        viewModel.getLoggedInUser()
+    }
 
     SettingsScreen(
         viewState = viewState,
@@ -64,7 +74,9 @@ fun SettingsScreen(
         onThemeChange = { viewModel.setTheme(it) },
         onSyncChange = { viewModel.setSync(it) },
         onSyncFrequencyChange = { viewModel.setSyncFrequency(it) },
-        onSyncWifiOnlyChange = { viewModel.setSyncWifiOnly(it) }
+        onSyncWifiOnlyChange = { viewModel.setSyncWifiOnly(it) },
+        onLogin = { launcher.launch(Unit) },
+        onLogout = { viewModel.logout() }
     )
 }
 
@@ -75,7 +87,9 @@ fun SettingsScreen(
     onThemeChange: (Theme) -> Unit,
     onSyncChange: (Boolean) -> Unit,
     onSyncFrequencyChange: (SyncFrequency) -> Unit,
-    onSyncWifiOnlyChange: (Boolean) -> Unit
+    onSyncWifiOnlyChange: (Boolean) -> Unit,
+    onLogin: () -> Unit,
+    onLogout: () -> Unit
 ) {
     val scrollState = rememberScrollState()
 
@@ -102,17 +116,21 @@ fun SettingsScreen(
             )
         }
     ) { innerPadding ->
-        if (viewState.loading || viewState.settings == null) {
+        if (viewState.loadingSettings || viewState.settings == null) {
             FullScreenLoading()
         } else {
             Settings(
                 settings = viewState.settings,
+                loggedInUser = viewState.loggedInUser,
+                loadingLoggedInUser = viewState.loadingLoggedInUser,
                 modifier = Modifier.padding(innerPadding),
                 scrollState = scrollState,
                 onThemeChange = onThemeChange,
                 onSyncChange = onSyncChange,
                 onSyncFrequencyChange = onSyncFrequencyChange,
-                onSyncWifiOnlyChange = onSyncWifiOnlyChange
+                onSyncWifiOnlyChange = onSyncWifiOnlyChange,
+                onLogin = onLogin,
+                onLogout = onLogout
             )
         }
     }
@@ -122,12 +140,16 @@ fun SettingsScreen(
 @Composable
 fun Settings(
     settings: Settings,
+    loggedInUser: LoggedInUser?,
+    loadingLoggedInUser: Boolean,
     modifier: Modifier = Modifier,
     scrollState: ScrollState = rememberScrollState(),
     onThemeChange: (Theme) -> Unit,
     onSyncChange: (Boolean) -> Unit,
     onSyncFrequencyChange: (SyncFrequency) -> Unit,
-    onSyncWifiOnlyChange: (Boolean) -> Unit
+    onSyncWifiOnlyChange: (Boolean) -> Unit,
+    onLogin: () -> Unit,
+    onLogout: () -> Unit
 ) {
     var themeDialogOpened by remember { mutableStateOf(false) }
     var syncFrequencyDialogOpened by remember { mutableStateOf(false) }
@@ -205,6 +227,43 @@ fun Settings(
             },
             modifier = Modifier.clickable { onSyncWifiOnlyChange(!settings.syncWifiOnly) }
         )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = stringResource(R.string.settings_account),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            color = MaterialTheme.colors.secondaryVariant,
+            style = MaterialTheme.typography.body2
+        )
+
+        when {
+            loadingLoggedInUser -> {
+                ListItem(
+                    text = {
+                        CircularProgressIndicator()
+                    }
+                )
+            }
+            loggedInUser != null -> {
+                ListItem(
+                    text = {
+                        Text(text = loggedInUser.displayName)
+                    },
+                    secondaryText = {
+                        Text(text = stringResource(R.string.settings_logout))
+                    },
+                    modifier = Modifier.clickable { onLogout() }
+                )
+            }
+            else -> {
+                ListItem(
+                    text = {
+                        Text(text = stringResource(R.string.settings_login))
+                    },
+                    modifier = Modifier.clickable { onLogin() }
+                )
+            }
+        }
+
         Spacer(modifier = Modifier.navigationBarsHeight())
     }
 
@@ -345,10 +404,23 @@ fun SettingsPreview() {
                 syncWifiOnly = true,
                 lastSyncDate = "5. 10. 2021 12:56"
             ),
+            loggedInUser = null,
+            loadingLoggedInUser = false,
             onThemeChange = { },
             onSyncChange = { },
             onSyncFrequencyChange = { },
-            onSyncWifiOnlyChange = { }
+            onSyncWifiOnlyChange = { },
+            onLogin = { },
+            onLogout = { }
         )
     }
+}
+
+object LoginActivityResultContract : ActivityResultContract<Unit, Unit>() {
+
+    override fun createIntent(context: Context, input: Unit?): Intent {
+        return Intent(context, LoginActivity::class.java)
+    }
+
+    override fun parseResult(resultCode: Int, intent: Intent?) {}
 }

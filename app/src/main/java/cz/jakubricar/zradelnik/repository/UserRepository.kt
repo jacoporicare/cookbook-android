@@ -5,7 +5,6 @@ import android.accounts.AccountManager.KEY_AUTHTOKEN
 import android.content.Context
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
-import com.apollographql.apollo.coroutines.toFlow
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.request.RequestHeaders
 import cz.jakubricar.zradelnik.LoginMutation
@@ -13,11 +12,7 @@ import cz.jakubricar.zradelnik.MeQuery
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator.Companion.ACCOUNT_TYPE
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator.Companion.AUTH_TOKEN_TYPE
 import cz.jakubricar.zradelnik.model.LoggedInUser
-import cz.jakubricar.zradelnik.network.mapToData
 import cz.jakubricar.zradelnik.network.toResult
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.coroutines.resume
@@ -40,8 +35,7 @@ class UserRepository @Inject constructor(
         accountManager.removeAccountExplicitly(account)
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getLoggedInUser(token: String): Flow<LoggedInUser> =
+    suspend fun getLoggedInUser(token: String): Result<LoggedInUser> =
         apolloClient.query(MeQuery())
             .toBuilder()
             .requestHeaders(
@@ -51,9 +45,8 @@ class UserRepository @Inject constructor(
             )
             .responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
             .build()
-            .watcher()
-            .toFlow()
-            .mapToData()
+            .await()
+            .toResult()
             .map { data ->
                 LoggedInUser(
                     id = data.me.id,

@@ -57,11 +57,15 @@
     <string name="settings_sync_wifi_only">Synchronizovat pouze přes Wi-Fi</string>
     <string name="settings_sync_wifi_only_summary">Není-li připojení Wi-Fi k dispozici, bude synchronizace pozastavena.</string>
 
+    <string name="settings_account">Účet</string>
+    <string name="settings_login">Přihlásit</string>
+    <string name="settings_logout">Odhlásit</string>
+
     <!-- Login -->
     <string name="login">Přihlášení</string>
     <string name="login_username">Uživatelské jméno</string>
     <string name="login_password">Heslo</string>
-    <string name="login_sign_in">Přihlásit</string>
+    <string name="login_login">Přihlásit</string>
     <string name="login_password_show">Ukázat heslo</string>
     <string name="login_password_hide">Schovat heslo</string>
     <string name="login_invalid_username">Uživatelské jméno je povinné</string>

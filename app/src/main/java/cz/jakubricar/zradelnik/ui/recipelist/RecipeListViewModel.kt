@@ -73,7 +73,7 @@ class RecipeListViewModel @Inject constructor(
     }
 
     private fun getRecipes() {
-        recipeRepository.getRecipes()
+        recipeRepository.observeRecipes()
             .catch { error ->
                 Timber.e(error)
                 _state.update {

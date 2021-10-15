@@ -10,10 +10,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -46,15 +44,16 @@ class RecipeViewModel @Inject constructor(
         get() = syncDataRepository.initialSync()
 
     fun getRecipe(slug: String) {
-        recipeRepository.getRecipe(slug)
-            .catch { error ->
-                Timber.e(error)
-                _state.update { it.copy(loading = false) }
-            }
-            .onEach { recipe ->
-                _state.update { it.copy(recipe = recipe, loading = false) }
-            }
-            .launchIn(viewModelScope)
+        viewModelScope.launch {
+            recipeRepository.getRecipe(slug)
+                .onSuccess { recipe ->
+                    _state.update { it.copy(recipe = recipe, loading = false) }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                    _state.update { it.copy(loading = false) }
+                }
+        }
     }
 
     fun toggleKeepAwake() {

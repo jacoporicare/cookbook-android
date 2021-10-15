@@ -1,6 +1,7 @@
 package cz.jakubricar.zradelnik.repository
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.coroutines.toFlow
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import cz.jakubricar.zradelnik.RecipeDetailQuery
@@ -8,6 +9,7 @@ import cz.jakubricar.zradelnik.RecipeListQuery
 import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.network.mapToData
+import cz.jakubricar.zradelnik.network.toResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,7 +22,7 @@ class RecipeRepository @Inject constructor(
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getRecipes(): Flow<List<Recipe>> =
+    fun observeRecipes(): Flow<List<Recipe>> =
         apolloClient.query(RecipeListQuery())
             .toBuilder()
             .responseFetcher(ApolloResponseFetchers.CACHE_ONLY)
@@ -41,15 +43,13 @@ class RecipeRepository @Inject constructor(
                 }
             }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
-    fun getRecipe(slug: String): Flow<RecipeDetail?> =
+    suspend fun getRecipe(slug: String): Result<RecipeDetail?> =
         apolloClient.query(RecipeDetailQuery(slug))
             .toBuilder()
             .responseFetcher(ApolloResponseFetchers.CACHE_ONLY)
             .build()
-            .watcher()
-            .toFlow()
-            .mapToData(RecipeDetailQuery.Data(null))
+            .await()
+            .toResult()
             .map { data ->
                 data.recipe?.let {
                     val recipe = it.fragments.recipeFragment

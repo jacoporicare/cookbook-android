@@ -91,8 +91,8 @@ fun LoginScreen(
     val snackbarLoginFailedMessage = stringResource(R.string.login_failed)
 
     LaunchedEffect(viewState.loginResult) {
-        viewState.loginResult?.fold(
-            onSuccess = { token ->
+        viewState.loginResult
+            ?.onSuccess { token ->
                 val intent = finishLogin(
                     context = context,
                     isNewAccount = isNewAccount,
@@ -102,15 +102,14 @@ fun LoginScreen(
                 )
 
                 onResult(intent)
-            },
-            onFailure = {
+            }
+            ?.onFailure {
                 viewModel.resetLoginResult()
 
                 scope.launch {
                     scaffoldState.snackbarHostState.showSnackbar(snackbarLoginFailedMessage)
                 }
             }
-        )
     }
 }
 
@@ -209,7 +208,7 @@ fun LoginScreen(
                 enabled = usernameState.isValid && passwordState.isValid && !loading
             ) {
                 Text(
-                    text = stringResource(id = R.string.login_sign_in)
+                    text = stringResource(id = R.string.login_login)
                 )
             }
         }
