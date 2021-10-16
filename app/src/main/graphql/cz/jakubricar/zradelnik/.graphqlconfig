@@ -3,7 +3,7 @@
   "extensions": {
     "endpoints": {
       "local": "http://localhost:8888/graphql",
-      "dev": "https://develop.api.zradelnik.eu/graphql"
+      "staging": "https://test.api.zradelnik.eu/graphql"
     }
   }
 }

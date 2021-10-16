@@ -61,7 +61,7 @@ android {
 
         create("development") {
             dimension = "environment"
-            buildConfigField("String", "API_URL", "\"https://develop.api.zradelnik.eu/graphql\"")
+            buildConfigField("String", "API_URL", "\"https://test.api.zradelnik.eu/graphql\"")
         }
 
         create("production") {

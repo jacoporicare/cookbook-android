@@ -442,7 +442,7 @@ fun DefaultPreview() {
                 id = "1",
                 slug = "slug",
                 title = "Koprovka",
-                imageUrl = "https://develop.api.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=640x640&format=webp"
+                imageUrl = "https://test.api.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=640x640&format=webp"
             ),
             onNavigateToRecipe = {}
         )
