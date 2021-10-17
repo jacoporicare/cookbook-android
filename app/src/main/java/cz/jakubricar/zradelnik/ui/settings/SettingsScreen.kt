@@ -57,32 +57,38 @@ import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.login.LoginActivity
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
+import cz.jakubricar.zradelnik.ui.user.UserViewModel
+import cz.jakubricar.zradelnik.ui.user.UserViewState
 
 @Composable
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel(),
     onBack: () -> Unit
 ) {
     val viewState by viewModel.state.collectAsState()
+    val userViewState by userViewModel.state.collectAsState()
     val launcher = rememberLauncherForActivityResult(LoginActivityResultContract) {
-        viewModel.getLoggedInUser()
+        userViewModel.getLoggedInUser()
     }
 
     SettingsScreen(
         viewState = viewState,
+        userViewState = userViewState,
         onBack = onBack,
         onThemeChange = { viewModel.setTheme(it) },
         onSyncChange = { viewModel.setSync(it) },
         onSyncFrequencyChange = { viewModel.setSyncFrequency(it) },
         onSyncWifiOnlyChange = { viewModel.setSyncWifiOnly(it) },
         onLogin = { launcher.launch(Unit) },
-        onLogout = { viewModel.logout() }
+        onLogout = { userViewModel.logout() }
     )
 }
 
 @Composable
 fun SettingsScreen(
     viewState: SettingsViewState,
+    userViewState: UserViewState,
     onBack: () -> Unit,
     onThemeChange: (Theme) -> Unit,
     onSyncChange: (Boolean) -> Unit,
@@ -116,13 +122,13 @@ fun SettingsScreen(
             )
         }
     ) { innerPadding ->
-        if (viewState.loadingSettings || viewState.settings == null) {
+        if (viewState.loading || viewState.settings == null) {
             FullScreenLoading()
         } else {
             Settings(
                 settings = viewState.settings,
-                loggedInUser = viewState.loggedInUser,
-                loadingLoggedInUser = viewState.loadingLoggedInUser,
+                loggedInUser = userViewState.loggedInUser,
+                loadingLoggedInUser = userViewState.loading,
                 modifier = Modifier.padding(innerPadding),
                 scrollState = scrollState,
                 onThemeChange = onThemeChange,
