@@ -11,22 +11,22 @@ import cz.jakubricar.zradelnik.model.Theme
 private val LightColorPalette = lightColors(
     primary = Blue700,
     primaryVariant = Blue800,
-    secondary = Cyan700,
-    secondaryVariant = Cyan700,
+    secondary = GoogleBlueLight,
+    secondaryVariant = GoogleBlueDark,
     background = Gray50,
     onPrimary = Color.White,
-    onSecondary = Color.White
+    onSecondary =  GoogleOnBlueLight
 )
 
 private val DarkColorPalette = darkColors(
     primary = Blue600,
     primaryVariant = Blue700,
-    secondary = Cyan500,
-    secondaryVariant = Cyan500,
+    secondary = Cyan700,
+    secondaryVariant = Cyan700,
     background = BlueGray1000,
     surface = BlueGray1000,
     onPrimary = Color.Black,
-    onSecondary = Color.Black
+    onSecondary = Color.White
 )
 
 @Composable

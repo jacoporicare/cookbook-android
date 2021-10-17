@@ -21,6 +21,7 @@
     <string name="recipe_image">Fotka receptu %1$s</string>
     <string name="no_recipes">Žádné výsledky.</string>
     <string name="image_failure">Chyba při načítání fotky</string>
+    <string name="new_recipe">Nový recept</string>
 
     <!-- Recipe -->
     <string name="recipe">Recept</string>

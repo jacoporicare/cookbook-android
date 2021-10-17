@@ -1,7 +1,12 @@
 package cz.jakubricar.zradelnik.ui
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -13,6 +18,7 @@ import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
 import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_SLUG_KEY
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
 import cz.jakubricar.zradelnik.ui.settings.SettingsScreen
+import cz.jakubricar.zradelnik.ui.user.UserViewModel
 
 object MainDestinations {
 
@@ -29,6 +35,23 @@ fun ZradelnikNavGraph(
     startDestination: String = MainDestinations.RECIPE_LIST_ROUTE
 ) {
     val actions = remember(navController) { MainActions(navController) }
+    val userViewModel: UserViewModel = hiltViewModel()
+
+    // Refresh logged in user - e.g. when the account is removed via system account settings
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                userViewModel.getLoggedInUser()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -39,6 +62,7 @@ fun ZradelnikNavGraph(
             deepLinks = listOf(navDeepLink { uriPattern = WEB_URI })
         ) {
             RecipeListScreen(
+                userViewModel = userViewModel,
                 onNavigateToRecipe = actions.navigateToRecipe,
                 onNavigateToSettings = actions.navigateToSettings
             )
@@ -53,6 +77,7 @@ fun ZradelnikNavGraph(
             val slug = backStackEntry.arguments?.getString(RECIPE_SLUG_KEY)!!
 
             RecipeScreen(
+                userViewModel = userViewModel,
                 slug = slug,
                 onBack = actions.upPress
             )
@@ -61,6 +86,7 @@ fun ZradelnikNavGraph(
             route = MainDestinations.SETTINGS_ROUTE
         ) {
             SettingsScreen(
+                userViewModel = userViewModel,
                 onBack = actions.upPress
             )
         }

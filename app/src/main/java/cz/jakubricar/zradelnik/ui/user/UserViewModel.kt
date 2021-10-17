@@ -39,7 +39,7 @@ class UserViewModel @Inject constructor(
             val authToken = userRepository.getAuthToken(app)
 
             if (authToken == null) {
-                _state.update { it.copy(loggedInUser = null) }
+                _state.update { it.copy(loggedInUser = null, loading = false) }
                 return@launch
             }
 

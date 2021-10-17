@@ -55,12 +55,14 @@ import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
+import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.launch
 
 @Composable
 fun RecipeScreen(
     viewModel: RecipeViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel(),
     slug: String,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit
@@ -121,7 +123,7 @@ fun RecipeScreen(
     onBack: () -> Unit,
     onKeepAwake: () -> Unit
 ) {
-    val scrollState = rememberLazyListState()
+    val listState = rememberLazyListState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -156,12 +158,12 @@ fun RecipeScreen(
                         )
                     }
                 },
-                backgroundColor = if (scrollState.firstVisibleItemScrollOffset == 0) {
+                backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
                     MaterialTheme.colors.background
                 } else {
                     MaterialTheme.colors.surface
                 },
-                elevation = if (scrollState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
+                elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
             )
         }
     ) { innerPadding ->
@@ -171,7 +173,7 @@ fun RecipeScreen(
             Recipe(
                 recipe = viewState.recipe,
                 contentPadding = innerPadding,
-                scrollState = scrollState
+                listState = listState
             )
         }
     }
@@ -181,10 +183,10 @@ fun RecipeScreen(
 fun Recipe(
     recipe: RecipeDetail,
     contentPadding: PaddingValues,
-    scrollState: LazyListState
+    listState: LazyListState
 ) {
     LazyColumn(
-        state = scrollState,
+        state = listState,
         contentPadding = contentPadding
     ) {
         recipe.imageUrl?.let { imageUrl ->

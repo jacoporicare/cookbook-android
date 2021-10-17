@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -33,6 +34,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
@@ -61,25 +63,31 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
+import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
+import cz.jakubricar.zradelnik.ui.user.UserViewModel
+import cz.jakubricar.zradelnik.ui.user.UserViewState
 
 @Composable
 fun RecipeListScreen(
     viewModel: RecipeListViewModel = hiltViewModel(),
+    userViewModel: UserViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onNavigateToRecipe: (String) -> Unit,
     onNavigateToSettings: () -> Unit
 ) {
     LogCompositions("RecipeListScreen")
     val viewState by viewModel.state.collectAsState()
+    val userViewState by userViewModel.state.collectAsState()
 
     BackHandler(viewState.searchVisible) {
         viewModel.hideSearch()
@@ -87,6 +95,7 @@ fun RecipeListScreen(
 
     RecipeListScreen(
         viewState = viewState,
+        userViewState = userViewState,
         scaffoldState = scaffoldState,
         onNavigateToRecipe = onNavigateToRecipe,
         onNavigateToSettings = onNavigateToSettings,
@@ -101,6 +110,7 @@ fun RecipeListScreen(
 @Composable
 fun RecipeListScreen(
     viewState: RecipeListViewState,
+    userViewState: UserViewState,
     scaffoldState: ScaffoldState,
     onNavigateToRecipe: (String) -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -112,7 +122,7 @@ fun RecipeListScreen(
 ) {
     LogCompositions("RecipeListScreenStateless")
     val recipes = rememberFilteredRecipes(viewState.recipes, viewState.searchQuery)
-    val scrollState = rememberLazyListState()
+    val listState = rememberLazyListState()
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -126,14 +136,43 @@ fun RecipeListScreen(
             TopBarContent(
                 searchVisible = viewState.searchVisible,
                 searchQuery = viewState.searchQuery,
-                scrollState = scrollState,
+                listState = listState,
                 onNavigateToSettings = onNavigateToSettings,
                 onRefreshRecipes = onRefreshRecipes,
                 onSearchHide = onSearchHide,
                 onSearchShow = onSearchShow,
                 onSearchQueryChange = onSearchQueryChange
             )
-        }
+        },
+        floatingActionButton = if (userViewState.loggedInUser != null) {
+            {
+                val expanded by remember {
+                    derivedStateOf {
+                        listState.firstVisibleItemIndex == 0
+                    }
+                }
+
+                ExpandableFloatingActionButton(
+                    text = {
+                        Text(text = stringResource(R.string.new_recipe))
+                    },
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Filled.Add,
+                            contentDescription = stringResource(R.string.new_recipe),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    },
+                    onClick = {
+                        // TODO: check if online otherwise snackbar
+                    },
+                    modifier = Modifier.navigationBarsPadding(),
+                    expanded = expanded
+                )
+            }
+        } else {
+            {}
+        },
     ) { innerPadding ->
         LoadingContent(
             empty = viewState.initialLoad,
@@ -145,7 +184,7 @@ fun RecipeListScreen(
                 recipes = recipes,
                 modifier = Modifier.padding(innerPadding),
                 isShowingErrors = viewState.errorMessages.isNotEmpty(),
-                scrollState = scrollState,
+                scrollState = listState,
                 onNavigateToRecipe = onNavigateToRecipe,
                 onRefresh = onRefreshRecipes
             )
@@ -184,7 +223,7 @@ fun RecipeListScreen(
 private fun TopBarContent(
     searchVisible: Boolean,
     searchQuery: String,
-    scrollState: LazyListState,
+    listState: LazyListState,
     onNavigateToSettings: () -> Unit,
     onRefreshRecipes: () -> Unit,
     onSearchHide: () -> Unit,
@@ -196,7 +235,7 @@ private fun TopBarContent(
     val focusRequester = remember { FocusRequester() }
     val isScrolled by remember {
         derivedStateOf {
-            scrollState.firstVisibleItemIndex > 0 || scrollState.firstVisibleItemScrollOffset > 0
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
         }
     }
 
