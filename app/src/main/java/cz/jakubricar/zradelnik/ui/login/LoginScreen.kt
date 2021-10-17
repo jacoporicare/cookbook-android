@@ -24,7 +24,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
@@ -221,7 +220,7 @@ fun Username(
     imeAction: ImeAction = ImeAction.Next,
     onImeAction: () -> Unit = {}
 ) {
-    OutlinedTextField(
+    TextField(
         value = usernameState.value,
         onValueChange = {
             usernameState.value = it
@@ -258,7 +257,7 @@ fun Password(
 ) {
     val showPassword = remember { mutableStateOf(false) }
 
-    OutlinedTextField(
+    TextField(
         value = passwordState.value,
         onValueChange = {
             passwordState.value = it
