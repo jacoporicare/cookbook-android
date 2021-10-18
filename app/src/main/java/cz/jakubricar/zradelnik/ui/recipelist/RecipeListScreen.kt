@@ -47,6 +47,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,6 +70,7 @@ import com.google.accompanist.insets.rememberInsetsPaddingValues
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
+import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
@@ -76,6 +78,7 @@ import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
+import kotlinx.coroutines.launch
 
 @Composable
 fun RecipeListScreen(
@@ -124,12 +127,19 @@ fun RecipeListScreen(
     val recipes = rememberFilteredRecipes(viewState.recipes, viewState.searchQuery)
     val listState = rememberLazyListState()
 
+    val fabVisible = userViewState.loggedInUser != null
+
     Scaffold(
         scaffoldState = scaffoldState,
         snackbarHost = {
             SnackbarHost(
                 hostState = it,
-                modifier = Modifier.navigationBarsWithImePadding()
+                modifier = if (!fabVisible) {
+                    Modifier.navigationBarsWithImePadding()
+                } else {
+                    // FAB is visible, position is handled by Scaffold based on FAB's position
+                    Modifier
+                }
             )
         },
         topBar = {
@@ -144,13 +154,16 @@ fun RecipeListScreen(
                 onSearchQueryChange = onSearchQueryChange
             )
         },
-        floatingActionButton = if (userViewState.loggedInUser != null) {
+        floatingActionButton = if (fabVisible) {
             {
                 val expanded by remember {
                     derivedStateOf {
                         listState.firstVisibleItemIndex == 0
                     }
                 }
+                val connected by connectedState()
+                val scope = rememberCoroutineScope()
+                val onlyOnlineWarningMessage = stringResource(R.string.changes_only_online_warning)
 
                 ExpandableFloatingActionButton(
                     text = {
@@ -164,7 +177,19 @@ fun RecipeListScreen(
                         )
                     },
                     onClick = {
-                        // TODO: check if online otherwise snackbar
+                        // TODO: Move this to the add/edit screen.
+                        //  Let the user navigate to the add/edit screen and start editing.
+                        //  Show a warning they are offline somewhere, maybe a thin stripe
+                        //  at the top.
+                        //  https://miro.medium.com/max/1200/1*18X_aTNszEmyhMoQaB11Ow.gif
+                        if (!connected) {
+                            scope.launch {
+                                scaffoldState.snackbarHostState
+                                    .showSnackbar(onlyOnlineWarningMessage)
+                            }
+                        } else {
+                            // TODO: Redirect to the add screen
+                        }
                     },
                     modifier = Modifier.navigationBarsPadding(),
                     expanded = expanded

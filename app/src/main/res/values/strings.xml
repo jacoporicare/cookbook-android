@@ -7,6 +7,7 @@
     <string name="cancel">Zrušit</string>
     <string name="try_again">Zkusit znovu</string>
     <string name="connection_error">Nastal problém s připojením.</string>
+    <string name="changes_only_online_warning">Nový recept nebo změny lze uložit pouze s připojením k internetu.</string>
 
     <!-- Toolbar -->
     <string name="search_placeholder">Hledat…</string>
