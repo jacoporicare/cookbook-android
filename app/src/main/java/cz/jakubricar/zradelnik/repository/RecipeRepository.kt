@@ -43,42 +43,46 @@ class RecipeRepository @Inject constructor(
                 }
             }
 
-    suspend fun getRecipe(slug: String): Result<RecipeDetail?> =
-        apolloClient.query(RecipeDetailQuery(slug))
-            .toBuilder()
-            .responseFetcher(ApolloResponseFetchers.CACHE_ONLY)
-            .build()
-            .await()
-            .toResult()
-            .map { data ->
-                data.recipe?.let {
-                    val recipe = it.fragments.recipeFragment
-                    val recipeDetail = it.fragments.recipeDetailFragment
+    suspend fun getRecipe(slug: String, skipCache: Boolean = false): Result<RecipeDetail?> =
+        try {
+            apolloClient.query(RecipeDetailQuery(slug))
+                .toBuilder()
+                .responseFetcher(if (skipCache) ApolloResponseFetchers.NETWORK_ONLY else ApolloResponseFetchers.CACHE_ONLY)
+                .build()
+                .await()
+                .toResult()
+                .map { data ->
+                    data.recipe?.let {
+                        val recipe = it.fragments.recipeFragment
+                        val recipeDetail = it.fragments.recipeDetailFragment
 
-                    RecipeDetail(
-                        id = recipe.id,
-                        slug = recipe.slug,
-                        title = recipe.title,
-                        imageUrl = recipe.fullImageUrl,
-                        directions = recipeDetail.directions,
-                        ingredients = recipeDetail.ingredients?.map { ingredient ->
-                            RecipeDetail.Ingredient(
-                                name = ingredient.name,
-                                isGroup = ingredient.isGroup,
-                                amount = ingredient.amount?.let { amount ->
-                                    NumberFormat.getInstance().format(amount)
-                                },
-                                amountUnit = ingredient.amountUnit,
-                            )
-                        } ?: emptyList(),
-                        preparationTime = recipeDetail.preparationTime?.let { time ->
-                            formatTime(time)
-                        },
-                        servingCount = recipeDetail.servingCount?.toString(),
-                        sideDish = recipeDetail.sideDish,
-                    )
+                        RecipeDetail(
+                            id = recipe.id,
+                            slug = recipe.slug,
+                            title = recipe.title,
+                            imageUrl = recipe.fullImageUrl,
+                            directions = recipeDetail.directions,
+                            ingredients = recipeDetail.ingredients?.map { ingredient ->
+                                RecipeDetail.Ingredient(
+                                    name = ingredient.name,
+                                    isGroup = ingredient.isGroup,
+                                    amount = ingredient.amount?.let { amount ->
+                                        NumberFormat.getInstance().format(amount)
+                                    },
+                                    amountUnit = ingredient.amountUnit,
+                                )
+                            } ?: emptyList(),
+                            preparationTime = recipeDetail.preparationTime?.let { time ->
+                                formatTime(time)
+                            },
+                            servingCount = recipeDetail.servingCount?.toString(),
+                            sideDish = recipeDetail.sideDish,
+                        )
+                    }
                 }
-            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
 
     private fun formatTime(time: Int): String {
         val hours = floor(time.toDouble() / 60).toInt()

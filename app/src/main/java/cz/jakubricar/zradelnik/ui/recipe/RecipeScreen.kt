@@ -6,7 +6,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,6 +27,7 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.rememberScaffoldState
@@ -48,14 +48,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
-import com.google.accompanist.insets.navigationBarsHeight
+import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.navigationBarsWithImePadding
+import com.google.accompanist.insets.rememberInsetsPaddingValues
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
+import cz.jakubricar.zradelnik.ui.user.UserViewState
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.launch
 
@@ -65,7 +67,8 @@ fun RecipeScreen(
     userViewModel: UserViewModel = hiltViewModel(),
     slug: String,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
-    onBack: () -> Unit
+    onBack: () -> Unit = {},
+    onNavigateToRecipeEdit: (String) -> Unit = {},
 ) {
     LaunchedEffect(slug) {
         // The app opened for the first time, navigate to the list to fetch recipes
@@ -77,6 +80,7 @@ fun RecipeScreen(
     }
 
     val viewState by viewModel.state.collectAsState()
+    val userViewState by userViewModel.state.collectAsState()
 
     if (viewState.keepAwake) {
         val context = LocalContext.current
@@ -96,8 +100,10 @@ fun RecipeScreen(
 
     RecipeScreen(
         viewState = viewState,
+        userViewState = userViewState,
         scaffoldState = scaffoldState,
         onBack = onBack,
+        onEdit = { onNavigateToRecipeEdit(slug) },
         onKeepAwake = {
             viewModel.toggleKeepAwake()
 
@@ -119,9 +125,11 @@ fun RecipeScreen(
 @Composable
 fun RecipeScreen(
     viewState: RecipeViewState,
-    scaffoldState: ScaffoldState,
-    onBack: () -> Unit,
-    onKeepAwake: () -> Unit
+    userViewState: UserViewState,
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    onBack: () -> Unit = {},
+    onEdit: () -> Unit = {},
+    onKeepAwake: () -> Unit = {}
 ) {
     val listState = rememberLazyListState()
 
@@ -147,6 +155,15 @@ fun RecipeScreen(
                     }
                 },
                 actions = {
+                    if (userViewState.loggedInUser != null) {
+                        IconButton(onClick = onEdit) {
+                            Icon(
+                                imageVector = Icons.Filled.Edit,
+                                contentDescription = stringResource(R.string.edit)
+                            )
+                        }
+                    }
+
                     IconButton(onClick = onKeepAwake) {
                         Icon(
                             imageVector = if (viewState.keepAwake) {
@@ -172,7 +189,7 @@ fun RecipeScreen(
         } else {
             Recipe(
                 recipe = viewState.recipe,
-                contentPadding = innerPadding,
+                modifier = Modifier.padding(innerPadding),
                 listState = listState
             )
         }
@@ -182,12 +199,16 @@ fun RecipeScreen(
 @Composable
 fun Recipe(
     recipe: RecipeDetail,
-    contentPadding: PaddingValues,
-    listState: LazyListState
+    modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState()
 ) {
     LazyColumn(
+        modifier = modifier,
         state = listState,
-        contentPadding = contentPadding
+        contentPadding = rememberInsetsPaddingValues(
+            insets = LocalWindowInsets.current.systemBars + LocalWindowInsets.current.ime,
+            applyTop = false
+        )
     ) {
         recipe.imageUrl?.let { imageUrl ->
             item {
@@ -237,7 +258,6 @@ fun Recipe(
                     markdown = recipe.directions ?: stringResource(R.string.no_directions)
                 )
             }
-            Spacer(modifier = Modifier.navigationBarsHeight(16.dp))
         }
     }
 }

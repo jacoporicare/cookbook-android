@@ -16,6 +16,8 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
 import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_SLUG_KEY
+import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditScreen
+import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditViewModel.Companion.RECIPE_EDIT_SLUG_KEY
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
 import cz.jakubricar.zradelnik.ui.settings.SettingsScreen
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
@@ -24,6 +26,7 @@ object MainDestinations {
 
     const val RECIPE_LIST_ROUTE = "recipelist"
     const val RECIPE_ROUTE = "recipe"
+    const val RECIPE_EDIT_ROUTE = "recipeedit"
     const val SETTINGS_ROUTE = "settings"
 }
 
@@ -79,6 +82,19 @@ fun ZradelnikNavGraph(
             RecipeScreen(
                 userViewModel = userViewModel,
                 slug = slug,
+                onBack = actions.upPress,
+                onNavigateToRecipeEdit = actions.navigateToRecipeEdit
+            )
+        }
+        composable(
+            route = "${MainDestinations.RECIPE_EDIT_ROUTE}/{$RECIPE_EDIT_SLUG_KEY}",
+            arguments = listOf(navArgument(RECIPE_EDIT_SLUG_KEY) { type = NavType.StringType })
+        ) { backStackEntry ->
+            val slug = backStackEntry.arguments?.getString(RECIPE_EDIT_SLUG_KEY)!!
+
+            RecipeEditScreen(
+                userViewModel = userViewModel,
+                slug = slug,
                 onBack = actions.upPress
             )
         }
@@ -97,6 +113,10 @@ class MainActions(navController: NavHostController) {
 
     val navigateToRecipe: (String) -> Unit = { slug: String ->
         navController.navigate("${MainDestinations.RECIPE_ROUTE}/$slug")
+    }
+
+    val navigateToRecipeEdit: (String) -> Unit = { slug: String ->
+        navController.navigate("${MainDestinations.RECIPE_EDIT_ROUTE}/$slug")
     }
 
     val navigateToSettings: () -> Unit = {

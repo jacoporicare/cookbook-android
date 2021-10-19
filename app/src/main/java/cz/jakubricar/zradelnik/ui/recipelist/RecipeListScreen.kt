@@ -47,7 +47,6 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -70,7 +69,6 @@ import com.google.accompanist.insets.rememberInsetsPaddingValues
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
-import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
@@ -78,15 +76,14 @@ import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
-import kotlinx.coroutines.launch
 
 @Composable
 fun RecipeListScreen(
     viewModel: RecipeListViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
-    onNavigateToRecipe: (String) -> Unit,
-    onNavigateToSettings: () -> Unit
+    onNavigateToRecipe: (String) -> Unit = {},
+    onNavigateToSettings: () -> Unit = {}
 ) {
     LogCompositions("RecipeListScreen")
     val viewState by viewModel.state.collectAsState()
@@ -114,14 +111,14 @@ fun RecipeListScreen(
 fun RecipeListScreen(
     viewState: RecipeListViewState,
     userViewState: UserViewState,
-    scaffoldState: ScaffoldState,
-    onNavigateToRecipe: (String) -> Unit,
-    onNavigateToSettings: () -> Unit,
-    onRefreshRecipes: () -> Unit,
-    onErrorDismiss: (Long) -> Unit,
-    onSearchShow: () -> Unit,
-    onSearchHide: () -> Unit,
-    onSearchQueryChange: (String) -> Unit
+    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    onNavigateToRecipe: (String) -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
+    onRefreshRecipes: () -> Unit = {},
+    onErrorDismiss: (Long) -> Unit = {},
+    onSearchShow: () -> Unit = {},
+    onSearchHide: () -> Unit = {},
+    onSearchQueryChange: (String) -> Unit = {}
 ) {
     LogCompositions("RecipeListScreenStateless")
     val recipes = rememberFilteredRecipes(viewState.recipes, viewState.searchQuery)
@@ -161,9 +158,6 @@ fun RecipeListScreen(
                         listState.firstVisibleItemIndex == 0
                     }
                 }
-                val connected by connectedState()
-                val scope = rememberCoroutineScope()
-                val onlyOnlineWarningMessage = stringResource(R.string.changes_only_online_warning)
 
                 ExpandableFloatingActionButton(
                     text = {
@@ -177,19 +171,7 @@ fun RecipeListScreen(
                         )
                     },
                     onClick = {
-                        // TODO: Move this to the add/edit screen.
-                        //  Let the user navigate to the add/edit screen and start editing.
-                        //  Show a warning they are offline somewhere, maybe a thin stripe
-                        //  at the top.
-                        //  https://miro.medium.com/max/1200/1*18X_aTNszEmyhMoQaB11Ow.gif
-                        if (!connected) {
-                            scope.launch {
-                                scaffoldState.snackbarHostState
-                                    .showSnackbar(onlyOnlineWarningMessage)
-                            }
-                        } else {
-                            // TODO: Redirect to the add screen
-                        }
+                        // TODO: Redirect to the add screen
                     },
                     modifier = Modifier.navigationBarsPadding(),
                     expanded = expanded
@@ -209,7 +191,7 @@ fun RecipeListScreen(
                 recipes = recipes,
                 modifier = Modifier.padding(innerPadding),
                 isShowingErrors = viewState.errorMessages.isNotEmpty(),
-                scrollState = listState,
+                listState = listState,
                 onNavigateToRecipe = onNavigateToRecipe,
                 onRefresh = onRefreshRecipes
             )
@@ -246,14 +228,14 @@ fun RecipeListScreen(
 
 @Composable
 private fun TopBarContent(
-    searchVisible: Boolean,
-    searchQuery: String,
-    listState: LazyListState,
-    onNavigateToSettings: () -> Unit,
-    onRefreshRecipes: () -> Unit,
-    onSearchHide: () -> Unit,
-    onSearchShow: () -> Unit,
-    onSearchQueryChange: (String) -> Unit
+    searchVisible: Boolean = false,
+    searchQuery: String = "",
+    listState: LazyListState = rememberLazyListState(),
+    onNavigateToSettings: () -> Unit = {},
+    onRefreshRecipes: () -> Unit = {},
+    onSearchHide: () -> Unit = {},
+    onSearchShow: () -> Unit = {},
+    onSearchQueryChange: (String) -> Unit = {}
 ) {
     LogCompositions("TopBarContent")
     var menuExpanded by remember { mutableStateOf(false) }
@@ -375,17 +357,17 @@ private fun TopBarContent(
 private fun RecipeListScreenErrorAndContent(
     recipes: List<Recipe>,
     modifier: Modifier = Modifier,
-    isShowingErrors: Boolean,
-    scrollState: LazyListState,
-    onNavigateToRecipe: (String) -> Unit,
-    onRefresh: () -> Unit
+    isShowingErrors: Boolean = false,
+    listState: LazyListState = rememberLazyListState(),
+    onNavigateToRecipe: (String) -> Unit = {},
+    onRefresh: () -> Unit = {}
 ) {
     LogCompositions("RecipeListScreenErrorAndContent")
     if (recipes.isNotEmpty()) {
         RecipeList(
             recipes = recipes,
             modifier = modifier,
-            scrollState = scrollState,
+            listState = listState,
             onNavigateToRecipe = onNavigateToRecipe
         )
     } else if (!isShowingErrors) {
@@ -414,8 +396,8 @@ private fun RecipeListScreenErrorAndContent(
 fun RecipeList(
     recipes: List<Recipe>,
     modifier: Modifier = Modifier,
-    scrollState: LazyListState,
-    onNavigateToRecipe: (String) -> Unit
+    listState: LazyListState = rememberLazyListState(),
+    onNavigateToRecipe: (String) -> Unit = {}
 ) {
     LogCompositions("RecipeList")
     val columnsPerRow = when (LocalConfiguration.current.orientation) {
@@ -426,7 +408,7 @@ fun RecipeList(
 
     LazyColumn(
         modifier = modifier,
-        state = scrollState,
+        state = listState,
         contentPadding = rememberInsetsPaddingValues(
             insets = LocalWindowInsets.current.systemBars + LocalWindowInsets.current.ime,
             applyTop = false,
@@ -464,7 +446,7 @@ fun RecipeList(
 fun Recipe(
     recipe: Recipe,
     modifier: Modifier = Modifier,
-    onNavigateToRecipe: (String) -> Unit
+    onNavigateToRecipe: (String) -> Unit = {}
 ) {
     Card(
         modifier = modifier.clickable { onNavigateToRecipe(recipe.slug) },
@@ -512,8 +494,7 @@ fun DefaultPreview() {
                 slug = "slug",
                 title = "Koprovka",
                 imageUrl = "https://test.api.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=640x640&format=webp"
-            ),
-            onNavigateToRecipe = {}
+            )
         )
     }
 }
