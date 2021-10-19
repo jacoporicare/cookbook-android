@@ -49,6 +49,7 @@ import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
+import cz.jakubricar.zradelnik.ui.components.floatingActionButtonSize
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -75,7 +76,7 @@ fun RecipeEditScreen(
     )
 
     LaunchedEffect(viewState) {
-        if (!userViewState.loading && userViewState.loggedInUser == null) {
+        if (userViewState.loggedInUser == null) {
             onBack()
         }
     }
@@ -153,7 +154,7 @@ fun RecipeEditScreen(
                         Icon(
                             imageVector = Icons.Filled.Save,
                             contentDescription = stringResource(R.string.save),
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.floatingActionButtonSize()
                         )
                     },
                     onClick = {
