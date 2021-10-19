@@ -14,4 +14,3 @@ val GoogleBlueLight = Color(0xFFC3E7FF)
 val GoogleOnBlueLight = Color(0xFF011D35)
 val GoogleBlueDark = Color(0xFF004A77)
 val GoogleOnBlueDark = Color(0xFFC2E7FF)
-

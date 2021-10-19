@@ -225,45 +225,42 @@ fun Recipe(
 
         if (recipe.ingredients.isNotEmpty()) {
             item {
-                Spacer(modifier = Modifier.height(16.dp))
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                    Text(
-                        text = stringResource(R.string.ingredients),
-                        style = MaterialTheme.typography.h6
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        elevation = 2.dp
-                    ) {
-                        Box(modifier = Modifier.padding(8.dp)) {
-                            Ingredients(ingredients = recipe.ingredients)
-                        }
-                    }
+                Section(title = stringResource(R.string.ingredients)) {
+                    Ingredients(ingredients = recipe.ingredients)
                 }
             }
         }
 
         item {
-            Spacer(modifier = Modifier.height(16.dp))
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                Text(
-                    text = stringResource(R.string.directions),
-                    style = MaterialTheme.typography.h6
+            Section(title = stringResource(R.string.directions)) {
+                MarkdownText(
+                    markdown = recipe.directions ?: stringResource(R.string.no_directions)
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    elevation = 2.dp
-                ) {
-                    Box(modifier = Modifier.padding(8.dp)) {
-                        MarkdownText(
-                            markdown = recipe.directions ?: stringResource(R.string.no_directions)
-                        )
-                    }
-                }
             }
             Spacer(modifier = Modifier.navigationBarsHeight(16.dp))
+        }
+    }
+}
+
+@Composable
+private fun Section(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Spacer(modifier = Modifier.height(16.dp))
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.h6
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            elevation = 2.dp
+        ) {
+            Box(modifier = Modifier.padding(8.dp)) {
+                content()
+            }
         }
     }
 }

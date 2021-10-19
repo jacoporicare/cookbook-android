@@ -15,7 +15,7 @@ private val LightColorPalette = lightColors(
     secondaryVariant = GoogleBlueDark,
     background = Gray50,
     onPrimary = Color.White,
-    onSecondary =  GoogleOnBlueLight
+    onSecondary = GoogleOnBlueLight
 )
 
 private val DarkColorPalette = darkColors(
