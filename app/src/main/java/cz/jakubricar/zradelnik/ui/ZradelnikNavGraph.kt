@@ -26,6 +26,7 @@ object MainDestinations {
 
     const val RECIPE_LIST_ROUTE = "recipelist"
     const val RECIPE_ROUTE = "recipe"
+    const val RECIPE_ADD_ROUTE = "recipeadd"
     const val RECIPE_EDIT_ROUTE = "recipeedit"
     const val SETTINGS_ROUTE = "settings"
 }
@@ -67,6 +68,7 @@ fun ZradelnikNavGraph(
             RecipeListScreen(
                 userViewModel = userViewModel,
                 onNavigateToRecipe = actions.navigateToRecipe,
+                onNavigateToRecipeAdd = actions.navigateToRecipeAdd,
                 onNavigateToSettings = actions.navigateToSettings
             )
         }
@@ -84,6 +86,12 @@ fun ZradelnikNavGraph(
                 slug = slug,
                 onBack = actions.upPress,
                 onNavigateToRecipeEdit = actions.navigateToRecipeEdit
+            )
+        }
+        composable(route = MainDestinations.RECIPE_ADD_ROUTE) {
+            RecipeEditScreen(
+                userViewModel = userViewModel,
+                onBack = actions.upPress
             )
         }
         composable(
@@ -113,6 +121,10 @@ class MainActions(navController: NavHostController) {
 
     val navigateToRecipe: (String) -> Unit = { slug: String ->
         navController.navigate("${MainDestinations.RECIPE_ROUTE}/$slug")
+    }
+
+    val navigateToRecipeAdd: () -> Unit = {
+        navController.navigate(MainDestinations.RECIPE_ADD_ROUTE)
     }
 
     val navigateToRecipeEdit: (String) -> Unit = { slug: String ->

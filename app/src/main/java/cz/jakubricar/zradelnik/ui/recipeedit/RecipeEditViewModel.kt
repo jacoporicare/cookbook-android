@@ -18,12 +18,7 @@ import javax.inject.Inject
 data class RecipeEditViewState(
     val recipe: RecipeDetail? = null,
     val loading: Boolean = false
-) {
-
-    // TODO: not for new recipe
-    val failedLoading: Boolean
-        get() = recipe == null && !loading
-}
+)
 
 @HiltViewModel
 class RecipeEditViewModel @Inject constructor(
@@ -49,5 +44,9 @@ class RecipeEditViewModel @Inject constructor(
                     _state.update { it.copy(loading = false) }
                 }
         }
+    }
+
+    fun setLoading(loading: Boolean) {
+        _state.update { it.copy(loading = loading) }
     }
 }

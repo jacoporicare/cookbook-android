@@ -83,6 +83,7 @@ fun RecipeListScreen(
     userViewModel: UserViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onNavigateToRecipe: (String) -> Unit = {},
+    onNavigateToRecipeAdd: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {}
 ) {
     LogCompositions("RecipeListScreen")
@@ -98,6 +99,7 @@ fun RecipeListScreen(
         userViewState = userViewState,
         scaffoldState = scaffoldState,
         onNavigateToRecipe = onNavigateToRecipe,
+        onNavigateToRecipeAdd = onNavigateToRecipeAdd,
         onNavigateToSettings = onNavigateToSettings,
         onRefreshRecipes = { viewModel.refreshRecipes() },
         onErrorDismiss = { viewModel.errorShown(it) },
@@ -113,6 +115,7 @@ fun RecipeListScreen(
     userViewState: UserViewState,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onNavigateToRecipe: (String) -> Unit = {},
+    onNavigateToRecipeAdd: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onRefreshRecipes: () -> Unit = {},
     onErrorDismiss: (Long) -> Unit = {},
@@ -170,9 +173,7 @@ fun RecipeListScreen(
                             modifier = Modifier.floatingActionButtonSize()
                         )
                     },
-                    onClick = {
-                        // TODO: Redirect to the add screen
-                    },
+                    onClick = onNavigateToRecipeAdd,
                     modifier = Modifier.navigationBarsPadding(),
                     expanded = expanded
                 )

@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -57,12 +56,16 @@ import kotlinx.coroutines.launch
 fun RecipeEditScreen(
     viewModel: RecipeEditViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
-    slug: String,
+    slug: String? = null,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit = {}
 ) {
     LaunchedEffect(slug) {
-        viewModel.getRecipe(slug)
+        if (slug != null) {
+            viewModel.getRecipe(slug)
+        } else {
+            viewModel.setLoading(false)
+        }
     }
 
     val viewState by viewModel.state.collectAsState()
@@ -71,8 +74,9 @@ fun RecipeEditScreen(
     RecipeEditScreen(
         viewState = viewState,
         scaffoldState = scaffoldState,
+        isNew = slug == null,
         onBack = onBack,
-        onRefresh = { viewModel.getRecipe(slug) }
+        onRefresh = slug?.let { { viewModel.getRecipe(it) } } ?: {}
     )
 
     LaunchedEffect(viewState) {
@@ -86,6 +90,7 @@ fun RecipeEditScreen(
 fun RecipeEditScreen(
     viewState: RecipeEditViewState,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
+    isNew: Boolean = true,
     onBack: () -> Unit = {},
     onRefresh: () -> Unit = {}
 ) {
@@ -99,7 +104,13 @@ fun RecipeEditScreen(
         topBar = {
             InsetAwareTopAppBar(
                 title = {
-                    Text(text = viewState.recipe?.title ?: stringResource(R.string.recipe))
+                    Text(
+                        text = if (isNew) {
+                            stringResource(R.string.new_recipe)
+                        } else {
+                            viewState.recipe?.title ?: stringResource(R.string.recipe_edit)
+                        }
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
@@ -109,27 +120,29 @@ fun RecipeEditScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(
-                        onClick = {
-                            if (!connected) {
-                                scope.launch {
-                                    scaffoldState.snackbarHostState
-                                        .showSnackbar(onlyOnlineWarningMessage)
+                actions = viewState.recipe?.let {
+                    {
+                        IconButton(
+                            onClick = {
+                                if (!connected) {
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState
+                                            .showSnackbar(onlyOnlineWarningMessage)
+                                    }
+
+                                    return@IconButton
                                 }
 
-                                return@IconButton
+                                // TODO: Perform delete
                             }
-
-                            // TODO: Perform delete
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.delete)
+                            )
                         }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.delete)
-                        )
                     }
-                },
+                } ?: {},
                 backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
                     MaterialTheme.colors.background
                 } else {
@@ -138,7 +151,7 @@ fun RecipeEditScreen(
                 elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
             )
         },
-        floatingActionButton = if (!viewState.failedLoading) {
+        floatingActionButton = if (isNew || viewState.recipe != null) {
             {
                 val expanded by remember {
                     derivedStateOf {
@@ -184,6 +197,7 @@ fun RecipeEditScreen(
                 recipe = viewState.recipe,
                 modifier = Modifier.padding(innerPadding),
                 listState = listState,
+                isNew = isNew,
                 onRefresh = onRefresh
             )
         }
@@ -195,10 +209,11 @@ private fun RecipeScreenErrorAndContent(
     recipe: RecipeDetail?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
+    isNew: Boolean = true,
     onRefresh: () -> Unit = {}
 ) {
     LogCompositions("RecipeScreenErrorAndContent")
-    if (recipe != null) {
+    if (isNew || recipe != null) {
         RecipeEdit(
             recipe = recipe,
             modifier = modifier,
@@ -239,7 +254,7 @@ private fun RecipeScreenErrorAndContent(
 
 @Composable
 fun RecipeEdit(
-    recipe: RecipeDetail,
+    recipe: RecipeDetail?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {

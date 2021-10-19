@@ -36,6 +36,7 @@
     <string name="edit">Upravit</string>
 
     <!-- Recipe Edit -->
+    <string name="recipe_edit">Úprava receptu</string>
     <string name="basic_info">Základní údaje</string>
     <string name="save">Uložit</string>
     <string name="delete">Smazat</string>
