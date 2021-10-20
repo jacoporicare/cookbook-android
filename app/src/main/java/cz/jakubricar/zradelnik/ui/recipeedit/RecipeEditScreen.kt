@@ -1,8 +1,8 @@
 package cz.jakubricar.zradelnik.ui.recipeedit
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,14 +11,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
@@ -33,7 +35,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -108,7 +113,7 @@ fun RecipeEditScreen(
                         text = if (isNew) {
                             stringResource(R.string.new_recipe)
                         } else {
-                            viewState.recipe?.title ?: stringResource(R.string.recipe_edit)
+                            viewState.editedRecipe?.title ?: stringResource(R.string.recipe_edit)
                         }
                     )
                 },
@@ -120,7 +125,7 @@ fun RecipeEditScreen(
                         )
                     }
                 },
-                actions = viewState.recipe?.let {
+                actions = viewState.editedRecipe?.let {
                     {
                         IconButton(
                             onClick = {
@@ -151,7 +156,7 @@ fun RecipeEditScreen(
                 elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
             )
         },
-        floatingActionButton = if (isNew || viewState.recipe != null) {
+        floatingActionButton = if (isNew || viewState.editedRecipe != null) {
             {
                 val expanded by remember {
                     derivedStateOf {
@@ -194,7 +199,7 @@ fun RecipeEditScreen(
             FullScreenLoading()
         } else {
             RecipeScreenErrorAndContent(
-                recipe = viewState.recipe,
+                editedRecipe = viewState.editedRecipe,
                 modifier = Modifier.padding(innerPadding),
                 listState = listState,
                 isNew = isNew,
@@ -206,16 +211,16 @@ fun RecipeEditScreen(
 
 @Composable
 private fun RecipeScreenErrorAndContent(
-    recipe: RecipeDetail?,
+    editedRecipe: RecipeDetail?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     isNew: Boolean = true,
     onRefresh: () -> Unit = {}
 ) {
     LogCompositions("RecipeScreenErrorAndContent")
-    if (isNew || recipe != null) {
+    if (isNew || editedRecipe != null) {
         RecipeEdit(
-            recipe = recipe,
+            editedRecipe = editedRecipe,
             modifier = modifier,
             listState = listState
         )
@@ -254,10 +259,16 @@ private fun RecipeScreenErrorAndContent(
 
 @Composable
 fun RecipeEdit(
-    recipe: RecipeDetail?,
+    editedRecipe: RecipeDetail?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
+    val formState = remember(editedRecipe) {
+        RecipeEditFormState(editedRecipe)
+    }
+//    val (preparationTime, servingCount, sideDish) = FocusRequester.createRefs()
+    val focusManager = LocalFocusManager.current
+
     LazyColumn(
         modifier = modifier,
         state = listState,
@@ -272,7 +283,62 @@ fun RecipeEdit(
 
         item {
             Section(title = stringResource(R.string.basic_info)) {
-                // TODO: Basic info (details) edit
+                TextField(
+                    value = formState.title,
+                    onValueChange = { formState.title = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(text = stringResource(R.string.recipe_title)) },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
+                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
+                    //  imeAction is Next.
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    singleLine = true
+                )
+                TextField(
+                    value = formState.preparationTime,
+                    onValueChange = { formState.preparationTime = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(text = stringResource(R.string.preparation_time)) },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
+                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
+                    //  imeAction is Next.
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    singleLine = true
+                )
+                TextField(
+                    value = formState.servingCount,
+                    onValueChange = { formState.servingCount = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(text = stringResource(R.string.serving_count)) },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
+                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
+                    //  imeAction is Next.
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    singleLine = true
+                )
+                TextField(
+                    value = formState.sideDish,
+                    onValueChange = { formState.sideDish = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(text = stringResource(R.string.side_dish)) },
+                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
+                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
+                    //  imeAction is Next.
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    singleLine = true
+                )
             }
         }
 
@@ -294,22 +360,17 @@ fun RecipeEdit(
 @Composable
 private fun Section(
     title: String,
-    content: @Composable () -> Unit
+    content: @Composable ColumnScope.() -> Unit
 ) {
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(24.dp))
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
             text = title,
             style = MaterialTheme.typography.h6
         )
-        Spacer(modifier = Modifier.height(8.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = 2.dp
-        ) {
-            Box(modifier = Modifier.padding(8.dp)) {
-                content()
-            }
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            content()
         }
     }
 }

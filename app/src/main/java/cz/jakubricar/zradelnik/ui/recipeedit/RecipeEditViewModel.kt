@@ -1,6 +1,9 @@
 package cz.jakubricar.zradelnik.ui.recipeedit
 
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.model.RecipeDetail
@@ -16,9 +19,17 @@ import javax.inject.Inject
 
 @Immutable
 data class RecipeEditViewState(
-    val recipe: RecipeDetail? = null,
+    val editedRecipe: RecipeDetail? = null,
     val loading: Boolean = false
 )
+
+class RecipeEditFormState(recipe: RecipeDetail?) {
+    var title by mutableStateOf(recipe?.title ?: "")
+    var directions by mutableStateOf(recipe?.directions ?: "")
+    var preparationTime by mutableStateOf(recipe?.preparationTime ?: "")
+    var servingCount by mutableStateOf(recipe?.servingCount ?: "")
+    var sideDish by mutableStateOf(recipe?.sideDish ?: "")
+}
 
 @HiltViewModel
 class RecipeEditViewModel @Inject constructor(
@@ -37,7 +48,7 @@ class RecipeEditViewModel @Inject constructor(
         viewModelScope.launch {
             recipeRepository.getRecipe(slug, true)
                 .onSuccess { recipe ->
-                    _state.update { it.copy(recipe = recipe, loading = false) }
+                    _state.update { it.copy(editedRecipe = recipe, loading = false) }
                 }
                 .onFailure { error ->
                     Timber.e(error)

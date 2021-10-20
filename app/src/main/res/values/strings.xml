@@ -41,6 +41,7 @@
     <string name="save">Uložit</string>
     <string name="delete">Smazat</string>
     <string name="recipe_load_failed">Recept se nepodařilo načíst.</string>
+    <string name="recipe_title">Název</string>
 
     <!-- Settings -->
     <!--    <string name="action_login">Přihlásit</string>-->
