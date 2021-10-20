@@ -3,15 +3,15 @@ package cz.jakubricar.zradelnik.model
 import androidx.compose.runtime.Immutable
 
 @Immutable
-data class RecipeDetail(
+data class RecipeEdit(
     val id: String,
     val slug: String,
     val title: String,
     val imageUrl: String?,
     val directions: String?,
     val ingredients: List<Ingredient>,
-    val preparationTime: String?,
-    val servingCount: String?,
+    val preparationTime: Int?,
+    val servingCount: Int?,
     val sideDish: String?,
 ) {
 
@@ -20,7 +20,7 @@ data class RecipeDetail(
         val id: String,
         val name: String,
         val isGroup: Boolean,
-        val amount: String?,
+        val amount: Double?,
         val amountUnit: String?,
     )
 }

@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -232,7 +233,7 @@ fun Username(
             },
         textStyle = MaterialTheme.typography.body2,
         isError = usernameState.showErrors(),
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         keyboardActions = KeyboardActions(
             onNext = { focusManager.moveFocus(FocusDirection.Down) }
         )
@@ -288,7 +289,10 @@ fun Password(
             PasswordVisualTransformation()
         },
         isError = passwordState.showErrors(),
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
+            keyboardType = KeyboardType.Password
+        ),
         keyboardActions = KeyboardActions(onDone = { onDone() })
     )
 

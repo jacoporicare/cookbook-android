@@ -4,6 +4,7 @@ fragment RecipeDetailFragment on Recipe {
   preparationTime
   servingCount
   ingredients {
+    id
     name
     isGroup
     amount

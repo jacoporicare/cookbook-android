@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import cz.jakubricar.zradelnik.model.RecipeDetail
+import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.repository.RecipeRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,15 +19,16 @@ import javax.inject.Inject
 
 @Immutable
 data class RecipeEditViewState(
-    val editedRecipe: RecipeDetail? = null,
+    val editedRecipe: RecipeEdit? = null,
     val loading: Boolean = false
 )
 
-class RecipeEditFormState(recipe: RecipeDetail?) {
+class RecipeEditFormState(recipe: RecipeEdit?) {
+
     var title by mutableStateOf(recipe?.title ?: "")
     var directions by mutableStateOf(recipe?.directions ?: "")
-    var preparationTime by mutableStateOf(recipe?.preparationTime ?: "")
-    var servingCount by mutableStateOf(recipe?.servingCount ?: "")
+    var preparationTime by mutableStateOf(recipe?.preparationTime?.toString() ?: "")
+    var servingCount by mutableStateOf(recipe?.servingCount?.toString() ?: "")
     var sideDish by mutableStateOf(recipe?.sideDish ?: "")
 }
 
@@ -46,7 +47,7 @@ class RecipeEditViewModel @Inject constructor(
 
     fun getRecipe(slug: String) {
         viewModelScope.launch {
-            recipeRepository.getRecipe(slug, true)
+            recipeRepository.getRecipeEdit(slug)
                 .onSuccess { recipe ->
                     _state.update { it.copy(editedRecipe = recipe, loading = false) }
                 }

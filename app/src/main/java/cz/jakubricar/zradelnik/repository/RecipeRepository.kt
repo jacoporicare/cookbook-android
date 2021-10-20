@@ -8,6 +8,7 @@ import cz.jakubricar.zradelnik.RecipeDetailQuery
 import cz.jakubricar.zradelnik.RecipeListQuery
 import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.model.RecipeDetail
+import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.network.mapToData
 import cz.jakubricar.zradelnik.network.toResult
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,11 +44,11 @@ class RecipeRepository @Inject constructor(
                 }
             }
 
-    suspend fun getRecipe(slug: String, skipCache: Boolean = false): Result<RecipeDetail?> =
+    suspend fun getRecipeDetail(slug: String): Result<RecipeDetail?> =
         try {
             apolloClient.query(RecipeDetailQuery(slug))
                 .toBuilder()
-                .responseFetcher(if (skipCache) ApolloResponseFetchers.NETWORK_ONLY else ApolloResponseFetchers.CACHE_ONLY)
+                .responseFetcher(ApolloResponseFetchers.CACHE_ONLY)
                 .build()
                 .await()
                 .toResult()
@@ -64,6 +65,7 @@ class RecipeRepository @Inject constructor(
                             directions = recipeDetail.directions,
                             ingredients = recipeDetail.ingredients?.map { ingredient ->
                                 RecipeDetail.Ingredient(
+                                    id = ingredient.id,
                                     name = ingredient.name,
                                     isGroup = ingredient.isGroup,
                                     amount = ingredient.amount?.let { amount ->
@@ -76,6 +78,44 @@ class RecipeRepository @Inject constructor(
                                 formatTime(time)
                             },
                             servingCount = recipeDetail.servingCount?.toString(),
+                            sideDish = recipeDetail.sideDish,
+                        )
+                    }
+                }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    suspend fun getRecipeEdit(slug: String): Result<RecipeEdit?> =
+        try {
+            apolloClient.query(RecipeDetailQuery(slug))
+                .toBuilder()
+                .responseFetcher(ApolloResponseFetchers.NETWORK_ONLY)
+                .build()
+                .await()
+                .toResult()
+                .map { data ->
+                    data.recipe?.let {
+                        val recipe = it.fragments.recipeFragment
+                        val recipeDetail = it.fragments.recipeDetailFragment
+
+                        RecipeEdit(
+                            id = recipe.id,
+                            slug = recipe.slug,
+                            title = recipe.title,
+                            imageUrl = recipe.fullImageUrl,
+                            directions = recipeDetail.directions,
+                            ingredients = recipeDetail.ingredients?.map { ingredient ->
+                                RecipeEdit.Ingredient(
+                                    id = ingredient.id,
+                                    name = ingredient.name,
+                                    isGroup = ingredient.isGroup,
+                                    amount = ingredient.amount,
+                                    amountUnit = ingredient.amountUnit,
+                                )
+                            } ?: emptyList(),
+                            preparationTime = recipeDetail.preparationTime,
+                            servingCount = recipeDetail.servingCount,
                             sideDish = recipeDetail.sideDish,
                         )
                     }

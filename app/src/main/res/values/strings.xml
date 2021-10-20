@@ -27,9 +27,9 @@
 
     <!-- Recipe -->
     <string name="recipe">Recept</string>
-    <string name="preparation_time">Doba přípravy:</string>
-    <string name="serving_count">Počet porcí:</string>
-    <string name="side_dish">Příloha:</string>
+    <string name="preparation_time">Doba přípravy</string>
+    <string name="serving_count">Počet porcí</string>
+    <string name="side_dish">Příloha</string>
     <string name="ingredients">Ingredience</string>
     <string name="directions">Postup</string>
     <string name="no_directions">Kde nic tu nic.</string>

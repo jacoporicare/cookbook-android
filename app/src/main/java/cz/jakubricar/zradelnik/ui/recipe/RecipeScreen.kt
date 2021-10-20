@@ -300,19 +300,19 @@ private fun Details(
     ) {
         preparationTime?.let {
             DetailItem(
-                label = stringResource(R.string.preparation_time),
+                label = "${stringResource(R.string.preparation_time)}:",
                 value = it
             )
         }
         servingCount?.let {
             DetailItem(
-                label = stringResource(R.string.serving_count),
+                label = "${stringResource(R.string.serving_count)}:",
                 value = it
             )
         }
         sideDish?.let {
             DetailItem(
-                label = stringResource(R.string.side_dish),
+                label = "${stringResource(R.string.side_dish)}:",
                 value = it
             )
         }

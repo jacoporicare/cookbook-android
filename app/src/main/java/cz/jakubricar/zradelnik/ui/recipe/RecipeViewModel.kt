@@ -45,7 +45,7 @@ class RecipeViewModel @Inject constructor(
 
     fun getRecipe(slug: String) {
         viewModelScope.launch {
-            recipeRepository.getRecipe(slug)
+            recipeRepository.getRecipeDetail(slug)
                 .onSuccess { recipe ->
                     _state.update { it.copy(recipe = recipe, loading = false) }
                 }

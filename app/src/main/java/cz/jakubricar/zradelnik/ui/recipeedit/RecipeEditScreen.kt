@@ -39,6 +39,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,7 +49,7 @@ import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
-import cz.jakubricar.zradelnik.model.RecipeDetail
+import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
@@ -211,7 +212,7 @@ fun RecipeEditScreen(
 
 @Composable
 private fun RecipeScreenErrorAndContent(
-    editedRecipe: RecipeDetail?,
+    editedRecipe: RecipeEdit?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     isNew: Boolean = true,
@@ -259,14 +260,11 @@ private fun RecipeScreenErrorAndContent(
 
 @Composable
 fun RecipeEdit(
-    editedRecipe: RecipeDetail?,
+    editedRecipe: RecipeEdit?,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
-    val formState = remember(editedRecipe) {
-        RecipeEditFormState(editedRecipe)
-    }
-//    val (preparationTime, servingCount, sideDish) = FocusRequester.createRefs()
+    val formState = remember(editedRecipe) { RecipeEditFormState(editedRecipe) }
     val focusManager = LocalFocusManager.current
 
     LazyColumn(
@@ -288,7 +286,7 @@ fun RecipeEdit(
                     onValueChange = { formState.title = it },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = stringResource(R.string.recipe_title)) },
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
                     //  TextField automatically calls moveFocus(FocusDirection.Next) when
                     //  imeAction is Next.
@@ -302,10 +300,11 @@ fun RecipeEdit(
                     onValueChange = { formState.preparationTime = it },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = stringResource(R.string.preparation_time)) },
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
-                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
-                    //  imeAction is Next.
+                    trailingIcon = { Text(text = "min") },
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    ),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
@@ -316,10 +315,10 @@ fun RecipeEdit(
                     onValueChange = { formState.servingCount = it },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = stringResource(R.string.serving_count)) },
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
-                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
-                    //  imeAction is Next.
+                    keyboardOptions = KeyboardOptions(
+                        imeAction = ImeAction.Next,
+                        keyboardType = KeyboardType.Number
+                    ),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
@@ -330,10 +329,7 @@ fun RecipeEdit(
                     onValueChange = { formState.sideDish = it },
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(text = stringResource(R.string.side_dish)) },
-                    keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
-                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
-                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
-                    //  imeAction is Next.
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     keyboardActions = KeyboardActions(
                         onNext = { focusManager.moveFocus(FocusDirection.Down) }
                     ),
