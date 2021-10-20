@@ -44,10 +44,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -173,7 +173,6 @@ fun LoginScreen(
     scrollState: ScrollState,
     onSubmit: () -> Unit
 ) {
-    val focusRequester = remember { FocusRequester() }
     Column {
         if (loading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -188,15 +187,11 @@ fun LoginScreen(
                 .padding(contentPadding)
                 .padding(horizontal = 16.dp)
         ) {
-            Username(
-                usernameState = usernameState,
-                onImeAction = { focusRequester.requestFocus() }
-            )
+            Username(usernameState = usernameState)
             Spacer(modifier = Modifier.height(16.dp))
             Password(
                 passwordState = passwordState,
-                modifier = Modifier.focusRequester(focusRequester),
-                onImeAction = { onSubmit() }
+                onDone = { onSubmit() }
             )
             Spacer(modifier = Modifier.height(24.dp))
             Button(
@@ -216,10 +211,10 @@ fun LoginScreen(
 
 @Composable
 fun Username(
-    usernameState: TextFieldState = remember { UsernameState() },
-    imeAction: ImeAction = ImeAction.Next,
-    onImeAction: () -> Unit = {}
+    usernameState: TextFieldState = remember { UsernameState() }
 ) {
+    val focusManager = LocalFocusManager.current
+
     TextField(
         value = usernameState.value,
         onValueChange = {
@@ -237,11 +232,9 @@ fun Username(
             },
         textStyle = MaterialTheme.typography.body2,
         isError = usernameState.showErrors(),
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction),
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Next),
         keyboardActions = KeyboardActions(
-            onNext = {
-                onImeAction()
-            }
+            onNext = { focusManager.moveFocus(FocusDirection.Down) }
         )
     )
 
@@ -251,9 +244,7 @@ fun Username(
 @Composable
 fun Password(
     passwordState: TextFieldState,
-    modifier: Modifier = Modifier,
-    imeAction: ImeAction = ImeAction.Done,
-    onImeAction: () -> Unit = {}
+    onDone: () -> Unit = {}
 ) {
     val showPassword = remember { mutableStateOf(false) }
 
@@ -263,7 +254,7 @@ fun Password(
             passwordState.value = it
             passwordState.enableShowErrors()
         },
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
             .onFocusChanged { focusState ->
                 passwordState.onFocusChange(focusState.isFocused)
@@ -297,12 +288,8 @@ fun Password(
             PasswordVisualTransformation()
         },
         isError = passwordState.showErrors(),
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                onImeAction()
-            }
-        )
+        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { onDone() })
     )
 
     passwordState.getError()?.let { error -> TextFieldError(textError = stringResource(error)) }
