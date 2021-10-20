@@ -36,6 +36,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -51,10 +52,12 @@ import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.network.connectedState
+import cz.jakubricar.zradelnik.ui.TextFieldState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.floatingActionButtonSize
+import cz.jakubricar.zradelnik.ui.login.TextFieldError
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import kotlinx.coroutines.launch
 
@@ -265,7 +268,6 @@ fun RecipeEdit(
     listState: LazyListState = rememberLazyListState()
 ) {
     val formState = remember(editedRecipe) { RecipeEditFormState(editedRecipe) }
-    val focusManager = LocalFocusManager.current
 
     LazyColumn(
         modifier = modifier,
@@ -281,59 +283,24 @@ fun RecipeEdit(
 
         item {
             Section(title = stringResource(R.string.basic_info)) {
-                TextField(
-                    value = formState.title,
-                    onValueChange = { formState.title = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text = stringResource(R.string.recipe_title)) },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
-                    //  TextField automatically calls moveFocus(FocusDirection.Next) when
-                    //  imeAction is Next.
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    ),
-                    singleLine = true
+                TextFieldTextState(
+                    state = formState.title,
+                    label = { Text(text = stringResource(R.string.recipe_title)) }
                 )
-                TextField(
-                    value = formState.preparationTime,
-                    onValueChange = { formState.preparationTime = it },
-                    modifier = Modifier.fillMaxWidth(),
+                TextFieldTextState(
+                    state = formState.preparationTime,
                     label = { Text(text = stringResource(R.string.preparation_time)) },
                     trailingIcon = { Text(text = "min") },
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Number
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    ),
-                    singleLine = true
+                    keyboardType = KeyboardType.Number
                 )
-                TextField(
-                    value = formState.servingCount,
-                    onValueChange = { formState.servingCount = it },
-                    modifier = Modifier.fillMaxWidth(),
+                TextFieldTextState(
+                    state = formState.servingCount,
                     label = { Text(text = stringResource(R.string.serving_count)) },
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Next,
-                        keyboardType = KeyboardType.Number
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    ),
-                    singleLine = true
+                    keyboardType = KeyboardType.Number
                 )
-                TextField(
-                    value = formState.sideDish,
-                    onValueChange = { formState.sideDish = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    label = { Text(text = stringResource(R.string.side_dish)) },
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                    ),
-                    singleLine = true
+                TextFieldTextState(
+                    state = formState.sideDish,
+                    label = { Text(text = stringResource(R.string.side_dish)) }
                 )
             }
         }
@@ -367,6 +334,50 @@ private fun Section(
         Spacer(modifier = Modifier.height(16.dp))
         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
             content()
+        }
+    }
+}
+
+@Composable
+private fun TextFieldTextState(
+    state: TextFieldState,
+    label: @Composable (() -> Unit)? = null,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    keyboardType: KeyboardType = KeyboardType.Text
+) {
+    val focusManager = LocalFocusManager.current
+
+    Column {
+        TextField(
+            value = state.value,
+            onValueChange = { state.value = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    state.onFocusChange(focusState.isFocused)
+
+                    if (!focusState.isFocused) {
+                        state.enableShowErrors()
+                    }
+                },
+            label = label,
+            trailingIcon = trailingIcon,
+            isError = state.showErrors(),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Next,
+                keyboardType = keyboardType
+            ),
+            // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
+            //  TextField automatically calls moveFocus(FocusDirection.Next) when
+            //  imeAction is Next.
+            keyboardActions = KeyboardActions(
+                onNext = { focusManager.moveFocus(FocusDirection.Down) }
+            ),
+            singleLine = true
+        )
+
+        state.getError()?.let { error ->
+            TextFieldError(textError = stringResource(error))
         }
     }
 }

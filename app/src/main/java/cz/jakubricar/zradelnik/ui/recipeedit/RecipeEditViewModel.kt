@@ -1,9 +1,6 @@
 package cz.jakubricar.zradelnik.ui.recipeedit
 
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.model.RecipeEdit
@@ -22,15 +19,6 @@ data class RecipeEditViewState(
     val editedRecipe: RecipeEdit? = null,
     val loading: Boolean = false
 )
-
-class RecipeEditFormState(recipe: RecipeEdit?) {
-
-    var title by mutableStateOf(recipe?.title ?: "")
-    var directions by mutableStateOf(recipe?.directions ?: "")
-    var preparationTime by mutableStateOf(recipe?.preparationTime?.toString() ?: "")
-    var servingCount by mutableStateOf(recipe?.servingCount?.toString() ?: "")
-    var sideDish by mutableStateOf(recipe?.sideDish ?: "")
-}
 
 @HiltViewModel
 class RecipeEditViewModel @Inject constructor(

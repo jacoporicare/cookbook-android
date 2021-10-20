@@ -42,6 +42,9 @@
     <string name="delete">Smazat</string>
     <string name="recipe_load_failed">Recept se nepodařilo načíst.</string>
     <string name="recipe_title">Název</string>
+    <string name="recipe_title_error">Název je povinný</string>
+    <string name="preparation_time_error">Doba přípravy musí být celé číslo</string>
+    <string name="serving_count_error">Počet porcí musí být celé číslo</string>
 
     <!-- Settings -->
     <!--    <string name="action_login">Přihlásit</string>-->
