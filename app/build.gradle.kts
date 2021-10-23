@@ -136,8 +136,10 @@ dependencies {
     // Hilt
     implementation("com.google.dagger:hilt-android:${Versions.hilt}")
     kapt("com.google.dagger:hilt-compiler:${Versions.hilt}")
-    implementation("androidx.hilt:hilt-work:1.0.0")
+    // Hilt Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0-alpha03")
+    // Hilt Work
+    implementation("androidx.hilt:hilt-work:1.0.0")
     kapt("androidx.hilt:hilt-compiler:1.0.0")
 
     // Logging
