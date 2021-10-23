@@ -1,6 +1,7 @@
 package cz.jakubricar.zradelnik.ui.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
@@ -18,6 +19,7 @@ fun LoadingContent(
     empty: Boolean,
     emptyContent: @Composable () -> Unit,
     loading: Boolean,
+    modifier: Modifier = Modifier,
     onRefresh: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -27,7 +29,8 @@ fun LoadingContent(
         SwipeRefresh(
             state = rememberSwipeRefreshState(loading),
             onRefresh = onRefresh,
-            content = content,
+            modifier = modifier,
+            content = content
         )
     }
 }

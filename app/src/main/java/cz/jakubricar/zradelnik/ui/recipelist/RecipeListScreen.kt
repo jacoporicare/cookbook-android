@@ -187,11 +187,11 @@ fun RecipeListScreen(
             empty = viewState.initialLoad,
             emptyContent = { FullScreenLoading() },
             loading = viewState.loading,
+            modifier = Modifier.padding(innerPadding),
             onRefresh = onRefreshRecipes
         ) {
             RecipeListScreenErrorAndContent(
                 recipes = recipes,
-                modifier = Modifier.padding(innerPadding),
                 isShowingErrors = viewState.errorMessages.isNotEmpty(),
                 listState = listState,
                 onNavigateToRecipe = onNavigateToRecipe,
@@ -240,8 +240,6 @@ private fun TopBarContent(
     onSearchQueryChange: (String) -> Unit = {}
 ) {
     LogCompositions("TopBarContent")
-    var menuExpanded by remember { mutableStateOf(false) }
-    val focusRequester = remember { FocusRequester() }
     val isScrolled by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 0
@@ -253,6 +251,8 @@ private fun TopBarContent(
             if (!searchVisible) {
                 Text(text = stringResource(R.string.app_name))
             } else {
+                val focusRequester = remember { FocusRequester() }
+
                 TextField(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
@@ -315,6 +315,8 @@ private fun TopBarContent(
                 return@TopAppBar
             }
 
+            var menuExpanded by remember { mutableStateOf(false) }
+
             IconButton(onClick = onSearchShow) {
                 Icon(
                     imageVector = Icons.Filled.Search,
@@ -363,7 +365,6 @@ private fun TopBarContent(
 @Composable
 private fun RecipeListScreenErrorAndContent(
     recipes: List<Recipe>,
-    modifier: Modifier = Modifier,
     isShowingErrors: Boolean = false,
     listState: LazyListState = rememberLazyListState(),
     onNavigateToRecipe: (String) -> Unit = {},
@@ -373,7 +374,6 @@ private fun RecipeListScreenErrorAndContent(
     if (recipes.isNotEmpty()) {
         RecipeList(
             recipes = recipes,
-            modifier = modifier,
             listState = listState,
             onNavigateToRecipe = onNavigateToRecipe
         )
@@ -395,14 +395,13 @@ private fun RecipeListScreenErrorAndContent(
         }
     } else {
         // there's currently an error showing, don't show any content
-        Spacer(modifier = modifier.fillMaxSize())
+        Spacer(modifier = Modifier.fillMaxSize())
     }
 }
 
 @Composable
 fun RecipeList(
     recipes: List<Recipe>,
-    modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
     onNavigateToRecipe: (String) -> Unit = {}
 ) {
@@ -418,7 +417,6 @@ fun RecipeList(
     val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
 
     LazyColumn(
-        modifier = modifier,
         state = listState,
         contentPadding = rememberInsetsPaddingValues(
             insets = insets,
