@@ -124,7 +124,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
 
     // Work
-    implementation("androidx.work:work-runtime-ktx:2.7.0-rc01")
+    implementation("androidx.work:work-runtime-ktx:2.7.0")
 
     // Apollo
     implementation("com.apollographql.apollo:apollo-runtime:${Versions.apollo}")
