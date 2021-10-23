@@ -22,4 +22,5 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
         errorFor = { R.string.serving_count_error }
     )
     var sideDish = TextFieldState(defaultValue = recipe?.sideDish)
+    var directions = TextFieldState(defaultValue = recipe?.directions)
 }

@@ -313,7 +313,11 @@ fun RecipeEdit(
 
         item {
             Section(title = stringResource(R.string.directions)) {
-                // TODO: Description edit
+                TextFieldTextState(
+                    state = formState.directions,
+                    label = { Text(text = stringResource(R.string.directions)) },
+                    singleLine = false
+                )
             }
             Spacer(modifier = Modifier.navigationBarsHeight(16.dp))
         }
@@ -343,7 +347,9 @@ private fun TextFieldTextState(
     state: TextFieldState,
     label: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
-    keyboardType: KeyboardType = KeyboardType.Text
+    keyboardType: KeyboardType = KeyboardType.Text,
+    singleLine: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -363,8 +369,8 @@ private fun TextFieldTextState(
             label = label,
             trailingIcon = trailingIcon,
             isError = state.showErrors(),
-            keyboardOptions = KeyboardOptions(
-                imeAction = ImeAction.Next,
+            keyboardOptions =  KeyboardOptions(
+                imeAction = if (singleLine) ImeAction.Next else ImeAction.None,
                 keyboardType = keyboardType
             ),
             // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
@@ -373,7 +379,8 @@ private fun TextFieldTextState(
             keyboardActions = KeyboardActions(
                 onNext = { focusManager.moveFocus(FocusDirection.Down) }
             ),
-            singleLine = true
+            singleLine = singleLine,
+            maxLines = maxLines
         )
 
         state.getError()?.let { error ->
