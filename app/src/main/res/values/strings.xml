@@ -45,6 +45,7 @@
     <string name="recipe_title_error">Název je povinný</string>
     <string name="preparation_time_error">Doba přípravy musí být celé číslo</string>
     <string name="serving_count_error">Počet porcí musí být celé číslo</string>
+    <string name="form_is_not_valid_snackbar_message">Formulář obsahuje chyby.</string>
 
     <!-- Settings -->
     <!--    <string name="action_login">Přihlásit</string>-->

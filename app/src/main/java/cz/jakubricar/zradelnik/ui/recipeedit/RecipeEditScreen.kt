@@ -18,6 +18,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
+import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
@@ -44,12 +45,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.derivedWindowInsetsTypeOf
 import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.insets.ui.Scaffold
 import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
-import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.TextFieldState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
@@ -75,9 +76,11 @@ fun RecipeEditScreen(
 
     val viewState by viewModel.state.collectAsState()
     val userViewState by userViewModel.state.collectAsState()
+    val formState = remember(viewState.editedRecipe) { RecipeEditFormState(viewState.editedRecipe) }
 
     RecipeEditScreen(
         viewState = viewState,
+        formState = formState,
         scaffoldState = scaffoldState,
         isNew = slug == null,
         onBack = onBack,
@@ -94,6 +97,7 @@ fun RecipeEditScreen(
 @Composable
 fun RecipeEditScreen(
     viewState: RecipeEditViewState,
+    formState: RecipeEditFormState,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     isNew: Boolean = true,
     onBack: () -> Unit = {},
@@ -102,10 +106,16 @@ fun RecipeEditScreen(
     val listState = rememberLazyListState()
     val connected by connectedState()
     val scope = rememberCoroutineScope()
-    val onlyOnlineWarningMessage = stringResource(R.string.changes_only_online_warning)
+    val failedLoading = !isNew && viewState.editedRecipe == null
 
     Scaffold(
         scaffoldState = scaffoldState,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = it,
+                modifier = Modifier.navigationBarsWithImePadding()
+            )
+        },
         topBar = {
             TopAppBar(
                 title = {
@@ -131,13 +141,29 @@ fun RecipeEditScreen(
                     }
                 },
                 actions = {
-                    if (isNew || viewState.editedRecipe != null) {
+                    if (!failedLoading) {
+                        val onlyOnlineWarningMessage =
+                            stringResource(R.string.changes_only_online_warning)
+                        val formIsNotValidMessage =
+                            stringResource(R.string.form_is_not_valid_snackbar_message)
+
                         IconButton(
                             onClick = {
                                 if (!connected) {
                                     scope.launch {
                                         scaffoldState.snackbarHostState
                                             .showSnackbar(onlyOnlineWarningMessage)
+                                    }
+
+                                    return@IconButton
+                                }
+
+                                if (!formState.isValid) {
+                                    formState.enableShowErrors()
+
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState
+                                            .showSnackbar(formIsNotValidMessage)
                                     }
 
                                     return@IconButton
@@ -166,10 +192,10 @@ fun RecipeEditScreen(
             FullScreenLoading()
         } else {
             RecipeScreenErrorAndContent(
-                editedRecipe = viewState.editedRecipe,
+                formState = formState,
+                failedLoading = failedLoading,
                 modifier = Modifier.padding(innerPadding),
                 listState = listState,
-                isNew = isNew,
                 onRefresh = onRefresh
             )
         }
@@ -178,16 +204,16 @@ fun RecipeEditScreen(
 
 @Composable
 private fun RecipeScreenErrorAndContent(
-    editedRecipe: RecipeEdit?,
+    formState: RecipeEditFormState,
+    failedLoading: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    isNew: Boolean = true,
     onRefresh: () -> Unit = {}
 ) {
     LogCompositions("RecipeScreenErrorAndContent")
-    if (isNew || editedRecipe != null) {
+    if (!failedLoading) {
         RecipeEdit(
-            editedRecipe = editedRecipe,
+            formState = formState,
             modifier = modifier,
             listState = listState
         )
@@ -226,12 +252,10 @@ private fun RecipeScreenErrorAndContent(
 
 @Composable
 fun RecipeEdit(
-    editedRecipe: RecipeEdit?,
+    formState: RecipeEditFormState,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
-    val formState = remember(editedRecipe) { RecipeEditFormState(editedRecipe) }
-
     val ime = LocalWindowInsets.current.ime
     val navBars = LocalWindowInsets.current.navigationBars
     val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }

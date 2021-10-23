@@ -23,4 +23,16 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
     )
     var sideDish = TextFieldState(defaultValue = recipe?.sideDish)
     var directions = TextFieldState(defaultValue = recipe?.directions)
+
+    private val validatedFields = listOf(title, preparationTime, servingCount)
+
+    val isValid: Boolean
+        get() = validatedFields.all { it.isValid }
+
+    fun enableShowErrors() {
+        validatedFields.forEach {
+            it.isFocusedDirty = true
+            it.enableShowErrors()
+        }
+    }
 }
