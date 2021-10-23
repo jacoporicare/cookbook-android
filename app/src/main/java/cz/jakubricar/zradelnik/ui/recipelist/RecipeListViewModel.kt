@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -31,7 +32,8 @@ data class RecipeListViewState(
     val loading: Boolean = false,
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchQuery: String = "",
-    val searchVisible: Boolean = false
+    val searchVisible: Boolean = false,
+    val initialSyncing: Boolean = false
 ) {
 
     val initialLoad: Boolean
@@ -84,7 +86,9 @@ class RecipeListViewModel @Inject constructor(
             }
             .onEach { recipes ->
                 if (syncDataRepository.initialSync()) {
-                    refreshRecipes()
+                    if (!_state.getAndUpdate { it.copy(initialSyncing = true) }.initialSyncing) {
+                        refreshRecipes()
+                    }
                     return@onEach
                 }
 
@@ -103,13 +107,17 @@ class RecipeListViewModel @Inject constructor(
 
             _state.update { viewState ->
                 result.fold(
-                    onSuccess = { viewState.copy(loading = false) },
+                    onSuccess = { viewState.copy(loading = false, initialSyncing = false) },
                     onFailure = {
                         val errorMessages = viewState.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.connection_error
                         )
-                        viewState.copy(errorMessages = errorMessages, loading = false)
+                        viewState.copy(
+                            errorMessages = errorMessages,
+                            loading = false,
+                            initialSyncing = false
+                        )
                     }
                 )
             }
