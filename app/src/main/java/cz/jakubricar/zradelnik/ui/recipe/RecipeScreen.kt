@@ -21,7 +21,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
@@ -37,6 +36,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,13 +49,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.derivedWindowInsetsTypeOf
+import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.ui.Scaffold
+import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
-import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
 import dev.jeziellago.compose.markdowntext.MarkdownText
@@ -142,10 +145,15 @@ fun RecipeScreen(
             )
         },
         topBar = {
-            InsetAwareTopAppBar(
+            TopAppBar(
                 title = {
                     Text(text = viewState.recipe?.title ?: stringResource(R.string.recipe))
                 },
+                modifier = Modifier.navigationBarsPadding(bottom = false),
+                contentPadding = rememberInsetsPaddingValues(
+                    LocalWindowInsets.current.statusBars,
+                    applyBottom = false
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -202,11 +210,15 @@ fun Recipe(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState()
 ) {
+    val ime = LocalWindowInsets.current.ime
+    val navBars = LocalWindowInsets.current.navigationBars
+    val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
+
     LazyColumn(
         modifier = modifier,
         state = listState,
         contentPadding = rememberInsetsPaddingValues(
-            insets = LocalWindowInsets.current.systemBars + LocalWindowInsets.current.ime,
+            insets = insets,
             applyTop = false
         )
     ) {
@@ -258,6 +270,7 @@ fun Recipe(
                     markdown = recipe.directions ?: stringResource(R.string.no_directions)
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

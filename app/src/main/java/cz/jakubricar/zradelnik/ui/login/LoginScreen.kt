@@ -5,10 +5,7 @@ import android.accounts.AccountManager
 import android.content.Context
 import android.content.Intent
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -25,7 +23,6 @@ import androidx.compose.material.LinearProgressIndicator
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProgressIndicatorDefaults
-import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
@@ -55,11 +52,15 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
+import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.ui.Scaffold
+import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator
 import cz.jakubricar.zradelnik.ui.TextFieldState
-import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import kotlinx.coroutines.launch
 
 @Composable
@@ -133,10 +134,15 @@ fun LoginScreen(
             )
         },
         topBar = {
-            InsetAwareTopAppBar(
+            TopAppBar(
                 title = {
                     Text(text = stringResource(R.string.login))
                 },
+                modifier = Modifier.navigationBarsPadding(bottom = false),
+                contentPadding = rememberInsetsPaddingValues(
+                    LocalWindowInsets.current.statusBars,
+                    applyBottom = false
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -158,7 +164,7 @@ fun LoginScreen(
             loading = viewState.loading,
             usernameState = usernameState,
             passwordState = passwordState,
-            contentPadding = innerPadding,
+            modifier = Modifier.padding(innerPadding),
             scrollState = scrollState,
             onSubmit = onSubmit
         )
@@ -170,7 +176,7 @@ fun LoginScreen(
     loading: Boolean,
     usernameState: UsernameState,
     passwordState: PasswordState,
-    contentPadding: PaddingValues,
+    modifier: Modifier = Modifier,
     scrollState: ScrollState,
     onSubmit: () -> Unit
 ) {
@@ -183,9 +189,9 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
         Column(
-            modifier = Modifier
-                .scrollable(scrollState, Orientation.Vertical)
-                .padding(contentPadding)
+            modifier = modifier
+                .verticalScroll(scrollState)
+                .navigationBarsWithImePadding()
                 .padding(horizontal = 16.dp)
         ) {
             Username(usernameState = usernameState)
@@ -206,6 +212,7 @@ fun LoginScreen(
                     text = stringResource(id = R.string.login_login)
                 )
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

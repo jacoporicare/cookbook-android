@@ -110,6 +110,7 @@ dependencies {
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-insets:${Versions.accompanist}")
+    implementation("com.google.accompanist:accompanist-insets-ui:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
     implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
 

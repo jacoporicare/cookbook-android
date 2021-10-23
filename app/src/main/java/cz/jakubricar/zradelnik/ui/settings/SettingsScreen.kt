@@ -26,7 +26,6 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
@@ -47,14 +46,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.insets.navigationBarsHeight
+import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.navigationBarsPadding
+import com.google.accompanist.insets.navigationBarsWithImePadding
+import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.ui.Scaffold
+import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.LoggedInUser
 import cz.jakubricar.zradelnik.model.Settings
 import cz.jakubricar.zradelnik.model.SyncFrequency
 import cz.jakubricar.zradelnik.model.Theme
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
-import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.login.LoginActivity
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
@@ -101,10 +104,15 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            InsetAwareTopAppBar(
+            TopAppBar(
                 title = {
                     Text(text = stringResource(R.string.settings))
                 },
+                modifier = Modifier.navigationBarsPadding(bottom = false),
+                contentPadding = rememberInsetsPaddingValues(
+                    LocalWindowInsets.current.statusBars,
+                    applyBottom = false
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -160,7 +168,11 @@ fun Settings(
     var themeDialogOpened by remember { mutableStateOf(false) }
     var syncFrequencyDialogOpened by remember { mutableStateOf(false) }
 
-    Column(modifier = modifier.verticalScroll(scrollState)) {
+    Column(
+        modifier = modifier
+            .verticalScroll(scrollState)
+            .navigationBarsWithImePadding()
+    ) {
         ListItem(
             text = {
                 Text(text = stringResource(R.string.settings_theme))
@@ -270,7 +282,7 @@ fun Settings(
             }
         }
 
-        Spacer(modifier = Modifier.navigationBarsHeight())
+        Spacer(modifier = Modifier.height(16.dp))
     }
 
     if (themeDialogOpened) {

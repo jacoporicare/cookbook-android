@@ -17,7 +17,6 @@ import androidx.compose.material.Button
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
@@ -45,9 +44,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.navigationBarsHeight
+import com.google.accompanist.insets.derivedWindowInsetsTypeOf
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.ui.Scaffold
+import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.RecipeEdit
@@ -55,7 +56,6 @@ import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.TextFieldState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
-import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.floatingActionButtonSize
 import cz.jakubricar.zradelnik.ui.login.TextFieldError
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
@@ -111,7 +111,7 @@ fun RecipeEditScreen(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            InsetAwareTopAppBar(
+            TopAppBar(
                 title = {
                     Text(
                         text = if (isNew) {
@@ -121,6 +121,11 @@ fun RecipeEditScreen(
                         }
                     )
                 },
+                modifier = Modifier.navigationBarsPadding(bottom = false),
+                contentPadding = rememberInsetsPaddingValues(
+                    LocalWindowInsets.current.statusBars,
+                    applyBottom = false
+                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
@@ -269,11 +274,15 @@ fun RecipeEdit(
 ) {
     val formState = remember(editedRecipe) { RecipeEditFormState(editedRecipe) }
 
+    val ime = LocalWindowInsets.current.ime
+    val navBars = LocalWindowInsets.current.navigationBars
+    val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
+
     LazyColumn(
         modifier = modifier,
         state = listState,
         contentPadding = rememberInsetsPaddingValues(
-            insets = LocalWindowInsets.current.systemBars + LocalWindowInsets.current.ime,
+            insets = insets,
             applyTop = false
         )
     ) {
@@ -319,7 +328,7 @@ fun RecipeEdit(
                     singleLine = false
                 )
             }
-            Spacer(modifier = Modifier.navigationBarsHeight(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -369,7 +378,7 @@ private fun TextFieldTextState(
             label = label,
             trailingIcon = trailingIcon,
             isError = state.showErrors(),
-            keyboardOptions =  KeyboardOptions(
+            keyboardOptions = KeyboardOptions(
                 imeAction = if (singleLine) ImeAction.Next else ImeAction.None,
                 keyboardType = keyboardType
             ),

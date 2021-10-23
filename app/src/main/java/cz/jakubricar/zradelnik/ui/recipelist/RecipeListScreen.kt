@@ -25,7 +25,6 @@ import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarResult
@@ -62,15 +61,17 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.LocalWindowInsets
+import com.google.accompanist.insets.derivedWindowInsetsTypeOf
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
+import com.google.accompanist.insets.ui.Scaffold
+import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
-import cz.jakubricar.zradelnik.ui.components.InsetAwareTopAppBar
 import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.components.floatingActionButtonSize
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
@@ -247,7 +248,7 @@ private fun TopBarContent(
         }
     }
 
-    InsetAwareTopAppBar(
+    TopAppBar(
         title = {
             if (!searchVisible) {
                 Text(text = stringResource(R.string.app_name))
@@ -292,6 +293,11 @@ private fun TopBarContent(
                 }
             }
         },
+        modifier = Modifier.navigationBarsPadding(bottom = false),
+        contentPadding = rememberInsetsPaddingValues(
+            LocalWindowInsets.current.statusBars,
+            applyBottom = false
+        ),
         navigationIcon = if (searchVisible) {
             {
                 IconButton(onClick = onSearchHide) {
@@ -306,7 +312,7 @@ private fun TopBarContent(
         },
         actions = {
             if (searchVisible) {
-                return@InsetAwareTopAppBar
+                return@TopAppBar
             }
 
             IconButton(onClick = onSearchShow) {
@@ -407,11 +413,15 @@ fun RecipeList(
     }
     val chunkedRecipes = remember(recipes) { recipes.chunked(columnsPerRow) }
 
+    val ime = LocalWindowInsets.current.ime
+    val navBars = LocalWindowInsets.current.navigationBars
+    val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
+
     LazyColumn(
         modifier = modifier,
         state = listState,
         contentPadding = rememberInsetsPaddingValues(
-            insets = LocalWindowInsets.current.systemBars + LocalWindowInsets.current.ime,
+            insets = insets,
             applyTop = false,
             additionalStart = 16.dp,
             additionalTop = 16.dp,
