@@ -9,11 +9,9 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import cz.jakubricar.zradelnik.getAppSharedPreferences
 import cz.jakubricar.zradelnik.getSettingsSharedPreferences
 import cz.jakubricar.zradelnik.model.SyncFrequency
 import cz.jakubricar.zradelnik.repository.SyncDataRepository
-import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.PERIODIC_SYNC_DATA_VERSION
 import cz.jakubricar.zradelnik.work.SyncDataWorker.Companion.WORK_NAME
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
@@ -31,7 +29,7 @@ class SyncDataWorker @AssistedInject constructor(
         const val WORK_NAME = "SyncData"
 
         // Increase when work definition changes
-        const val PERIODIC_SYNC_DATA_VERSION = 1
+        const val PERIODIC_SYNC_DATA_VERSION = 2
     }
 
     override suspend fun doWork(): Result {
@@ -46,7 +44,6 @@ fun Context.setupPeriodicSyncDataWork(
     newSyncFrequency: SyncFrequency? = null,
     newWifiOnly: Boolean? = null
 ) {
-    val appPreferences = getAppSharedPreferences()
     val preferences = getSettingsSharedPreferences()
     val sync = newSync ?: preferences.sync
 
@@ -77,17 +74,6 @@ fun Context.setupPeriodicSyncDataWork(
         )
         .build()
 
-    val replace = newSyncFrequency != null || newWifiOnly != null
-    val versionChanged = appPreferences.periodicSyncDataVersion < PERIODIC_SYNC_DATA_VERSION
-
-    val existingPeriodicWorkPolicy =
-        if (!replace && !versionChanged) ExistingPeriodicWorkPolicy.KEEP
-        else ExistingPeriodicWorkPolicy.REPLACE
-
-    if (versionChanged) {
-        appPreferences.periodicSyncDataVersion = PERIODIC_SYNC_DATA_VERSION
-    }
-
     WorkManager.getInstance(this)
-        .enqueueUniquePeriodicWork(WORK_NAME, existingPeriodicWorkPolicy, request)
+        .enqueueUniquePeriodicWork(WORK_NAME, ExistingPeriodicWorkPolicy.REPLACE, request)
 }

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import cz.jakubricar.zradelnik.di.ZradelnikApiUrl
+import cz.jakubricar.zradelnik.work.SyncDataWorker
 import cz.jakubricar.zradelnik.work.setupPeriodicSyncDataWork
 import dagger.Module
 import dagger.Provides
@@ -27,7 +28,13 @@ class ZradelnikApplication : Application(), Configuration.Provider {
 
     private fun delayedInit() {
         applicationScope.launch {
-            setupPeriodicSyncDataWork()
+            val prefs = getAppSharedPreferences()
+
+            // Initial launch or version changed
+            if (prefs.periodicSyncDataVersion != SyncDataWorker.PERIODIC_SYNC_DATA_VERSION) {
+                prefs.periodicSyncDataVersion = SyncDataWorker.PERIODIC_SYNC_DATA_VERSION
+                setupPeriodicSyncDataWork()
+            }
         }
     }
 
