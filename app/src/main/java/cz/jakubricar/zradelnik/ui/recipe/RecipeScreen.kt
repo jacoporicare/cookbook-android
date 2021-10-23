@@ -17,6 +17,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalContentAlpha
@@ -26,8 +28,8 @@ import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -36,8 +38,10 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -58,6 +62,7 @@ import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
+import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
@@ -163,15 +168,6 @@ fun RecipeScreen(
                     }
                 },
                 actions = {
-                    if (userViewState.loggedInUser != null) {
-                        IconButton(onClick = onEdit) {
-                            Icon(
-                                imageVector = Icons.Filled.Edit,
-                                contentDescription = stringResource(R.string.edit)
-                            )
-                        }
-                    }
-
                     IconButton(onClick = onKeepAwake) {
                         Icon(
                             imageVector = if (viewState.keepAwake) {
@@ -181,6 +177,52 @@ fun RecipeScreen(
                             },
                             contentDescription = stringResource(R.string.keep_awake)
                         )
+                    }
+
+                    if (userViewState.loggedInUser != null) {
+                        val connected by connectedState()
+                        val scope = rememberCoroutineScope()
+                        val onlyOnlineWarningMessage =
+                            stringResource(R.string.changes_only_online_warning)
+                        var menuExpanded by remember { mutableStateOf(false) }
+
+                        Box {
+                            IconButton(onClick = { menuExpanded = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = null
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false }
+                            ) {
+                                DropdownMenuItem(
+                                    onClick = {
+                                        menuExpanded = false
+                                        onEdit()
+                                    }
+                                ) {
+                                    Text(text = stringResource(R.string.edit))
+                                }
+                                DropdownMenuItem(
+                                    onClick = {
+                                        menuExpanded = false
+
+                                        if (!connected) {
+                                            scope.launch {
+                                                scaffoldState.snackbarHostState
+                                                    .showSnackbar(onlyOnlineWarningMessage)
+                                            }
+
+                                            return@DropdownMenuItem
+                                        }
+                                    }
+                                ) {
+                                    Text(text = stringResource(R.string.delete))
+                                }
+                            }
+                        }
                     }
                 },
                 backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {

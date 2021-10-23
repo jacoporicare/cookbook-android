@@ -22,13 +22,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,9 +52,7 @@ import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.TextFieldState
-import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
-import cz.jakubricar.zradelnik.ui.components.floatingActionButtonSize
 import cz.jakubricar.zradelnik.ui.login.TextFieldError
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import kotlinx.coroutines.launch
@@ -134,8 +130,8 @@ fun RecipeEditScreen(
                         )
                     }
                 },
-                actions = viewState.editedRecipe?.let {
-                    {
+                actions = {
+                    if (isNew || viewState.editedRecipe != null) {
                         IconButton(
                             onClick = {
                                 if (!connected) {
@@ -147,16 +143,16 @@ fun RecipeEditScreen(
                                     return@IconButton
                                 }
 
-                                // TODO: Perform delete
+                                // TODO: Perform save
                             }
                         ) {
                             Icon(
-                                imageVector = Icons.Filled.Delete,
-                                contentDescription = stringResource(R.string.delete)
+                                imageVector = Icons.Filled.Save,
+                                contentDescription = stringResource(R.string.save)
                             )
                         }
                     }
-                } ?: {},
+                },
                 backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
                     MaterialTheme.colors.background
                 } else {
@@ -164,44 +160,6 @@ fun RecipeEditScreen(
                 },
                 elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
             )
-        },
-        floatingActionButton = if (isNew || viewState.editedRecipe != null) {
-            {
-                val expanded by remember {
-                    derivedStateOf {
-                        listState.firstVisibleItemIndex == 0
-                    }
-                }
-
-                ExpandableFloatingActionButton(
-                    text = {
-                        Text(text = stringResource(R.string.save))
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Filled.Save,
-                            contentDescription = stringResource(R.string.save),
-                            modifier = Modifier.floatingActionButtonSize()
-                        )
-                    },
-                    onClick = {
-                        if (!connected) {
-                            scope.launch {
-                                scaffoldState.snackbarHostState
-                                    .showSnackbar(onlyOnlineWarningMessage)
-                            }
-
-                            return@ExpandableFloatingActionButton
-                        }
-
-                        // TODO: Perform save
-                    },
-                    modifier = Modifier.navigationBarsPadding(),
-                    expanded = expanded
-                )
-            }
-        } else {
-            {}
         }
     ) { innerPadding ->
         if (viewState.loading) {
