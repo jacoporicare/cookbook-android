@@ -33,7 +33,7 @@ data class RecipeListViewState(
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchQuery: String = "",
     val searchVisible: Boolean = false,
-    val initialSyncing: Boolean = false
+    val initialSync: Boolean = false
 ) {
 
     val initialLoad: Boolean
@@ -69,11 +69,23 @@ class RecipeListViewModel @Inject constructor(
         Comparator<Recipe> { o1, o2 -> collator.compare(o1.title, o2.title) }
 
     init {
-        getRecipes()
+        observeRecipes()
     }
 
-    private fun getRecipes() {
+    private fun observeRecipes() {
         recipeRepository.observeRecipes()
+            .onEach { recipes ->
+                if (syncDataRepository.initialSync()) {
+                    if (!_state.getAndUpdate { it.copy(initialSync = true) }.initialSync) {
+                        refreshRecipes()
+                    }
+                    return@onEach
+                }
+
+                _state.update {
+                    it.copy(recipes = recipes.sortedWith(recipeComparator), loading = false)
+                }
+            }
             .catch { error ->
                 Timber.e(error)
                 _state.update {
@@ -84,18 +96,6 @@ class RecipeListViewModel @Inject constructor(
                     it.copy(errorMessages = errorMessages, loading = false)
                 }
             }
-            .onEach { recipes ->
-                if (syncDataRepository.initialSync()) {
-                    if (!_state.getAndUpdate { it.copy(initialSyncing = true) }.initialSyncing) {
-                        refreshRecipes()
-                    }
-                    return@onEach
-                }
-
-                _state.update {
-                    it.copy(recipes = recipes.sortedWith(recipeComparator), loading = false)
-                }
-            }
             .launchIn(viewModelScope)
     }
 
@@ -103,24 +103,23 @@ class RecipeListViewModel @Inject constructor(
         _state.update { it.copy(loading = true) }
 
         viewModelScope.launch {
-            val result = syncDataRepository.fetchAllRecipeDetails()
-
-            _state.update { viewState ->
-                result.fold(
-                    onSuccess = { viewState.copy(loading = false, initialSyncing = false) },
-                    onFailure = {
-                        val errorMessages = viewState.errorMessages + ErrorMessage(
+            syncDataRepository.fetchAllRecipeDetails()
+                .onSuccess {
+                    _state.update { it.copy(loading = false, initialSync = false) }
+                }
+                .onFailure {
+                    _state.update {
+                        val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
                             messageId = R.string.connection_error
                         )
-                        viewState.copy(
+                        it.copy(
                             errorMessages = errorMessages,
                             loading = false,
-                            initialSyncing = false
+                            initialSync = false
                         )
                     }
-                )
-            }
+                }
         }
     }
 
