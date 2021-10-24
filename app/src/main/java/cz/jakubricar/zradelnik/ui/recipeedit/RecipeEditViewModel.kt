@@ -17,12 +17,12 @@ import javax.inject.Inject
 @Immutable
 data class RecipeEditViewState(
     val editedRecipe: RecipeEdit? = null,
-    val loading: Boolean = false
+    val loading: Boolean = false,
 )
 
 @HiltViewModel
 class RecipeEditViewModel @Inject constructor(
-    private val recipeRepository: RecipeRepository
+    private val recipeRepository: RecipeRepository,
 ) : ViewModel() {
 
     companion object {

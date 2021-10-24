@@ -32,7 +32,7 @@ private val DarkColorPalette = darkColors(
 @Composable
 fun ZradelnikTheme(
     theme: Theme = Theme.DEFAULT,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val darkTheme = when (theme) {
         Theme.LIGHT -> false

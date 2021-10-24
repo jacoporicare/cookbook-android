@@ -64,7 +64,7 @@ fun RecipeEditScreen(
     userViewModel: UserViewModel = hiltViewModel(),
     slug: String? = null,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
 ) {
     LaunchedEffect(slug) {
         if (slug != null) {
@@ -101,7 +101,7 @@ fun RecipeEditScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     isNew: Boolean = true,
     onBack: () -> Unit = {},
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val connected by connectedState()
@@ -208,7 +208,7 @@ private fun RecipeScreenErrorAndContent(
     failedLoading: Boolean,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
 ) {
     LogCompositions("RecipeScreenErrorAndContent")
     if (!failedLoading) {
@@ -254,7 +254,7 @@ private fun RecipeScreenErrorAndContent(
 fun RecipeEdit(
     formState: RecipeEditFormState,
     modifier: Modifier = Modifier,
-    listState: LazyListState = rememberLazyListState()
+    listState: LazyListState = rememberLazyListState(),
 ) {
     val ime = LocalWindowInsets.current.ime
     val navBars = LocalWindowInsets.current.navigationBars
@@ -318,7 +318,7 @@ fun RecipeEdit(
 @Composable
 private fun Section(
     title: String,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Spacer(modifier = Modifier.height(24.dp))
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -340,7 +340,7 @@ private fun TextFieldTextState(
     trailingIcon: @Composable (() -> Unit)? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
-    maxLines: Int = Int.MAX_VALUE
+    maxLines: Int = Int.MAX_VALUE,
 ) {
     val focusManager = LocalFocusManager.current
 

@@ -33,7 +33,7 @@ data class RecipeListViewState(
     val errorMessages: List<ErrorMessage> = emptyList(),
     val searchQuery: String = "",
     val searchVisible: Boolean = false,
-    val initialSync: Boolean = false
+    val initialSync: Boolean = false,
 ) {
 
     val initialLoad: Boolean
@@ -58,7 +58,7 @@ fun rememberFilteredRecipes(recipes: List<Recipe>, searchQuery: String): List<Re
 @HiltViewModel
 class RecipeListViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
-    private val syncDataRepository: SyncDataRepository
+    private val syncDataRepository: SyncDataRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(RecipeListViewState(loading = true))

@@ -19,7 +19,7 @@ import javax.inject.Inject
 import kotlin.math.floor
 
 class RecipeRepository @Inject constructor(
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
 ) {
 
     @OptIn(ExperimentalCoroutinesApi::class)

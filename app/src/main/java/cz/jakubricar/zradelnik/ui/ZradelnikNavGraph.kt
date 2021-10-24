@@ -36,7 +36,7 @@ const val WEB_URI = "https://www.zradelnik.eu"
 @Composable
 fun ZradelnikNavGraph(
     navController: NavHostController = rememberNavController(),
-    startDestination: String = MainDestinations.RECIPE_LIST_ROUTE
+    startDestination: String = MainDestinations.RECIPE_LIST_ROUTE,
 ) {
     val actions = remember(navController) { MainActions(navController) }
     val userViewModel: UserViewModel = hiltViewModel()

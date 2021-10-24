@@ -19,7 +19,7 @@ import javax.inject.Inject
 data class RecipeViewState(
     val recipe: RecipeDetail? = null,
     val loading: Boolean = false,
-    val keepAwake: Boolean = false
+    val keepAwake: Boolean = false,
 ) {
 
     val failedLoading: Boolean
@@ -29,7 +29,7 @@ data class RecipeViewState(
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
-    private val syncDataRepository: SyncDataRepository
+    private val syncDataRepository: SyncDataRepository,
 ) : ViewModel() {
 
     companion object {

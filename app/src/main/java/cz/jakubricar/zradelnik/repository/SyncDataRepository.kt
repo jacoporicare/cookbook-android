@@ -23,7 +23,7 @@ import javax.inject.Inject
 
 class SyncDataRepository @Inject constructor(
     private val apolloClient: ApolloClient,
-    private val app: Application
+    private val app: Application,
 ) {
 
     fun initialSync() = app.getAppSharedPreferences().lastSyncDate == 0L

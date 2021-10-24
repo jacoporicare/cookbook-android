@@ -137,7 +137,7 @@ fun RecipeScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit = {},
     onEdit: () -> Unit = {},
-    onKeepAwake: () -> Unit = {}
+    onKeepAwake: () -> Unit = {},
 ) {
     val listState = rememberLazyListState()
 
@@ -250,7 +250,7 @@ fun RecipeScreen(
 fun Recipe(
     recipe: RecipeDetail,
     modifier: Modifier = Modifier,
-    listState: LazyListState = rememberLazyListState()
+    listState: LazyListState = rememberLazyListState(),
 ) {
     val ime = LocalWindowInsets.current.ime
     val navBars = LocalWindowInsets.current.navigationBars
@@ -320,7 +320,7 @@ fun Recipe(
 @Composable
 private fun Section(
     title: String,
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     Spacer(modifier = Modifier.height(16.dp))
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -377,7 +377,7 @@ private fun Details(
 @Composable
 private fun DetailItem(
     label: String,
-    value: String
+    value: String,
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
@@ -395,7 +395,7 @@ private fun DetailItem(
 
 @Composable
 private fun Ingredients(
-    ingredients: List<RecipeDetail.Ingredient>
+    ingredients: List<RecipeDetail.Ingredient>,
 ) {
     Row {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
@@ -439,7 +439,7 @@ private fun Ingredients(
 
 private fun Modifier.ingredientGroupPadding(
     index: Int,
-    ingredient: RecipeDetail.Ingredient
+    ingredient: RecipeDetail.Ingredient,
 ): Modifier {
     if (ingredient.isGroup && index > 0) {
         return padding(top = 16.dp)

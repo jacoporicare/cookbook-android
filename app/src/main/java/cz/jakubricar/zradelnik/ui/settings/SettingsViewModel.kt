@@ -16,12 +16,12 @@ import javax.inject.Inject
 @Immutable
 data class SettingsViewState(
     val settings: Settings? = null,
-    val loading: Boolean = false
+    val loading: Boolean = false,
 )
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsViewState(loading = true))

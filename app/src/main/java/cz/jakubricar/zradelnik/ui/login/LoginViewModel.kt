@@ -13,12 +13,12 @@ import javax.inject.Inject
 
 data class LoginViewState(
     val loginResult: Result<String>? = null,
-    val loading: Boolean = false
+    val loading: Boolean = false,
 )
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginViewState())

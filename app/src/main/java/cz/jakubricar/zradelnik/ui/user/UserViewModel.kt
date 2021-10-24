@@ -18,13 +18,13 @@ import javax.inject.Inject
 @Immutable
 data class UserViewState(
     val loggedInUser: LoggedInUser? = null,
-    val loading: Boolean = false
+    val loading: Boolean = false,
 )
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
     private val app: Application,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : AndroidViewModel(app) {
 
     private val _state = MutableStateFlow(UserViewState(loading = true))

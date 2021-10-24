@@ -15,7 +15,7 @@ import java.time.format.FormatStyle
 import javax.inject.Inject
 
 class SettingsRepository @Inject constructor(
-    private val app: Application
+    private val app: Application,
 ) {
 
     private val prefManager = app.getSettingsSharedPreferences()

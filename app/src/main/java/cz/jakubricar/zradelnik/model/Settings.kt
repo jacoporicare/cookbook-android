@@ -8,7 +8,7 @@ data class Settings(
     val sync: Boolean,
     val syncFrequency: SyncFrequency,
     val syncWifiOnly: Boolean,
-    val lastSyncDate: String
+    val lastSyncDate: String,
 )
 
 enum class Theme {

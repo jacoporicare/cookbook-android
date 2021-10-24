@@ -85,7 +85,7 @@ fun RecipeListScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onNavigateToRecipe: (String) -> Unit = {},
     onNavigateToRecipeAdd: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {}
+    onNavigateToSettings: () -> Unit = {},
 ) {
     LogCompositions("RecipeListScreen")
     val viewState by viewModel.state.collectAsState()
@@ -122,7 +122,7 @@ fun RecipeListScreen(
     onErrorDismiss: (Long) -> Unit = {},
     onSearchShow: () -> Unit = {},
     onSearchHide: () -> Unit = {},
-    onSearchQueryChange: (String) -> Unit = {}
+    onSearchQueryChange: (String) -> Unit = {},
 ) {
     LogCompositions("RecipeListScreenStateless")
     val recipes = rememberFilteredRecipes(viewState.recipes, viewState.searchQuery)
@@ -237,7 +237,7 @@ private fun TopBarContent(
     onRefreshRecipes: () -> Unit = {},
     onSearchHide: () -> Unit = {},
     onSearchShow: () -> Unit = {},
-    onSearchQueryChange: (String) -> Unit = {}
+    onSearchQueryChange: (String) -> Unit = {},
 ) {
     LogCompositions("TopBarContent")
     val isScrolled by remember {
@@ -368,7 +368,7 @@ private fun RecipeListScreenErrorAndContent(
     isShowingErrors: Boolean = false,
     listState: LazyListState = rememberLazyListState(),
     onNavigateToRecipe: (String) -> Unit = {},
-    onRefresh: () -> Unit = {}
+    onRefresh: () -> Unit = {},
 ) {
     LogCompositions("RecipeListScreenErrorAndContent")
     if (recipes.isNotEmpty()) {
@@ -403,7 +403,7 @@ private fun RecipeListScreenErrorAndContent(
 fun RecipeList(
     recipes: List<Recipe>,
     listState: LazyListState = rememberLazyListState(),
-    onNavigateToRecipe: (String) -> Unit = {}
+    onNavigateToRecipe: (String) -> Unit = {},
 ) {
     LogCompositions("RecipeList")
     val columnsPerRow = when (LocalConfiguration.current.orientation) {
@@ -455,7 +455,7 @@ fun RecipeList(
 fun Recipe(
     recipe: Recipe,
     modifier: Modifier = Modifier,
-    onNavigateToRecipe: (String) -> Unit = {}
+    onNavigateToRecipe: (String) -> Unit = {},
 ) {
     Card(
         modifier = modifier.clickable { onNavigateToRecipe(recipe.slug) },

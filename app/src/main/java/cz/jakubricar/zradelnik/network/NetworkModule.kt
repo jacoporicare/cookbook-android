@@ -37,14 +37,14 @@ object NetworkModule {
 
         override fun fromFieldArguments(
             field: ResponseField,
-            variables: Operation.Variables
+            variables: Operation.Variables,
         ): CacheKey {
             return CacheKey.NO_KEY
         }
 
         override fun fromFieldRecordSet(
             field: ResponseField,
-            recordSet: Map<String, Any>
+            recordSet: Map<String, Any>,
         ): CacheKey {
             return if (recordSet.containsKey("id") && recordSet["id"] != null) {
                 getCacheKey(recordSet["__typename"], recordSet["id"])
@@ -66,7 +66,7 @@ object NetworkModule {
     @Provides
     fun provideApolloClient(
         @ZradelnikApiUrl url: String,
-        @ApplicationContext appContext: Context
+        @ApplicationContext appContext: Context,
     ): ApolloClient {
         val sqlCacheFactory = SqlNormalizedCacheFactory(appContext, "apollo.db")
         val memoryCacheFactory = LruNormalizedCacheFactory(

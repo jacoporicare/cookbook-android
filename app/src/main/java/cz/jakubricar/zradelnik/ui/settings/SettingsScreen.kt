@@ -67,7 +67,7 @@ import cz.jakubricar.zradelnik.ui.user.UserViewState
 fun SettingsScreen(
     viewModel: SettingsViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val viewState by viewModel.state.collectAsState()
     val userViewState by userViewModel.state.collectAsState()
@@ -98,7 +98,7 @@ fun SettingsScreen(
     onSyncFrequencyChange: (SyncFrequency) -> Unit,
     onSyncWifiOnlyChange: (Boolean) -> Unit,
     onLogin: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -163,7 +163,7 @@ fun Settings(
     onSyncFrequencyChange: (SyncFrequency) -> Unit,
     onSyncWifiOnlyChange: (Boolean) -> Unit,
     onLogin: () -> Unit,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
 ) {
     var themeDialogOpened by remember { mutableStateOf(false) }
     var syncFrequencyDialogOpened by remember { mutableStateOf(false) }
@@ -336,7 +336,7 @@ fun Settings(
 
 data class ListOption<T>(
     val label: String,
-    val value: T
+    val value: T,
 )
 
 @Composable

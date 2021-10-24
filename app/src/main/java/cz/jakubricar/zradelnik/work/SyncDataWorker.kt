@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 class SyncDataWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted params: WorkerParameters,
-    private val syncDataRepository: SyncDataRepository
+    private val syncDataRepository: SyncDataRepository,
 ) : CoroutineWorker(appContext, params) {
 
     companion object {
@@ -42,7 +42,7 @@ class SyncDataWorker @AssistedInject constructor(
 fun Context.setupPeriodicSyncDataWork(
     newSync: Boolean? = null,
     newSyncFrequency: SyncFrequency? = null,
-    newWifiOnly: Boolean? = null
+    newWifiOnly: Boolean? = null,
 ) {
     val preferences = getSettingsSharedPreferences()
     val sync = newSync ?: preferences.sync

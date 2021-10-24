@@ -33,7 +33,7 @@ fun ExpandableFloatingActionButton(
     backgroundColor: Color = MaterialTheme.colors.secondary,
     contentColor: Color = contentColorFor(backgroundColor),
     elevation: FloatingActionButtonElevation = FloatingActionButtonDefaults.elevation(),
-    expanded: Boolean = true
+    expanded: Boolean = true,
 ) {
     FloatingActionButton(
         onClick = onClick,

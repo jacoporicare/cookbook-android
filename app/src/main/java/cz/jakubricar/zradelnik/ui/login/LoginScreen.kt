@@ -70,7 +70,7 @@ fun LoginScreen(
     isNewAccount: Boolean,
     defaultUsername: String?,
     onResult: (intent: Intent) -> Unit,
-    onBack: () -> Unit
+    onBack: () -> Unit,
 ) {
     val viewState by viewModel.state.collectAsState()
     val usernameState = remember { UsernameState(defaultUsername) }
@@ -121,7 +121,7 @@ fun LoginScreen(
     passwordState: PasswordState,
     scaffoldState: ScaffoldState,
     onBack: () -> Unit,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
@@ -178,7 +178,7 @@ fun LoginScreen(
     passwordState: PasswordState,
     modifier: Modifier = Modifier,
     scrollState: ScrollState,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
 ) {
     Column {
         if (loading) {
@@ -219,7 +219,7 @@ fun LoginScreen(
 
 @Composable
 fun Username(
-    usernameState: TextFieldState = remember { UsernameState() }
+    usernameState: TextFieldState = remember { UsernameState() },
 ) {
     val focusManager = LocalFocusManager.current
 
@@ -252,7 +252,7 @@ fun Username(
 @Composable
 fun Password(
     passwordState: TextFieldState,
-    onDone: () -> Unit = {}
+    onDone: () -> Unit = {},
 ) {
     val showPassword = remember { mutableStateOf(false) }
 
@@ -326,7 +326,7 @@ private fun finishLogin(
     isNewAccount: Boolean,
     username: String,
     password: String,
-    token: String
+    token: String,
 ): Intent {
     val account = Account(username, AccountAuthenticator.ACCOUNT_TYPE)
     val accountManager = AccountManager.get(context)

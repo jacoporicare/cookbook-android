@@ -19,7 +19,7 @@ import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 
 @Composable
 fun ZradelnikApp(
-    content: @Composable () -> Unit
+    content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
     val prefs = remember(context) { context.getSettingsSharedPreferences() }

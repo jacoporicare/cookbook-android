@@ -19,7 +19,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 class UserRepository @Inject constructor(
-    private val apolloClient: ApolloClient
+    private val apolloClient: ApolloClient,
 ) {
 
     suspend fun login(username: String, password: String): Result<String> =

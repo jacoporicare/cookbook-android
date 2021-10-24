@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
 
 class AccountAuthenticator(
     private val context: Context,
-    private val userRepository: UserRepository
+    private val userRepository: UserRepository,
 ) : AbstractAccountAuthenticator(context) {
 
     companion object {
@@ -34,7 +34,7 @@ class AccountAuthenticator(
         accountType: String,
         authTokenType: String?,
         requiredFeatures: Array<String>?,
-        options: Bundle
+        options: Bundle,
     ): Bundle {
         val account = AccountManager.get(context).getAccountsByType(ACCOUNT_TYPE).firstOrNull()
         if (account != null) {
@@ -65,7 +65,7 @@ class AccountAuthenticator(
     override fun confirmCredentials(
         arg0: AccountAuthenticatorResponse,
         arg1: Account,
-        arg2: Bundle
+        arg2: Bundle,
     ): Bundle {
         return Bundle.EMPTY
     }
@@ -78,7 +78,7 @@ class AccountAuthenticator(
         response: AccountAuthenticatorResponse,
         account: Account,
         authTokenType: String,
-        options: Bundle
+        options: Bundle,
     ): Bundle {
         val accountManager = AccountManager.get(context)
         var authToken = accountManager.peekAuthToken(account, authTokenType)
@@ -117,7 +117,7 @@ class AccountAuthenticator(
     override fun hasFeatures(
         arg0: AccountAuthenticatorResponse,
         arg1: Account,
-        arg2: Array<String>
+        arg2: Array<String>,
     ): Bundle {
         return Bundle.EMPTY
     }
@@ -126,7 +126,7 @@ class AccountAuthenticator(
         arg0: AccountAuthenticatorResponse,
         arg1: Account,
         arg2: String,
-        arg3: Bundle
+        arg3: Bundle,
     ): Bundle {
         return Bundle.EMPTY
     }
