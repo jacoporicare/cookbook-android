@@ -42,9 +42,13 @@
     <string name="delete">Smazat</string>
     <string name="recipe_load_failed">Recept se nepodařilo načíst.</string>
     <string name="recipe_title">Název</string>
+    <string name="ingredient_name">Název</string>
+    <string name="ingredient_amount">Množství</string>
+    <string name="ingredient_amount_unit">Jednotka</string>
     <string name="recipe_title_error">Název je povinný</string>
     <string name="preparation_time_error">Doba přípravy musí být celé číslo</string>
     <string name="serving_count_error">Počet porcí musí být celé číslo</string>
+    <string name="ingredient_amount_error">Množství musí být číslo</string>
     <string name="form_is_not_valid_snackbar_message">Formulář obsahuje chyby.</string>
 
     <!-- Settings -->

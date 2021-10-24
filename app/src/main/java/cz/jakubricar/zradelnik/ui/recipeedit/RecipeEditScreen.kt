@@ -3,19 +3,24 @@ package cz.jakubricar.zradelnik.ui.recipeedit
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
@@ -23,6 +28,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -37,6 +43,7 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -250,6 +257,7 @@ private fun RecipeScreenErrorAndContent(
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RecipeEdit(
     formState: RecipeEditFormState,
@@ -298,7 +306,64 @@ fun RecipeEdit(
 
         item {
             Section(title = stringResource(R.string.ingredients)) {
-                // TODO: Ingredients edit
+                formState.ingredients.forEachIndexed { index, ingredientFormState ->
+                    if (index > 0) {
+                        Divider()
+                    }
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            TextFieldTextState(
+                                state = ingredientFormState.name,
+                                label = { Text(text = stringResource(R.string.ingredient_name)) },
+                                onValueChange = {
+                                    val last = formState.ingredients.last()
+                                    val secondLast =
+                                        formState.ingredients.elementAtOrNull(formState.ingredients.lastIndex - 1)
+
+                                    if (last.name.value != "") {
+                                        formState.ingredients =
+                                            formState.ingredients + RecipeEditFormState.IngredientFormState()
+                                    } else if (last.name.value == "" && secondLast?.name?.value == "") {
+                                        formState.ingredients = formState.ingredients.dropLast(1)
+                                    }
+                                }
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                TextFieldTextState(
+                                    state = ingredientFormState.amount,
+                                    modifier = Modifier.weight(2f),
+                                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Right),
+                                    label = { Text(text = stringResource(R.string.ingredient_amount)) },
+                                    keyboardType = KeyboardType.Number
+                                )
+                                TextFieldTextState(
+                                    state = ingredientFormState.amountUnit,
+                                    modifier = Modifier.weight(3f),
+                                    label = { Text(text = stringResource(R.string.ingredient_amount_unit)) }
+                                )
+                            }
+                        }
+                        if (index < formState.ingredients.size - 1) {
+                            IconButton(
+                                onClick = {
+                                    formState.ingredients =
+                                        formState.ingredients - ingredientFormState
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = null,
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.size(48.dp))
+                        }
+                    }
+                }
             }
         }
 
@@ -336,6 +401,9 @@ private fun Section(
 @Composable
 private fun TextFieldTextState(
     state: TextFieldState,
+    modifier: Modifier = Modifier,
+    onValueChange: (String) -> Unit = {},
+    textStyle: TextStyle = LocalTextStyle.current,
     label: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     keyboardType: KeyboardType = KeyboardType.Text,
@@ -344,10 +412,13 @@ private fun TextFieldTextState(
 ) {
     val focusManager = LocalFocusManager.current
 
-    Column {
+    Column(modifier = modifier) {
         TextField(
             value = state.value,
-            onValueChange = { state.value = it },
+            onValueChange = {
+                state.value = it
+                onValueChange(it)
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .onFocusChanged { focusState ->
@@ -357,6 +428,7 @@ private fun TextFieldTextState(
                         state.enableShowErrors()
                     }
                 },
+            textStyle = textStyle,
             label = label,
             trailingIcon = trailingIcon,
             isError = state.showErrors(),
