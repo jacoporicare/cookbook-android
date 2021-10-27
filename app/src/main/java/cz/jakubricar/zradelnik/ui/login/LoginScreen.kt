@@ -40,7 +40,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
@@ -60,6 +62,7 @@ import com.google.accompanist.insets.ui.Scaffold
 import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator
+import cz.jakubricar.zradelnik.autofill
 import cz.jakubricar.zradelnik.ui.TextFieldState
 import kotlinx.coroutines.launch
 
@@ -217,6 +220,7 @@ fun LoginScreen(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Username(
     usernameState: TextFieldState = remember { UsernameState() },
@@ -237,10 +241,14 @@ fun Username(
                 if (!focusState.isFocused) {
                     usernameState.enableShowErrors()
                 }
-            },
+            }
+            .autofill(listOf(AutofillType.Username)) { usernameState.value = it },
         textStyle = MaterialTheme.typography.body2,
         isError = usernameState.showErrors(),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(
+            autoCorrect = false,
+            imeAction = ImeAction.Next,
+        ),
         keyboardActions = KeyboardActions(
             onNext = { focusManager.moveFocus(FocusDirection.Down) }
         )
@@ -249,6 +257,7 @@ fun Username(
     usernameState.getError()?.let { error -> TextFieldError(textError = stringResource(error)) }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Password(
     passwordState: TextFieldState,
@@ -270,7 +279,8 @@ fun Password(
                 if (!focusState.isFocused) {
                     passwordState.enableShowErrors()
                 }
-            },
+            }
+            .autofill(listOf(AutofillType.Password)) { passwordState.value = it },
         textStyle = MaterialTheme.typography.body2,
         label = { Text(text = stringResource(R.string.login_password)) },
         trailingIcon = {

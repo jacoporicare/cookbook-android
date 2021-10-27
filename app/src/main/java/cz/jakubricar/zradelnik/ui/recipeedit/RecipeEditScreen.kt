@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -399,7 +400,8 @@ fun RecipeEdit(
             Section(title = stringResource(R.string.basic_info)) {
                 TextFieldTextState(
                     state = formState.title,
-                    label = { Text(text = stringResource(R.string.recipe_title)) }
+                    label = { Text(text = stringResource(R.string.recipe_title)) },
+                    capitalization = KeyboardCapitalization.Sentences,
                 )
                 TextFieldTextState(
                     state = formState.preparationTime,
@@ -552,6 +554,7 @@ private fun TextFieldTextState(
     textStyle: TextStyle = LocalTextStyle.current,
     label: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.None,
     keyboardType: KeyboardType = KeyboardType.Text,
     singleLine: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
@@ -579,6 +582,7 @@ private fun TextFieldTextState(
             trailingIcon = trailingIcon,
             isError = state.showErrors(),
             keyboardOptions = KeyboardOptions(
+                capitalization = capitalization,
                 imeAction = if (singleLine) ImeAction.Next else ImeAction.None,
                 keyboardType = keyboardType
             ),
