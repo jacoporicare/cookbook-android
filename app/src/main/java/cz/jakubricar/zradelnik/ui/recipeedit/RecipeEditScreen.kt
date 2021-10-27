@@ -402,6 +402,13 @@ fun RecipeEdit(
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
+                                if (ingredientFormState.isGroup.value) {
+                                    Text(
+                                        text = stringResource(R.string.ingredient_group),
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+
                                 IconButton(
                                     onClick = {
                                         ingredientFormState.isGroup.value =
@@ -417,10 +424,6 @@ fun RecipeEdit(
                                         },
                                         contentDescription = stringResource(R.string.ingredient_group),
                                     )
-                                }
-
-                                if (ingredientFormState.isGroup.value) {
-                                    Text(text = stringResource(R.string.ingredient_group))
                                 }
                             }
                         }
