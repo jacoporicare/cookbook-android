@@ -102,7 +102,7 @@ class SyncDataRepository @Inject constructor(
 
                                 apolloClient.apolloStore
                                     .writeAndPublish(
-                                        RecipeDetailQuery(recipe.fragments.recipeFragment.slug),
+                                        RecipeDetailQuery(recipe.fragments.recipeFragment.id),
                                         RecipeDetailQuery.Data(
                                             RecipeDetailQuery.Recipe(
                                                 recipe.__typename,

@@ -5,7 +5,6 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class RecipeDetail(
     val id: String,
-    val slug: String,
     val title: String,
     val imageUrl: String?,
     val directions: String?,

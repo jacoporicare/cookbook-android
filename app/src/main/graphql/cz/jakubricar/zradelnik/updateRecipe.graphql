@@ -1,0 +1,6 @@
+mutation UpdateRecipe($id: ID!, $recipe: RecipeInput!, $image: Upload) {
+  updateRecipe(id: $id, recipe: $recipe, image: $image) {
+    ...RecipeFragment
+    ...RecipeDetailFragment
+  }
+}

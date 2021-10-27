@@ -34,7 +34,7 @@ class RecipeViewModel @Inject constructor(
 
     companion object {
 
-        const val RECIPE_SLUG_KEY = "slug"
+        const val RECIPE_ID_KEY = "id"
     }
 
     private val _state = MutableStateFlow(RecipeViewState(loading = true))
@@ -43,9 +43,9 @@ class RecipeViewModel @Inject constructor(
     val initialSync
         get() = syncDataRepository.initialSync()
 
-    fun getRecipe(slug: String) {
+    fun getRecipe(id: String) {
         viewModelScope.launch {
-            recipeRepository.getRecipeDetail(slug)
+            recipeRepository.getRecipeDetail(id)
                 .onSuccess { recipe ->
                     _state.update { it.copy(recipe = recipe, loading = false) }
                 }

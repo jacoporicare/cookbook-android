@@ -26,6 +26,18 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
             errorFor = { R.string.ingredient_amount_error },
         )
         val amountUnit = TextFieldState(ingredient?.amountUnit ?: "")
+
+        private val validatedFields = listOf(amount)
+
+        val isValid: Boolean
+            get() = validatedFields.all { it.isValid }
+
+        fun enableShowErrors() {
+            validatedFields.forEach {
+                it.isFocusedDirty = true
+                it.enableShowErrors()
+            }
+        }
     }
 
     val title = TextFieldState(
@@ -54,7 +66,7 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
     private val validatedFields = listOf(title, preparationTime, servingCount)
 
     val isValid: Boolean
-        get() = validatedFields.all { it.isValid }
+        get() = validatedFields.all { it.isValid } && ingredients.all { it.isValid }
 
     init {
         ingredients = ingredients + IngredientFormState()
@@ -65,5 +77,7 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
             it.isFocusedDirty = true
             it.enableShowErrors()
         }
+
+        ingredients.forEach { it.enableShowErrors() }
     }
 }

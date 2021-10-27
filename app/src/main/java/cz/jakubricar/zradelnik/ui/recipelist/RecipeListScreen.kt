@@ -458,7 +458,7 @@ fun Recipe(
     onNavigateToRecipe: (String) -> Unit = {},
 ) {
     Card(
-        modifier = modifier.clickable { onNavigateToRecipe(recipe.slug) },
+        modifier = modifier.clickable { onNavigateToRecipe(recipe.id) },
         elevation = 2.dp
     ) {
         Column {
@@ -500,7 +500,6 @@ fun DefaultPreview() {
         Recipe(
             recipe = Recipe(
                 id = "1",
-                slug = "slug",
                 title = "Koprovka",
                 imageUrl = "https://test.api.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=640x640&format=webp"
             )

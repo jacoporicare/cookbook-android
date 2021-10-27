@@ -15,9 +15,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
-import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_SLUG_KEY
+import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_ID_KEY
 import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditScreen
-import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditViewModel.Companion.RECIPE_EDIT_SLUG_KEY
+import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditViewModel.Companion.RECIPE_EDIT_ID_KEY
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
 import cz.jakubricar.zradelnik.ui.settings.SettingsScreen
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
@@ -73,17 +73,17 @@ fun ZradelnikNavGraph(
             )
         }
         composable(
-            route = "${MainDestinations.RECIPE_ROUTE}/{$RECIPE_SLUG_KEY}",
-            arguments = listOf(navArgument(RECIPE_SLUG_KEY) { type = NavType.StringType }),
+            route = "${MainDestinations.RECIPE_ROUTE}/{$RECIPE_ID_KEY}",
+            arguments = listOf(navArgument(RECIPE_ID_KEY) { type = NavType.StringType }),
             deepLinks = listOf(
-                navDeepLink { uriPattern = "$WEB_URI/recept/{$RECIPE_SLUG_KEY}" }
+                navDeepLink { uriPattern = "$WEB_URI/recept/{$RECIPE_ID_KEY}" }
             )
         ) { backStackEntry ->
-            val slug = backStackEntry.arguments?.getString(RECIPE_SLUG_KEY)!!
+            val id = backStackEntry.arguments?.getString(RECIPE_ID_KEY)!!
 
             RecipeScreen(
                 userViewModel = userViewModel,
-                slug = slug,
+                id = id,
                 onBack = actions.upPress,
                 onNavigateToRecipeEdit = actions.navigateToRecipeEdit
             )
@@ -91,19 +91,21 @@ fun ZradelnikNavGraph(
         composable(route = MainDestinations.RECIPE_ADD_ROUTE) {
             RecipeEditScreen(
                 userViewModel = userViewModel,
-                onBack = actions.upPress
+                onBack = actions.upPress,
+                onNavigateToRecipe = actions.navigateAfterEditToRecipe,
             )
         }
         composable(
-            route = "${MainDestinations.RECIPE_EDIT_ROUTE}/{$RECIPE_EDIT_SLUG_KEY}",
-            arguments = listOf(navArgument(RECIPE_EDIT_SLUG_KEY) { type = NavType.StringType })
+            route = "${MainDestinations.RECIPE_EDIT_ROUTE}/{$RECIPE_EDIT_ID_KEY}",
+            arguments = listOf(navArgument(RECIPE_EDIT_ID_KEY) { type = NavType.StringType })
         ) { backStackEntry ->
-            val slug = backStackEntry.arguments?.getString(RECIPE_EDIT_SLUG_KEY)!!
+            val id = backStackEntry.arguments?.getString(RECIPE_EDIT_ID_KEY)!!
 
             RecipeEditScreen(
                 userViewModel = userViewModel,
-                slug = slug,
-                onBack = actions.upPress
+                id = id,
+                onBack = actions.upPress,
+                onNavigateToRecipe = actions.navigateAfterEditToRecipe,
             )
         }
         composable(
@@ -119,16 +121,22 @@ fun ZradelnikNavGraph(
 
 class MainActions(navController: NavHostController) {
 
-    val navigateToRecipe: (String) -> Unit = { slug: String ->
-        navController.navigate("${MainDestinations.RECIPE_ROUTE}/$slug")
+    val navigateToRecipe: (String) -> Unit = { id: String ->
+        navController.navigate("${MainDestinations.RECIPE_ROUTE}/$id")
     }
 
     val navigateToRecipeAdd: () -> Unit = {
         navController.navigate(MainDestinations.RECIPE_ADD_ROUTE)
     }
 
-    val navigateToRecipeEdit: (String) -> Unit = { slug: String ->
-        navController.navigate("${MainDestinations.RECIPE_EDIT_ROUTE}/$slug")
+    val navigateToRecipeEdit: (String) -> Unit = { id: String ->
+        navController.navigate("${MainDestinations.RECIPE_EDIT_ROUTE}/$id")
+    }
+
+    val navigateAfterEditToRecipe: (String) -> Unit = { id: String ->
+        navController.navigate("${MainDestinations.RECIPE_ROUTE}/$id") {
+            popUpTo(MainDestinations.RECIPE_LIST_ROUTE)
+        }
     }
 
     val navigateToSettings: () -> Unit = {

@@ -5,7 +5,6 @@ import androidx.compose.runtime.Immutable
 @Immutable
 data class RecipeEdit(
     val id: String,
-    val slug: String,
     val title: String,
     val imageUrl: String?,
     val directions: String?,
@@ -13,6 +12,7 @@ data class RecipeEdit(
     val preparationTime: Int?,
     val servingCount: Int?,
     val sideDish: String?,
+    val tags: List<String>?,
 ) {
 
     @Immutable

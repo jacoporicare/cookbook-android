@@ -73,17 +73,17 @@ import kotlinx.coroutines.launch
 fun RecipeScreen(
     viewModel: RecipeViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
-    slug: String,
+    id: String,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit = {},
     onNavigateToRecipeEdit: (String) -> Unit = {},
 ) {
-    LaunchedEffect(slug) {
+    LaunchedEffect(id) {
         // The app opened for the first time, navigate to the list to fetch recipes
         if (viewModel.initialSync) {
             onBack()
         } else {
-            viewModel.getRecipe(slug)
+            viewModel.getRecipe(id)
         }
     }
 
@@ -111,7 +111,7 @@ fun RecipeScreen(
         userViewState = userViewState,
         scaffoldState = scaffoldState,
         onBack = onBack,
-        onEdit = { onNavigateToRecipeEdit(slug) },
+        onEdit = { onNavigateToRecipeEdit(id) },
         onKeepAwake = {
             viewModel.toggleKeepAwake()
 
@@ -123,7 +123,7 @@ fun RecipeScreen(
         }
     )
 
-    LaunchedEffect(viewState) {
+    LaunchedEffect(viewState.failedLoading) {
         if (viewState.failedLoading) {
             onBack()
         }

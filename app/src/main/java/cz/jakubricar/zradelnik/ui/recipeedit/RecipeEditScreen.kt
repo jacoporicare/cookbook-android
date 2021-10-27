@@ -29,7 +29,9 @@ import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -69,13 +72,14 @@ import kotlinx.coroutines.launch
 fun RecipeEditScreen(
     viewModel: RecipeEditViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
-    slug: String? = null,
+    id: String? = null,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit = {},
+    onNavigateToRecipe: (String) -> Unit = {},
 ) {
-    LaunchedEffect(slug) {
-        if (slug != null) {
-            viewModel.getRecipe(slug)
+    LaunchedEffect(id) {
+        if (id != null) {
+            viewModel.getRecipe(id)
         } else {
             viewModel.setLoading(false)
         }
@@ -89,14 +93,23 @@ fun RecipeEditScreen(
         viewState = viewState,
         formState = formState,
         scaffoldState = scaffoldState,
-        isNew = slug == null,
+        isNew = id == null,
         onBack = onBack,
-        onRefresh = slug?.let { { viewModel.getRecipe(it) } } ?: {}
+        onRefresh = id?.let { { viewModel.getRecipe(it) } } ?: {},
+        onSave = { viewModel.save(formState) },
+        onErrorDismiss = { viewModel.errorShown(it) },
     )
 
-    LaunchedEffect(viewState) {
+    LaunchedEffect(userViewState.loggedInUser) {
         if (userViewState.loggedInUser == null) {
             onBack()
+        }
+    }
+
+    val navigateToRecipeId = viewState.navigateToRecipeId
+    LaunchedEffect(navigateToRecipeId) {
+        if (navigateToRecipeId != null) {
+            onNavigateToRecipe(navigateToRecipeId)
         }
     }
 }
@@ -109,6 +122,8 @@ fun RecipeEditScreen(
     isNew: Boolean = true,
     onBack: () -> Unit = {},
     onRefresh: () -> Unit = {},
+    onSave: () -> Unit = {},
+    onErrorDismiss: (Long) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val connected by connectedState()
@@ -151,8 +166,6 @@ fun RecipeEditScreen(
                     if (!failedLoading) {
                         val onlyOnlineWarningMessage =
                             stringResource(R.string.changes_only_online_warning)
-                        val formIsNotValidMessage =
-                            stringResource(R.string.form_is_not_valid_snackbar_message)
 
                         IconButton(
                             onClick = {
@@ -165,19 +178,9 @@ fun RecipeEditScreen(
                                     return@IconButton
                                 }
 
-                                if (!formState.isValid) {
-                                    formState.enableShowErrors()
-
-                                    scope.launch {
-                                        scaffoldState.snackbarHostState
-                                            .showSnackbar(formIsNotValidMessage)
-                                    }
-
-                                    return@IconButton
-                                }
-
-                                // TODO: Perform save
-                            }
+                                onSave()
+                            },
+                            enabled = !viewState.loading,
                         ) {
                             Icon(
                                 imageVector = Icons.Filled.Save,
@@ -205,6 +208,30 @@ fun RecipeEditScreen(
                 listState = listState,
                 onRefresh = onRefresh
             )
+        }
+    }
+
+    // Process one error message at a time and show them as Snackbars in the UI
+    if (viewState.errorMessages.isNotEmpty()) {
+        // Remember the errorMessage to display on the screen
+        val errorMessage = remember(viewState.errorMessages) { viewState.errorMessages[0] }
+
+        // Get the text to show on the message from resources
+        val errorMessageText = stringResource(errorMessage.messageId)
+        val retryMessageText = stringResource(R.string.try_again)
+
+        // If onErrorDismiss change while the LaunchedEffect is running,
+        // don't restart the effect and use the latest lambda values.
+        val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
+
+        LaunchedEffect(errorMessage.id, scaffoldState) {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessageText,
+                actionLabel = if (errorMessage.tryAgain) retryMessageText else null
+            )
+
+            // Once the message is displayed and dismissed, notify the ViewModel
+            onErrorDismissState(errorMessage.id)
         }
     }
 }
@@ -311,13 +338,11 @@ fun RecipeEdit(
                         Divider()
                     }
 
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Column(
-                            modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             TextFieldTextState(
                                 state = ingredientFormState.name,
+                                modifier = Modifier.weight(1f),
                                 label = { Text(text = stringResource(R.string.ingredient_name)) },
                                 onValueChange = {
                                     val last = formState.ingredients.last()
@@ -332,7 +357,26 @@ fun RecipeEdit(
                                     }
                                 }
                             )
-                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+
+                            if (index < formState.ingredients.size - 1) {
+                                IconButton(
+                                    onClick = {
+                                        formState.ingredients =
+                                            formState.ingredients - ingredientFormState
+                                    },
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Close,
+                                        contentDescription = null,
+                                    )
+                                }
+                            } else {
+                                Spacer(modifier = Modifier.size(48.dp))
+                            }
+                        }
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            if (!ingredientFormState.isGroup.value) {
                                 TextFieldTextState(
                                     state = ingredientFormState.amount,
                                     modifier = Modifier.weight(2f),
@@ -346,21 +390,32 @@ fun RecipeEdit(
                                     label = { Text(text = stringResource(R.string.ingredient_amount_unit)) }
                                 )
                             }
-                        }
-                        if (index < formState.ingredients.size - 1) {
-                            IconButton(
-                                onClick = {
-                                    formState.ingredients =
-                                        formState.ingredients - ingredientFormState
-                                }
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
-                                    contentDescription = null,
-                                )
+                                IconButton(
+                                    onClick = {
+                                        ingredientFormState.isGroup.value =
+                                            !ingredientFormState.isGroup.value
+                                    },
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                ) {
+                                    Icon(
+                                        imageVector = if (!ingredientFormState.isGroup.value) {
+                                            Icons.Outlined.Layers
+                                        } else {
+                                            Icons.Filled.Layers
+                                        },
+                                        contentDescription = stringResource(R.string.ingredient_group),
+                                    )
+                                }
+
+                                if (ingredientFormState.isGroup.value) {
+                                    Text(text = stringResource(R.string.ingredient_group))
+                                }
                             }
-                        } else {
-                            Spacer(modifier = Modifier.size(48.dp))
                         }
                     }
                 }

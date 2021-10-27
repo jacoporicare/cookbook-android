@@ -7,7 +7,7 @@ class AppSharedPreferences(context: Context) {
     companion object {
 
         // Increase when data handling changes - e.g. adding new field
-        const val DATA_VERSION = 6
+        const val DATA_VERSION = 7
     }
 
     object Keys {

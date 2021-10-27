@@ -91,7 +91,8 @@ class RecipeListViewModel @Inject constructor(
                 _state.update {
                     val errorMessages = it.errorMessages + ErrorMessage(
                         id = UUID.randomUUID().mostSignificantBits,
-                        messageId = R.string.connection_error
+                        messageId = R.string.connection_error,
+                        tryAgain = true,
                     )
                     it.copy(errorMessages = errorMessages, loading = false)
                 }
@@ -111,7 +112,8 @@ class RecipeListViewModel @Inject constructor(
                     _state.update {
                         val errorMessages = it.errorMessages + ErrorMessage(
                             id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.connection_error
+                            messageId = R.string.connection_error,
+                            tryAgain = true,
                         )
                         it.copy(
                             errorMessages = errorMessages,

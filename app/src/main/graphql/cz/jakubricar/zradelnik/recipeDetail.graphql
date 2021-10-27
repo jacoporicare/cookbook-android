@@ -1,5 +1,5 @@
-query RecipeDetail($slug: String!) {
-  recipe(slug: $slug) {
+query RecipeDetail($id: ID!) {
+  recipe(id: $id) {
     ...RecipeFragment
     ...RecipeDetailFragment
   }
