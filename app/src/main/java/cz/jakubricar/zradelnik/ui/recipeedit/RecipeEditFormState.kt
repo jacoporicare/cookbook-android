@@ -1,5 +1,6 @@
 package cz.jakubricar.zradelnik.ui.recipeedit
 
+import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -40,6 +41,7 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
         }
     }
 
+    val newImageUri = mutableStateOf<Uri?>(null)
     val title = TextFieldState(
         defaultValue = recipe?.title,
         validator = { it.isNotEmpty() },

@@ -19,3 +19,6 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
+
+# https://www.apollographql.com/docs/android/essentials/mutations/#uploading-files
+-keep class * implements com.apollographql.apollo.api.InputType { *; }

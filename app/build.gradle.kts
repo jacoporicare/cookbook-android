@@ -163,7 +163,8 @@ apollo {
     generateKotlinModels.set(true)
     customTypeMapping.set(
         mapOf(
-            "Date" to "java.time.OffsetDateTime"
+            "Date" to "java.time.OffsetDateTime",
+            "Upload" to "com.apollographql.apollo.api.FileUpload",
         )
     )
 }

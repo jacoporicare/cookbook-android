@@ -1,6 +1,7 @@
 package cz.jakubricar.zradelnik.repository
 
 import com.apollographql.apollo.ApolloClient
+import com.apollographql.apollo.api.FileUpload
 import com.apollographql.apollo.api.Input
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.coroutines.toFlow
@@ -23,6 +24,7 @@ import cz.jakubricar.zradelnik.type.RecipeInput
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import okio.BufferedSink
 import timber.log.Timber
 import java.text.NumberFormat
 import javax.inject.Inject
@@ -115,10 +117,23 @@ class RecipeRepository @Inject constructor(
         authToken: String,
         id: String?,
         input: RecipeInput,
+        newImage: RecipeEdit.NewImage?,
     ): Result<RecipeDetail> =
         try {
+            val imageUpload = newImage?.let {
+                object : FileUpload(it.mimeType) {
+                    override fun contentLength() = it.bytes.size.toLong()
+
+                    override fun writeTo(sink: BufferedSink) {
+                        sink.write(it.bytes)
+                    }
+
+                    override fun fileName() = "photo"
+                }
+            }
+
             if (id != null) {
-                apolloClient.mutate(UpdateRecipeMutation(id, input, Input.absent()))
+                apolloClient.mutate(UpdateRecipeMutation(id, input, Input.optional(imageUpload)))
                     .toBuilder()
                     .requestHeaders(
                         RequestHeaders.builder()
@@ -137,7 +152,7 @@ class RecipeRepository @Inject constructor(
                         }
                     }
             } else {
-                apolloClient.mutate(CreateRecipeMutation(input, Input.absent()))
+                apolloClient.mutate(CreateRecipeMutation(input, Input.optional(imageUpload)))
                     .toBuilder()
                     .requestHeaders(
                         RequestHeaders.builder()

@@ -58,7 +58,7 @@ class RecipeEditViewModel @Inject constructor(
         _state.update { it.copy(loading = loading) }
     }
 
-    fun save(authToken: String, formState: RecipeEditFormState) {
+    fun save(authToken: String, formState: RecipeEditFormState, newImage: RecipeEdit.NewImage?) {
         if (!formState.isValid) {
             formState.enableShowErrors()
 
@@ -114,7 +114,7 @@ class RecipeEditViewModel @Inject constructor(
         _state.update { it.copy(loading = true) }
 
         viewModelScope.launch {
-            recipeRepository.saveRecipe(authToken, _state.value.editedRecipe?.id, input)
+            recipeRepository.saveRecipe(authToken, _state.value.editedRecipe?.id, input, newImage)
                 .onSuccess { recipe ->
                     _state.update { it.copy(navigateToRecipeId = recipe.id) }
                 }

@@ -1,5 +1,12 @@
 package cz.jakubricar.zradelnik.ui.recipeedit
 
+import android.graphics.ImageDecoder
+import android.os.Build
+import android.provider.MediaStore
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -25,6 +32,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -36,6 +44,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -44,6 +53,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -52,6 +63,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.derivedWindowInsetsTypeOf
 import com.google.accompanist.insets.navigationBarsPadding
@@ -61,6 +73,7 @@ import com.google.accompanist.insets.ui.Scaffold
 import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
+import cz.jakubricar.zradelnik.model.RecipeEdit.NewImage
 import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.TextFieldState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
@@ -90,6 +103,7 @@ fun RecipeEditScreen(
     val formState = remember(viewState.editedRecipe) { RecipeEditFormState(viewState.editedRecipe) }
 
     val authToken = userViewState.authToken
+    val context = LocalContext.current
 
     RecipeEditScreen(
         viewState = viewState,
@@ -100,7 +114,20 @@ fun RecipeEditScreen(
         onRefresh = id?.let { { viewModel.getRecipe(it) } } ?: {},
         onSave = {
             if (authToken != null) {
-                viewModel.save(authToken, formState)
+                val newImage = formState.newImageUri.value?.let { uri ->
+                    val mimeType = context.contentResolver.getType(uri)
+                    val bytes = context.contentResolver.openInputStream(uri)?.buffered()?.use {
+                        it.readBytes()
+                    }
+
+                    if (mimeType != null && bytes != null) {
+                        NewImage(mimeType = mimeType, bytes = bytes)
+                    } else {
+                        null
+                    }
+                }
+
+                viewModel.save(authToken, formState, newImage)
             }
         },
         onErrorDismiss = { viewModel.errorShown(it) },
@@ -211,6 +238,7 @@ fun RecipeEditScreen(
                 formState = formState,
                 failedLoading = failedLoading,
                 modifier = Modifier.padding(innerPadding),
+                imageUrl = viewState.editedRecipe?.imageUrl,
                 listState = listState,
                 onRefresh = onRefresh
             )
@@ -248,6 +276,7 @@ private fun RecipeScreenErrorAndContent(
     formState: RecipeEditFormState,
     failedLoading: Boolean,
     modifier: Modifier = Modifier,
+    imageUrl: String? = null,
     listState: LazyListState = rememberLazyListState(),
     onRefresh: () -> Unit = {},
 ) {
@@ -256,6 +285,7 @@ private fun RecipeScreenErrorAndContent(
         RecipeEdit(
             formState = formState,
             modifier = modifier,
+            imageUrl = imageUrl,
             listState = listState
         )
     } else {
@@ -296,11 +326,31 @@ private fun RecipeScreenErrorAndContent(
 fun RecipeEdit(
     formState: RecipeEditFormState,
     modifier: Modifier = Modifier,
+    imageUrl: String? = null,
     listState: LazyListState = rememberLazyListState(),
 ) {
     val ime = LocalWindowInsets.current.ime
     val navBars = LocalWindowInsets.current.navigationBars
     val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
+    val context = LocalContext.current
+
+    val newImage by remember {
+        derivedStateOf {
+            formState.newImageUri.value?.let {
+                if (Build.VERSION.SDK_INT < 28) {
+                    @Suppress("DEPRECATION")
+                    MediaStore.Images.Media.getBitmap(context.contentResolver, it)
+                } else {
+                    val source = ImageDecoder.createSource(context.contentResolver, it)
+                    ImageDecoder.decodeBitmap(source)
+                }
+            }
+        }
+    }
+
+    val launcher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+        formState.newImageUri.value = it
+    }
 
     LazyColumn(
         modifier = modifier,
@@ -311,7 +361,38 @@ fun RecipeEdit(
         )
     ) {
         item {
-            // TODO: Image upload
+            if (newImage != null || imageUrl != null) {
+                Image(
+                    painter = rememberImagePainter(
+                        data = newImage ?: imageUrl,
+                        builder = {
+                            crossfade(200)
+                            error(R.drawable.ic_broken_image)
+                        }
+                    ),
+                    contentDescription = stringResource(
+                        R.string.recipe_image,
+                        formState.title.value
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(400.dp)
+                        .clickable { launcher.launch("image/*") },
+                    alignment = Alignment.TopCenter,
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp),
+            ) {
+                TextButton(onClick = { launcher.launch("image/*") }) {
+                    Text(text = stringResource(R.string.pick_photo))
+                }
+            }
         }
 
         item {
