@@ -200,6 +200,7 @@ fun RecipeListScreen(
         }
     }
 
+    // TODO: make reusable
     // Process one error message at a time and show them as Snackbars in the UI
     if (viewState.errorMessages.isNotEmpty()) {
         // Remember the errorMessage to display on the screen

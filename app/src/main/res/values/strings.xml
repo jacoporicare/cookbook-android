@@ -52,7 +52,11 @@
     <string name="serving_count_error">Počet porcí musí být celé číslo</string>
     <string name="ingredient_amount_error">Množství musí být číslo</string>
     <string name="form_is_not_valid_snackbar_message">Formulář obsahuje chyby.</string>
-    <string name="get_token_failed">Přihlášení pravděpodobně vypršelo.</string>
+
+    <!-- Recipe Delete -->
+    <string name="recipe_delete_failed">Recept se nepodařilo smazat. Zkontrolujte připojení k\u00A0internetu.</string>
+    <string name="delete_recipe_title">Opravdu smazat?</string>
+    <string name="delete_recipe_text">Jste si jisti, že chcete nenávratně smazat %1$s?</string>
 
     <!-- Settings -->
     <!--    <string name="action_login">Přihlásit</string>-->

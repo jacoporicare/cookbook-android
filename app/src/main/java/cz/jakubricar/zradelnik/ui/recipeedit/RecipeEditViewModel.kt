@@ -1,14 +1,12 @@
 package cz.jakubricar.zradelnik.ui.recipeedit
 
-import android.app.Application
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo.api.Input
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.repository.RecipeRepository
-import cz.jakubricar.zradelnik.repository.UserRepository
 import cz.jakubricar.zradelnik.type.IngredientInput
 import cz.jakubricar.zradelnik.type.RecipeInput
 import cz.jakubricar.zradelnik.utils.ErrorMessage
@@ -32,10 +30,8 @@ data class RecipeEditViewState(
 
 @HiltViewModel
 class RecipeEditViewModel @Inject constructor(
-    private val app: Application,
     private val recipeRepository: RecipeRepository,
-    private val userRepository: UserRepository,
-) : AndroidViewModel(app) {
+) : ViewModel() {
 
     companion object {
 
@@ -62,7 +58,7 @@ class RecipeEditViewModel @Inject constructor(
         _state.update { it.copy(loading = loading) }
     }
 
-    fun save(formState: RecipeEditFormState) {
+    fun save(authToken: String, formState: RecipeEditFormState) {
         if (!formState.isValid) {
             formState.enableShowErrors()
 
@@ -118,21 +114,7 @@ class RecipeEditViewModel @Inject constructor(
         _state.update { it.copy(loading = true) }
 
         viewModelScope.launch {
-            val token = userRepository.getAuthToken(app)
-
-            if (token == null) {
-                _state.update {
-                    val errorMessages = it.errorMessages + ErrorMessage(
-                        id = UUID.randomUUID().mostSignificantBits,
-                        messageId = R.string.get_token_failed
-                    )
-                    it.copy(errorMessages = errorMessages, loading = false)
-                }
-
-                return@launch
-            }
-
-            recipeRepository.saveRecipe(token, _state.value.editedRecipe?.id, input)
+            recipeRepository.saveRecipe(authToken, _state.value.editedRecipe?.id, input)
                 .onSuccess { recipe ->
                     _state.update { it.copy(navigateToRecipeId = recipe.id) }
                 }

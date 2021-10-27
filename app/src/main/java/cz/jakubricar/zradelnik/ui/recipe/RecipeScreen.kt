@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
@@ -26,6 +27,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.LightMode
@@ -41,6 +43,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -106,12 +109,19 @@ fun RecipeScreen(
     val scope = rememberCoroutineScope()
     val snackbarKeepAwakeMessage = stringResource(R.string.keep_awake_snackbar_message)
 
+    val authToken = userViewState.authToken
+
     RecipeScreen(
         viewState = viewState,
         userViewState = userViewState,
         scaffoldState = scaffoldState,
         onBack = onBack,
         onEdit = { onNavigateToRecipeEdit(id) },
+        onDelete = {
+            if (authToken != null) {
+                viewModel.deleteRecipe(authToken, id)
+            }
+        },
         onKeepAwake = {
             viewModel.toggleKeepAwake()
 
@@ -120,11 +130,12 @@ fun RecipeScreen(
                     scaffoldState.snackbarHostState.showSnackbar(snackbarKeepAwakeMessage)
                 }
             }
-        }
+        },
+        onErrorDismiss = { viewModel.errorShown(it) }
     )
 
-    LaunchedEffect(viewState.failedLoading) {
-        if (viewState.failedLoading) {
+    LaunchedEffect(viewState) {
+        if (viewState.failedLoading || viewState.navigateToList) {
             onBack()
         }
     }
@@ -137,9 +148,12 @@ fun RecipeScreen(
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onBack: () -> Unit = {},
     onEdit: () -> Unit = {},
+    onDelete: () -> Unit = {},
     onKeepAwake: () -> Unit = {},
+    onErrorDismiss: (Long) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
+    var deleteRecipeDialogOpened by remember { mutableStateOf(false) }
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -217,6 +231,8 @@ fun RecipeScreen(
 
                                             return@DropdownMenuItem
                                         }
+
+                                        deleteRecipeDialogOpened = true
                                     }
                                 ) {
                                     Text(text = stringResource(R.string.delete))
@@ -242,6 +258,61 @@ fun RecipeScreen(
                 modifier = Modifier.padding(innerPadding),
                 listState = listState
             )
+        }
+    }
+
+    if (deleteRecipeDialogOpened) {
+        AlertDialog(
+            onDismissRequest = { deleteRecipeDialogOpened = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        deleteRecipeDialogOpened = false
+                        onDelete()
+                    }
+                ) {
+                    Text(text = stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { deleteRecipeDialogOpened = false }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            },
+            title = { Text(text = stringResource(R.string.delete_recipe_title)) },
+            text = {
+                Text(
+                    text = stringResource(
+                        R.string.delete_recipe_text,
+                        viewState.recipe?.title ?: ""
+                    ),
+                )
+            },
+        )
+    }
+
+    // TODO: make reusable
+    // Process one error message at a time and show them as Snackbars in the UI
+    if (viewState.errorMessages.isNotEmpty()) {
+        // Remember the errorMessage to display on the screen
+        val errorMessage = remember(viewState.errorMessages) { viewState.errorMessages[0] }
+
+        // Get the text to show on the message from resources
+        val errorMessageText = stringResource(errorMessage.messageId)
+        val retryMessageText = stringResource(R.string.try_again)
+
+        // If onErrorDismiss change while the LaunchedEffect is running,
+        // don't restart the effect and use the latest lambda values.
+        val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
+
+        LaunchedEffect(errorMessage.id, scaffoldState) {
+            scaffoldState.snackbarHostState.showSnackbar(
+                message = errorMessageText,
+                actionLabel = if (errorMessage.tryAgain) retryMessageText else null
+            )
+
+            // Once the message is displayed and dismissed, notify the ViewModel
+            onErrorDismissState(errorMessage.id)
         }
     }
 }

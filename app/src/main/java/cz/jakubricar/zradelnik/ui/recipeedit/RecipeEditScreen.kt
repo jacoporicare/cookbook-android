@@ -89,6 +89,8 @@ fun RecipeEditScreen(
     val userViewState by userViewModel.state.collectAsState()
     val formState = remember(viewState.editedRecipe) { RecipeEditFormState(viewState.editedRecipe) }
 
+    val authToken = userViewState.authToken
+
     RecipeEditScreen(
         viewState = viewState,
         formState = formState,
@@ -96,7 +98,11 @@ fun RecipeEditScreen(
         isNew = id == null,
         onBack = onBack,
         onRefresh = id?.let { { viewModel.getRecipe(it) } } ?: {},
-        onSave = { viewModel.save(formState) },
+        onSave = {
+            if (authToken != null) {
+                viewModel.save(authToken, formState)
+            }
+        },
         onErrorDismiss = { viewModel.errorShown(it) },
     )
 
@@ -211,6 +217,7 @@ fun RecipeEditScreen(
         }
     }
 
+    // TODO: make reusable
     // Process one error message at a time and show them as Snackbars in the UI
     if (viewState.errorMessages.isNotEmpty()) {
         // Remember the errorMessage to display on the screen

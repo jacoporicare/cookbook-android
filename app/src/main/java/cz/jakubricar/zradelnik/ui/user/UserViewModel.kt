@@ -17,6 +17,7 @@ import javax.inject.Inject
 
 @Immutable
 data class UserViewState(
+    val authToken: String? = null,
     val loggedInUser: LoggedInUser? = null,
     val loading: Boolean = false,
 )
@@ -39,13 +40,19 @@ class UserViewModel @Inject constructor(
             val authToken = userRepository.getAuthToken(app)
 
             if (authToken == null) {
-                _state.update { it.copy(loggedInUser = null, loading = false) }
+                _state.update { it.copy(authToken = null, loggedInUser = null, loading = false) }
                 return@launch
             }
 
             userRepository.getLoggedInUser(authToken)
                 .onSuccess { user ->
-                    _state.update { it.copy(loggedInUser = user, loading = false) }
+                    _state.update {
+                        it.copy(
+                            authToken = authToken,
+                            loggedInUser = user,
+                            loading = false
+                        )
+                    }
                 }
                 .onFailure { error ->
                     Timber.e(error)
@@ -56,6 +63,6 @@ class UserViewModel @Inject constructor(
 
     fun logout() {
         userRepository.logout(app)
-        _state.update { it.copy(loggedInUser = null, loading = false) }
+        _state.update { it.copy(authToken = null, loggedInUser = null, loading = false) }
     }
 }

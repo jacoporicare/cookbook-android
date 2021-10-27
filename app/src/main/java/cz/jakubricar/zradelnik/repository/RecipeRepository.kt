@@ -7,6 +7,7 @@ import com.apollographql.apollo.coroutines.toFlow
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.apollographql.apollo.request.RequestHeaders
 import cz.jakubricar.zradelnik.CreateRecipeMutation
+import cz.jakubricar.zradelnik.DeleteRecipeMutation
 import cz.jakubricar.zradelnik.RecipeDetailQuery
 import cz.jakubricar.zradelnik.RecipeListQuery
 import cz.jakubricar.zradelnik.UpdateRecipeMutation
@@ -190,6 +191,43 @@ class RecipeRepository @Inject constructor(
                         }
                     }
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
+    suspend fun deleteRecipe(authToken: String, id: String): Result<Unit> =
+        try {
+            apolloClient.mutate(DeleteRecipeMutation(id))
+                .toBuilder()
+                .requestHeaders(
+                    RequestHeaders.builder()
+                        .addHeader("Authorization", "Bearer $authToken")
+                        .build()
+                )
+                .build()
+                .await()
+                .toResult()
+                .map {
+                    try {
+                        val cachedRecipes = apolloClient.apolloStore
+                            .read(RecipeListQuery())
+                            .await()
+                            .recipes
+
+                        apolloClient.apolloStore
+                            .writeAndPublish(
+                                RecipeListQuery(),
+                                RecipeListQuery.Data(
+                                    cachedRecipes.filterNot { it.fragments.recipeFragment.id == id }
+                                )
+                            )
+                            .await()
+                    } catch (e: Exception) {
+                        Timber.e(e)
+                    }
+
+                    Unit
+                }
         } catch (e: Exception) {
             Result.failure(e)
         }
