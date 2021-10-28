@@ -5,7 +5,9 @@ import android.os.Build
 import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,6 +20,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
@@ -29,6 +32,7 @@ import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.Text
@@ -395,152 +399,161 @@ fun RecipeEdit(
                 }
             }
         }
-
-        item {
-            Section(title = stringResource(R.string.basic_info)) {
-                TextFieldTextState(
-                    state = formState.title,
-                    label = { Text(text = stringResource(R.string.recipe_title)) },
-                    capitalization = KeyboardCapitalization.Sentences,
-                )
-                TextFieldTextState(
-                    state = formState.preparationTime,
-                    label = { Text(text = stringResource(R.string.preparation_time)) },
-                    trailingIcon = { Text(text = "min") },
-                    keyboardType = KeyboardType.Number
-                )
-                TextFieldTextState(
-                    state = formState.servingCount,
-                    label = { Text(text = stringResource(R.string.serving_count)) },
-                    keyboardType = KeyboardType.Number
-                )
-                TextFieldTextState(
-                    state = formState.sideDish,
-                    label = { Text(text = stringResource(R.string.side_dish)) }
-                )
-            }
+        section(title = { Text(text = stringResource(R.string.basic_info)) }) {
+            TextFieldTextState(
+                state = formState.title,
+                label = { Text(text = stringResource(R.string.recipe_title)) },
+                capitalization = KeyboardCapitalization.Sentences,
+            )
+            TextFieldTextState(
+                state = formState.preparationTime,
+                label = { Text(text = stringResource(R.string.preparation_time)) },
+                trailingIcon = { Text(text = "min") },
+                keyboardType = KeyboardType.Number
+            )
+            TextFieldTextState(
+                state = formState.servingCount,
+                label = { Text(text = stringResource(R.string.serving_count)) },
+                keyboardType = KeyboardType.Number
+            )
+            TextFieldTextState(
+                state = formState.sideDish,
+                label = { Text(text = stringResource(R.string.side_dish)) }
+            )
         }
+        section(title = { Text(text = stringResource(R.string.ingredients)) }) {
+            formState.ingredients.forEachIndexed { index, ingredientFormState ->
+                if (index > 0) {
+                    Divider()
+                }
 
-        item {
-            Section(title = stringResource(R.string.ingredients)) {
-                formState.ingredients.forEachIndexed { index, ingredientFormState ->
-                    if (index > 0) {
-                        Divider()
-                    }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        TextFieldTextState(
+                            state = ingredientFormState.name,
+                            modifier = Modifier.weight(1f),
+                            label = { Text(text = stringResource(R.string.ingredient_name)) },
+                            onValueChange = {
+                                val last = formState.ingredients.last()
+                                val secondLast =
+                                    formState.ingredients.elementAtOrNull(formState.ingredients.lastIndex - 1)
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            TextFieldTextState(
-                                state = ingredientFormState.name,
-                                modifier = Modifier.weight(1f),
-                                label = { Text(text = stringResource(R.string.ingredient_name)) },
-                                onValueChange = {
-                                    val last = formState.ingredients.last()
-                                    val secondLast =
-                                        formState.ingredients.elementAtOrNull(formState.ingredients.lastIndex - 1)
-
-                                    if (last.name.value != "") {
-                                        formState.ingredients =
-                                            formState.ingredients + RecipeEditFormState.IngredientFormState()
-                                    } else if (last.name.value == "" && secondLast?.name?.value == "") {
-                                        formState.ingredients = formState.ingredients.dropLast(1)
-                                    }
+                                if (last.name.value != "") {
+                                    formState.ingredients =
+                                        formState.ingredients + RecipeEditFormState.IngredientFormState()
+                                } else if (last.name.value == "" && secondLast?.name?.value == "") {
+                                    formState.ingredients = formState.ingredients.dropLast(1)
                                 }
-                            )
-
-                            if (index < formState.ingredients.size - 1) {
-                                IconButton(
-                                    onClick = {
-                                        formState.ingredients =
-                                            formState.ingredients - ingredientFormState
-                                    },
-                                    modifier = Modifier.padding(vertical = 4.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Close,
-                                        contentDescription = null,
-                                    )
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.size(48.dp))
                             }
-                        }
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            if (!ingredientFormState.isGroup.value) {
-                                TextFieldTextState(
-                                    state = ingredientFormState.amount,
-                                    modifier = Modifier.weight(2f),
-                                    textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Right),
-                                    label = { Text(text = stringResource(R.string.ingredient_amount)) },
-                                    keyboardType = KeyboardType.Number
-                                )
-                                TextFieldTextState(
-                                    state = ingredientFormState.amountUnit,
-                                    modifier = Modifier.weight(3f),
-                                    label = { Text(text = stringResource(R.string.ingredient_amount_unit)) }
-                                )
-                            }
+                        )
 
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
+                        if (index < formState.ingredients.size - 1) {
+                            IconButton(
+                                onClick = {
+                                    formState.ingredients =
+                                        formState.ingredients - ingredientFormState
+                                },
+                                modifier = Modifier.padding(vertical = 4.dp),
                             ) {
-                                if (ingredientFormState.isGroup.value) {
-                                    Text(
-                                        text = stringResource(R.string.ingredient_group),
-                                        modifier = Modifier.weight(1f),
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Filled.Close,
+                                    contentDescription = null,
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.size(48.dp))
+                        }
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        if (!ingredientFormState.isGroup.value) {
+                            TextFieldTextState(
+                                state = ingredientFormState.amount,
+                                modifier = Modifier.weight(2f),
+                                textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Right),
+                                label = { Text(text = stringResource(R.string.ingredient_amount)) },
+                                keyboardType = KeyboardType.Number
+                            )
+                            TextFieldTextState(
+                                state = ingredientFormState.amountUnit,
+                                modifier = Modifier.weight(3f),
+                                label = { Text(text = stringResource(R.string.ingredient_amount_unit)) }
+                            )
+                        }
 
-                                IconButton(
-                                    onClick = {
-                                        ingredientFormState.isGroup.value =
-                                            !ingredientFormState.isGroup.value
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            if (ingredientFormState.isGroup.value) {
+                                Text(
+                                    text = stringResource(R.string.ingredient_group),
+                                    modifier = Modifier.weight(1f),
+                                )
+                            }
+
+                            IconButton(
+                                onClick = {
+                                    ingredientFormState.isGroup.value =
+                                        !ingredientFormState.isGroup.value
+                                },
+                                modifier = Modifier.padding(vertical = 4.dp),
+                            ) {
+                                Icon(
+                                    imageVector = if (!ingredientFormState.isGroup.value) {
+                                        Icons.Outlined.Layers
+                                    } else {
+                                        Icons.Filled.Layers
                                     },
-                                    modifier = Modifier.padding(vertical = 4.dp),
-                                ) {
-                                    Icon(
-                                        imageVector = if (!ingredientFormState.isGroup.value) {
-                                            Icons.Outlined.Layers
-                                        } else {
-                                            Icons.Filled.Layers
-                                        },
-                                        contentDescription = stringResource(R.string.ingredient_group),
-                                    )
-                                }
+                                    contentDescription = stringResource(R.string.ingredient_group),
+                                )
                             }
                         }
                     }
                 }
             }
         }
-
+        section(title = { Text(text = stringResource(R.string.directions)) }) {
+            TextFieldTextState(
+                state = formState.directions,
+                label = { Text(text = stringResource(R.string.directions)) },
+                singleLine = false
+            )
+        }
         item {
-            Section(title = stringResource(R.string.directions)) {
-                TextFieldTextState(
-                    state = formState.directions,
-                    label = { Text(text = stringResource(R.string.directions)) },
-                    singleLine = false
-                )
-            }
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
 
-@Composable
-private fun Section(
-    title: String,
+@OptIn(ExperimentalFoundationApi::class)
+private fun LazyListScope.section(
+    title: @Composable ColumnScope.() -> Unit,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    Spacer(modifier = Modifier.height(24.dp))
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.h6
-        )
+    item {
         Spacer(modifier = Modifier.height(16.dp))
-        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    }
+    stickyHeader {
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colors.background)
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+        ) {
+            Spacer(modifier = Modifier.height(8.dp))
+            ProvideTextStyle(MaterialTheme.typography.h6) {
+                title()
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+        Divider()
+    }
+    item {
+        Spacer(modifier = Modifier.height(8.dp))
+        Column(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
             content()
         }
     }
