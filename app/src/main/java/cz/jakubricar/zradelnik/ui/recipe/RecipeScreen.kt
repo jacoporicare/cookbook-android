@@ -154,6 +154,9 @@ fun RecipeScreen(
 ) {
     val listState = rememberLazyListState()
     var deleteRecipeDialogOpened by remember { mutableStateOf(false) }
+    val title = viewState.recipe?.title
+    val keepAwake = viewState.keepAwake
+    val isUserLoggedIn = userViewState.loggedInUser != null
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -164,89 +167,16 @@ fun RecipeScreen(
             )
         },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = viewState.recipe?.title ?: stringResource(R.string.recipe))
-                },
-                modifier = Modifier.navigationBarsPadding(bottom = false),
-                contentPadding = rememberInsetsPaddingValues(
-                    LocalWindowInsets.current.statusBars,
-                    applyBottom = false
-                ),
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = onKeepAwake) {
-                        Icon(
-                            imageVector = if (viewState.keepAwake) {
-                                Icons.Filled.LightMode
-                            } else {
-                                Icons.Outlined.LightMode
-                            },
-                            contentDescription = stringResource(R.string.keep_awake)
-                        )
-                    }
-
-                    if (userViewState.loggedInUser != null) {
-                        val connected by connectedState()
-                        val scope = rememberCoroutineScope()
-                        val onlyOnlineWarningMessage =
-                            stringResource(R.string.changes_only_online_warning)
-                        var menuExpanded by remember { mutableStateOf(false) }
-
-                        Box {
-                            IconButton(onClick = { menuExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = null
-                                )
-                            }
-                            DropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false }
-                            ) {
-                                DropdownMenuItem(
-                                    onClick = {
-                                        menuExpanded = false
-                                        onEdit()
-                                    }
-                                ) {
-                                    Text(text = stringResource(R.string.edit))
-                                }
-                                DropdownMenuItem(
-                                    onClick = {
-                                        menuExpanded = false
-
-                                        if (!connected) {
-                                            scope.launch {
-                                                scaffoldState.snackbarHostState
-                                                    .showSnackbar(onlyOnlineWarningMessage)
-                                            }
-
-                                            return@DropdownMenuItem
-                                        }
-
-                                        deleteRecipeDialogOpened = true
-                                    }
-                                ) {
-                                    Text(text = stringResource(R.string.delete))
-                                }
-                            }
-                        }
-                    }
-                },
-                backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
-                    MaterialTheme.colors.background
-                } else {
-                    MaterialTheme.colors.surface
-                },
-                elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
+            TopBarContent(
+                title = title,
+                keepAwake = keepAwake,
+                isUserLoggedIn = isUserLoggedIn,
+                scaffoldState = scaffoldState,
+                listState = listState,
+                onBack = onBack,
+                onDelete = { deleteRecipeDialogOpened = true },
+                onEdit = onEdit,
+                onKeepAwake = onKeepAwake,
             )
         }
     ) { innerPadding ->
@@ -315,6 +245,104 @@ fun RecipeScreen(
             onErrorDismissState(errorMessage.id)
         }
     }
+}
+
+@Composable
+private fun TopBarContent(
+    title: String?,
+    keepAwake: Boolean,
+    isUserLoggedIn: Boolean,
+    scaffoldState: ScaffoldState,
+    listState: LazyListState,
+    onBack: () -> Unit,
+    onDelete: () -> Unit,
+    onEdit: () -> Unit,
+    onKeepAwake: () -> Unit,
+) {
+    TopAppBar(
+        title = {
+            Text(text = title ?: stringResource(R.string.recipe))
+        },
+        modifier = Modifier.navigationBarsPadding(bottom = false),
+        contentPadding = rememberInsetsPaddingValues(
+            LocalWindowInsets.current.statusBars,
+            applyBottom = false
+        ),
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = onKeepAwake) {
+                Icon(
+                    imageVector = if (keepAwake) {
+                        Icons.Filled.LightMode
+                    } else {
+                        Icons.Outlined.LightMode
+                    },
+                    contentDescription = stringResource(R.string.keep_awake)
+                )
+            }
+
+            if (isUserLoggedIn) {
+                val connected by connectedState()
+                val scope = rememberCoroutineScope()
+                val onlyOnlineWarningMessage =
+                    stringResource(R.string.changes_only_online_warning)
+                var menuExpanded by remember { mutableStateOf(false) }
+
+                Box {
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = null
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            onClick = {
+                                menuExpanded = false
+                                onEdit()
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.edit))
+                        }
+                        DropdownMenuItem(
+                            onClick = {
+                                menuExpanded = false
+
+                                if (!connected) {
+                                    scope.launch {
+                                        scaffoldState.snackbarHostState
+                                            .showSnackbar(onlyOnlineWarningMessage)
+                                    }
+
+                                    return@DropdownMenuItem
+                                }
+
+                                onDelete()
+                            }
+                        ) {
+                            Text(text = stringResource(R.string.delete))
+                        }
+                    }
+                }
+            }
+        },
+        backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
+            MaterialTheme.colors.background
+        } else {
+            MaterialTheme.colors.surface
+        },
+        elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
+    )
 }
 
 @Composable

@@ -84,6 +84,7 @@ import cz.jakubricar.zradelnik.ui.TextFieldState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.login.TextFieldError
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
@@ -164,8 +165,6 @@ fun RecipeEditScreen(
     onErrorDismiss: (Long) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
-    val connected by connectedState()
-    val scope = rememberCoroutineScope()
     val failedLoading = !isNew && viewState.editedRecipe == null
 
     Scaffold(
@@ -177,62 +176,15 @@ fun RecipeEditScreen(
             )
         },
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = if (isNew) {
-                            stringResource(R.string.new_recipe)
-                        } else {
-                            viewState.editedRecipe?.title ?: stringResource(R.string.recipe_edit)
-                        }
-                    )
-                },
-                modifier = Modifier.navigationBarsPadding(bottom = false),
-                contentPadding = rememberInsetsPaddingValues(
-                    LocalWindowInsets.current.statusBars,
-                    applyBottom = false
-                ),
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                },
-                actions = {
-                    if (!failedLoading) {
-                        val onlyOnlineWarningMessage =
-                            stringResource(R.string.changes_only_online_warning)
-
-                        IconButton(
-                            onClick = {
-                                if (!connected) {
-                                    scope.launch {
-                                        scaffoldState.snackbarHostState
-                                            .showSnackbar(onlyOnlineWarningMessage)
-                                    }
-
-                                    return@IconButton
-                                }
-
-                                onSave()
-                            },
-                            enabled = !viewState.loading,
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Save,
-                                contentDescription = stringResource(R.string.save)
-                            )
-                        }
-                    }
-                },
-                backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
-                    MaterialTheme.colors.background
-                } else {
-                    MaterialTheme.colors.surface
-                },
-                elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
+            TopBarContent(
+                title = viewState.editedRecipe?.title,
+                isNew = isNew,
+                loading = viewState.loading,
+                failedLoading = failedLoading,
+                scaffoldState = scaffoldState,
+                listState = listState,
+                onBack = onBack,
+                onSave = onSave,
             )
         }
     ) { innerPadding ->
@@ -274,6 +226,79 @@ fun RecipeEditScreen(
             onErrorDismissState(errorMessage.id)
         }
     }
+}
+
+@Composable
+private fun TopBarContent(
+    title: String?,
+    isNew: Boolean,
+    loading: Boolean,
+    failedLoading: Boolean,
+    scaffoldState: ScaffoldState,
+    listState: LazyListState,
+    onBack: () -> Unit,
+    onSave: () -> Unit,
+) {
+    val scope = rememberCoroutineScope()
+    val connected by connectedState()
+
+    TopAppBar(
+        title = {
+            Text(
+                text = if (isNew) {
+                    stringResource(R.string.new_recipe)
+                } else {
+                    title ?: stringResource(R.string.recipe_edit)
+                }
+            )
+        },
+        modifier = Modifier.navigationBarsPadding(bottom = false),
+        contentPadding = rememberInsetsPaddingValues(
+            LocalWindowInsets.current.statusBars,
+            applyBottom = false
+        ),
+        navigationIcon = {
+            IconButton(onClick = onBack) {
+                Icon(
+                    imageVector = Icons.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
+        },
+        actions = {
+            if (!failedLoading) {
+                val onlyOnlineWarningMessage =
+                    stringResource(R.string.changes_only_online_warning)
+
+                IconButton(
+                    onClick = {
+                        if (!connected) {
+                            scope.launch {
+                                scaffoldState.snackbarHostState
+                                    .showSnackbar(onlyOnlineWarningMessage)
+                            }
+
+                            return@IconButton
+                        }
+
+                        onSave()
+                    },
+                    enabled = !loading,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Save,
+                        contentDescription = stringResource(R.string.save)
+                    )
+                }
+            }
+        },
+        backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
+            MaterialTheme.colors.background
+        } else {
+            MaterialTheme.colors.surface
+        },
+        elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
+    )
 }
 
 @Composable
