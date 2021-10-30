@@ -36,23 +36,27 @@ class UserRepository @Inject constructor(
     }
 
     suspend fun getLoggedInUser(token: String): Result<LoggedInUser> =
-        apolloClient.query(MeQuery())
-            .toBuilder()
-            .requestHeaders(
-                RequestHeaders.builder()
-                    .addHeader("Authorization", "Bearer $token")
-                    .build()
-            )
-            .responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
-            .build()
-            .await()
-            .toResult()
-            .map { data ->
-                LoggedInUser(
-                    id = data.me.id,
-                    displayName = data.me.displayName
+        try {
+            apolloClient.query(MeQuery())
+                .toBuilder()
+                .requestHeaders(
+                    RequestHeaders.builder()
+                        .addHeader("Authorization", "Bearer $token")
+                        .build()
                 )
-            }
+                .responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
+                .build()
+                .await()
+                .toResult()
+                .map { data ->
+                    LoggedInUser(
+                        id = data.me.id,
+                        displayName = data.me.displayName
+                    )
+                }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
 
     suspend fun getAuthToken(context: Context): String? {
         val accountManager = AccountManager.get(context)

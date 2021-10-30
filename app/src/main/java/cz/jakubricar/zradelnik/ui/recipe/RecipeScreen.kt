@@ -43,7 +43,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +65,7 @@ import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.network.connectedState
+import cz.jakubricar.zradelnik.ui.ErrorSnackbar
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
@@ -221,30 +221,11 @@ fun RecipeScreen(
         )
     }
 
-    // TODO: make reusable
-    // Process one error message at a time and show them as Snackbars in the UI
-    if (viewState.errorMessages.isNotEmpty()) {
-        // Remember the errorMessage to display on the screen
-        val errorMessage = remember(viewState.errorMessages) { viewState.errorMessages[0] }
-
-        // Get the text to show on the message from resources
-        val errorMessageText = stringResource(errorMessage.messageId)
-        val retryMessageText = stringResource(R.string.try_again)
-
-        // If onErrorDismiss change while the LaunchedEffect is running,
-        // don't restart the effect and use the latest lambda values.
-        val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
-
-        LaunchedEffect(errorMessage.id, scaffoldState) {
-            scaffoldState.snackbarHostState.showSnackbar(
-                message = errorMessageText,
-                actionLabel = if (errorMessage.tryAgain) retryMessageText else null
-            )
-
-            // Once the message is displayed and dismissed, notify the ViewModel
-            onErrorDismissState(errorMessage.id)
-        }
-    }
+    ErrorSnackbar(
+        errorMessages = viewState.errorMessages,
+        scaffoldState = scaffoldState,
+        onErrorDismiss = onErrorDismiss,
+    )
 }
 
 @Composable
