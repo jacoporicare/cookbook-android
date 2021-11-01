@@ -10,7 +10,7 @@ import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.platform.unaccent
 import cz.jakubricar.zradelnik.repository.RecipeRepository
 import cz.jakubricar.zradelnik.repository.SyncDataRepository
-import cz.jakubricar.zradelnik.utils.ErrorMessage
+import cz.jakubricar.zradelnik.ui.ErrorState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,14 +23,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.text.Collator
-import java.util.UUID
 import javax.inject.Inject
 
 @Immutable
 data class RecipeListViewState(
     val recipes: List<Recipe> = emptyList(),
     val loading: Boolean = false,
-    val errorMessages: List<ErrorMessage> = emptyList(),
     val searchQuery: String = "",
     val searchVisible: Boolean = false,
     val initialSync: Boolean = false,
@@ -64,6 +62,8 @@ class RecipeListViewModel @Inject constructor(
     private val _state = MutableStateFlow(RecipeListViewState(loading = true))
     val state: StateFlow<RecipeListViewState> = _state.asStateFlow()
 
+    val errorState = ErrorState()
+
     private val collator = Collator.getInstance()
     private val recipeComparator =
         Comparator<Recipe> { o1, o2 -> collator.compare(o1.title, o2.title) }
@@ -88,14 +88,8 @@ class RecipeListViewModel @Inject constructor(
             }
             .catch { error ->
                 Timber.e(error)
-                _state.update {
-                    val errorMessages = it.errorMessages + ErrorMessage(
-                        id = UUID.randomUUID().mostSignificantBits,
-                        messageId = R.string.connection_error,
-                        onTryAgain = { refreshRecipes() },
-                    )
-                    it.copy(errorMessages = errorMessages, loading = false)
-                }
+                errorState.addError(R.string.connection_error) { refreshRecipes() }
+                _state.update { it.copy(loading = false) }
             }
             .launchIn(viewModelScope)
     }
@@ -109,26 +103,9 @@ class RecipeListViewModel @Inject constructor(
                     _state.update { it.copy(loading = false, initialSync = false) }
                 }
                 .onFailure {
-                    _state.update {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.connection_error,
-                            onTryAgain = { refreshRecipes() },
-                        )
-                        it.copy(
-                            errorMessages = errorMessages,
-                            loading = false,
-                            initialSync = false
-                        )
-                    }
+                    errorState.addError(R.string.connection_error) { refreshRecipes() }
+                    _state.update { it.copy(loading = false, initialSync = false) }
                 }
-        }
-    }
-
-    fun errorShown(errorId: Long) {
-        _state.update { viewState ->
-            val errorMessages = viewState.errorMessages.filterNot { it.id == errorId }
-            viewState.copy(errorMessages = errorMessages)
         }
     }
 

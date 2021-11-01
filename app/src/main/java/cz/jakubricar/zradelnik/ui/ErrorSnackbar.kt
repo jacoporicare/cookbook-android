@@ -5,24 +5,23 @@ import androidx.compose.material.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.res.stringResource
 import cz.jakubricar.zradelnik.R
-import cz.jakubricar.zradelnik.utils.ErrorMessage
 
 @Composable
 fun ErrorSnackbar(
-    errorMessages: List<ErrorMessage>,
+    errorState: ErrorState,
     scaffoldState: ScaffoldState,
-    onErrorDismiss: (Long) -> Unit,
 ) {
+    val errorMessages = errorState.errorMessages
+
     if (errorMessages.isEmpty()) {
         return
     }
 
-    // Remember the errorMessage to display on the screen
-    val errorMessage = remember(errorMessages) { errorMessages[0] }
+    // The errorMessage to display on the screen
+    val errorMessage = errorMessages[0]
 
     // Get the text to show on the message from resources
     val errorMessageText = stringResource(errorMessage.messageId)
@@ -31,7 +30,7 @@ fun ErrorSnackbar(
     // If onTryAgain or onErrorDismiss change while the LaunchedEffect is running,
     // don't restart the effect and use the latest lambda values.
     val onTryAgainState by rememberUpdatedState(errorMessage.onTryAgain)
-    val onErrorDismissState by rememberUpdatedState(onErrorDismiss)
+    val onErrorDismissState by rememberUpdatedState(errorState::errorShown)
 
     LaunchedEffect(errorMessage.id, scaffoldState) {
         val result = scaffoldState.snackbarHostState.showSnackbar(

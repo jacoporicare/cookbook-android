@@ -69,6 +69,7 @@ import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.ui.ErrorSnackbar
+import cz.jakubricar.zradelnik.ui.ErrorState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.components.LoadingContent
@@ -98,11 +99,11 @@ fun RecipeListScreen(
         viewState = viewState,
         userViewState = userViewState,
         scaffoldState = scaffoldState,
+        errorState = viewModel.errorState,
         onNavigateToRecipe = onNavigateToRecipe,
         onNavigateToRecipeAdd = onNavigateToRecipeAdd,
         onNavigateToSettings = onNavigateToSettings,
         onRefreshRecipes = { viewModel.refreshRecipes() },
-        onErrorDismiss = { viewModel.errorShown(it) },
         onSearchShow = { viewModel.showSearch() },
         onSearchHide = { viewModel.hideSearch() },
         onSearchQueryChange = { viewModel.setSearchQuery(it) }
@@ -114,11 +115,11 @@ fun RecipeListScreen(
     viewState: RecipeListViewState,
     userViewState: UserViewState,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
+    errorState: ErrorState = remember { ErrorState() },
     onNavigateToRecipe: (String) -> Unit = {},
     onNavigateToRecipeAdd: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onRefreshRecipes: () -> Unit = {},
-    onErrorDismiss: (Long) -> Unit = {},
     onSearchShow: () -> Unit = {},
     onSearchHide: () -> Unit = {},
     onSearchQueryChange: (String) -> Unit = {},
@@ -191,7 +192,7 @@ fun RecipeListScreen(
         ) {
             RecipeListScreenErrorAndContent(
                 recipes = recipes,
-                isShowingErrors = viewState.errorMessages.isNotEmpty(),
+                isShowingErrors = errorState.errorMessages.isNotEmpty(),
                 listState = listState,
                 onNavigateToRecipe = onNavigateToRecipe,
                 onRefresh = onRefreshRecipes
@@ -200,9 +201,8 @@ fun RecipeListScreen(
     }
 
     ErrorSnackbar(
-        errorMessages = viewState.errorMessages,
+        errorState = errorState,
         scaffoldState = scaffoldState,
-        onErrorDismiss = onErrorDismiss,
     )
 }
 

@@ -80,6 +80,7 @@ import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.RecipeEdit.NewImage
 import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.ErrorSnackbar
+import cz.jakubricar.zradelnik.ui.ErrorState
 import cz.jakubricar.zradelnik.ui.TextFieldState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.login.TextFieldError
@@ -114,6 +115,7 @@ fun RecipeEditScreen(
         viewState = viewState,
         formState = formState,
         scaffoldState = scaffoldState,
+        errorState = viewModel.errorState,
         isNew = id == null,
         onBack = onBack,
         onRefresh = id?.let { { viewModel.getRecipe(it) } } ?: {},
@@ -135,7 +137,6 @@ fun RecipeEditScreen(
                 viewModel.save(authToken, formState, newImage)
             }
         },
-        onErrorDismiss = { viewModel.errorShown(it) },
     )
 
     LaunchedEffect(userViewState.loggedInUser) {
@@ -157,11 +158,11 @@ fun RecipeEditScreen(
     viewState: RecipeEditViewState,
     formState: RecipeEditFormState,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
+    errorState: ErrorState = remember { ErrorState() },
     isNew: Boolean = true,
     onBack: () -> Unit = {},
     onRefresh: () -> Unit = {},
     onSave: () -> Unit = {},
-    onErrorDismiss: (Long) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     val failedLoading = !isNew && viewState.editedRecipe == null
@@ -202,9 +203,8 @@ fun RecipeEditScreen(
     }
 
     ErrorSnackbar(
-        errorMessages = viewState.errorMessages,
+        errorState = errorState,
         scaffoldState = scaffoldState,
-        onErrorDismiss = onErrorDismiss,
     )
 }
 

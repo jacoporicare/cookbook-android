@@ -66,6 +66,7 @@ import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.ErrorSnackbar
+import cz.jakubricar.zradelnik.ui.ErrorState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
@@ -115,6 +116,7 @@ fun RecipeScreen(
         viewState = viewState,
         userViewState = userViewState,
         scaffoldState = scaffoldState,
+        errorState = viewModel.errorState,
         onBack = onBack,
         onEdit = { onNavigateToRecipeEdit(id) },
         onDelete = {
@@ -131,7 +133,6 @@ fun RecipeScreen(
                 }
             }
         },
-        onErrorDismiss = { viewModel.errorShown(it) }
     )
 
     LaunchedEffect(viewState) {
@@ -146,11 +147,11 @@ fun RecipeScreen(
     viewState: RecipeViewState,
     userViewState: UserViewState,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
+    errorState: ErrorState = remember { ErrorState() },
     onBack: () -> Unit = {},
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {},
     onKeepAwake: () -> Unit = {},
-    onErrorDismiss: (Long) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     var deleteRecipeDialogOpened by remember { mutableStateOf(false) }
@@ -222,9 +223,8 @@ fun RecipeScreen(
     }
 
     ErrorSnackbar(
-        errorMessages = viewState.errorMessages,
+        errorState = errorState,
         scaffoldState = scaffoldState,
-        onErrorDismiss = onErrorDismiss,
     )
 }
 

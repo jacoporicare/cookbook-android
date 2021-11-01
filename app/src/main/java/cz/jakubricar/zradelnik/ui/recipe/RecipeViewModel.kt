@@ -7,7 +7,7 @@ import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.repository.RecipeRepository
 import cz.jakubricar.zradelnik.repository.SyncDataRepository
-import cz.jakubricar.zradelnik.utils.ErrorMessage
+import cz.jakubricar.zradelnik.ui.ErrorState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -15,14 +15,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.util.UUID
 import javax.inject.Inject
 
 @Immutable
 data class RecipeViewState(
     val recipe: RecipeDetail? = null,
     val loading: Boolean = false,
-    val errorMessages: List<ErrorMessage> = emptyList(),
     val keepAwake: Boolean = false,
     val navigateToList: Boolean = false,
 ) {
@@ -44,6 +42,8 @@ class RecipeViewModel @Inject constructor(
 
     private val _state = MutableStateFlow(RecipeViewState(loading = true))
     val state: StateFlow<RecipeViewState> = _state.asStateFlow()
+
+    val errorState = ErrorState()
 
     val initialSync
         get() = syncDataRepository.initialSync()
@@ -71,25 +71,13 @@ class RecipeViewModel @Inject constructor(
                 }
                 .onFailure { error ->
                     Timber.e(error)
-                    _state.update {
-                        val errorMessages = it.errorMessages + ErrorMessage(
-                            id = UUID.randomUUID().mostSignificantBits,
-                            messageId = R.string.recipe_delete_failed
-                        )
-                        it.copy(errorMessages = errorMessages, loading = false)
-                    }
+                    errorState.addError(R.string.recipe_delete_failed)
+                    _state.update { it.copy(loading = false) }
                 }
         }
     }
 
     fun toggleKeepAwake() {
         _state.update { it.copy(keepAwake = !it.keepAwake) }
-    }
-
-    fun errorShown(errorId: Long) {
-        _state.update { viewState ->
-            val errorMessages = viewState.errorMessages.filterNot { it.id == errorId }
-            viewState.copy(errorMessages = errorMessages)
-        }
     }
 }
