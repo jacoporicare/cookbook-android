@@ -436,7 +436,7 @@ fun SettingsPreview() {
 
 object LoginActivityResultContract : ActivityResultContract<Unit, Unit>() {
 
-    override fun createIntent(context: Context, input: Unit?): Intent {
+    override fun createIntent(context: Context, input: Unit): Intent {
         return Intent(context, LoginActivity::class.java)
     }
 
