@@ -7,7 +7,7 @@ plugins {
     kotlin("kapt")
 
     // Apollo
-    id("com.apollographql.apollo") version Versions.apollo
+    id("com.apollographql.apollo") version "2.5.11"
 
     // Hilt
     id("dagger.hilt.android.plugin")
@@ -88,7 +88,7 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = Versions.compose
+        kotlinCompilerExtensionVersion = "1.1.0"
     }
 
     packagingOptions {
@@ -99,44 +99,44 @@ android {
 }
 
 dependencies {
-    implementation(kotlin("stdlib", Versions.kotlin))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
+    implementation(kotlin("stdlib", "1.6.10" ))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0-native-mt")
 
     // Jetpack Compose
-    implementation("androidx.compose.ui:ui:${Versions.compose}")
-    implementation("androidx.compose.material:material:${Versions.compose}")
-    implementation("androidx.compose.material3:material3:1.0.0-alpha04")
-    implementation("androidx.compose.material:material-icons-extended:${Versions.compose}")
-    implementation("androidx.compose.ui:ui-tooling-preview:${Versions.compose}")
+    implementation("androidx.compose.ui:ui:1.1.0")
+    implementation("androidx.compose.material:material:1.1.0")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha05")
+    implementation("androidx.compose.material:material-icons-extended:1.1.0")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.1.0")
 
     // Accompanist
-    implementation("com.google.accompanist:accompanist-insets:${Versions.accompanist}")
-    implementation("com.google.accompanist:accompanist-insets-ui:${Versions.accompanist}")
-    implementation("com.google.accompanist:accompanist-swiperefresh:${Versions.accompanist}")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:${Versions.accompanist}")
+    implementation("com.google.accompanist:accompanist-insets:0.19.0")
+    implementation("com.google.accompanist:accompanist-insets-ui:0.19.0")
+    implementation("com.google.accompanist:accompanist-swiperefresh:0.19.0")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.19.0")
 
     implementation("androidx.core:core-ktx:1.7.0")
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.activity:activity-compose:1.4.0")
 
     // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.0")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.0")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.4.0")
+    implementation("androidx.navigation:navigation-compose:2.4.1")
 
     // Work
     implementation("androidx.work:work-runtime-ktx:2.7.1")
 
     // Apollo
-    implementation("com.apollographql.apollo:apollo-runtime:${Versions.apollo}")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:${Versions.apollo}")
-    implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:${Versions.apollo}")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.11")
+    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.11")
+    implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:2.5.11")
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:${Versions.hilt}")
-    kapt("com.google.dagger:hilt-compiler:${Versions.hilt}")
+    implementation("com.google.dagger:hilt-android:2.40.5")
+    kapt("com.google.dagger:hilt-compiler:2.40.5")
     // Hilt Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     // Hilt Work
@@ -147,17 +147,17 @@ dependencies {
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Coil
-    implementation("io.coil-kt:coil-compose:${Versions.coil}")
+    implementation("io.coil-kt:coil-compose:1.4.0")
 
     // Markdown
     implementation("com.github.jeziellago:compose-markdown:0.2.6")
 
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test:${Versions.compose}")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:${Versions.compose}")
+    androidTestImplementation("androidx.compose.ui:ui-test:1.1.0")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.0")
 
-    debugImplementation("androidx.compose.ui:ui-tooling:${Versions.compose}")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.1.0")
 }
 
 apollo {
