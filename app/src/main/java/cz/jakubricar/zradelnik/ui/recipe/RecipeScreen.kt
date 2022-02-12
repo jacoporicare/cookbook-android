@@ -16,7 +16,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Card
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
@@ -34,6 +33,8 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -398,6 +399,7 @@ fun Recipe(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 private fun Section(
     title: String,
     content: @Composable () -> Unit,
@@ -409,10 +411,7 @@ private fun Section(
             style = MaterialTheme.typography.h6
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            elevation = 2.dp
-        ) {
+        Card(modifier = Modifier.fillMaxWidth()) {
             Box(modifier = Modifier.padding(8.dp)) {
                 content()
             }

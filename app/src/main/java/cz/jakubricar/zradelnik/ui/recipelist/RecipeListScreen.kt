@@ -4,6 +4,7 @@ import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +20,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
-import androidx.compose.material.Card
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -37,6 +37,8 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -430,14 +432,19 @@ fun RecipeList(
 }
 
 @Composable
+@OptIn(ExperimentalMaterial3Api::class)
 fun Recipe(
     recipe: Recipe,
     modifier: Modifier = Modifier,
     onNavigateToRecipe: (String) -> Unit = {},
 ) {
+    val interactionSource = remember { MutableInteractionSource() }
+
     Card(
-        modifier = modifier.clickable { onNavigateToRecipe(recipe.id) },
-        elevation = 2.dp
+        modifier = modifier.clickable(interactionSource = interactionSource, indication = null) {
+            onNavigateToRecipe(recipe.id)
+        },
+        interactionSource = interactionSource,
     ) {
         Column {
             Image(
