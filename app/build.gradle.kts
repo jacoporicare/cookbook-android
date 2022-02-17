@@ -135,8 +135,8 @@ dependencies {
     implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:2.5.11")
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.40.5")
-    kapt("com.google.dagger:hilt-compiler:2.40.5")
+    implementation("com.google.dagger:hilt-android:2.41")
+    kapt("com.google.dagger:hilt-compiler:2.41")
     // Hilt Compose
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
     // Hilt Work

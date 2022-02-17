@@ -43,10 +43,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -225,8 +223,6 @@ fun LoginScreen(
 fun Username(
     usernameState: TextFieldState = remember { UsernameState() },
 ) {
-    val focusManager = LocalFocusManager.current
-
     TextField(
         value = usernameState.value,
         onValueChange = {
@@ -249,9 +245,6 @@ fun Username(
             autoCorrect = false,
             imeAction = ImeAction.Next,
         ),
-        keyboardActions = KeyboardActions(
-            onNext = { focusManager.moveFocus(FocusDirection.Down) }
-        )
     )
 
     usernameState.getError()?.let { error -> TextFieldError(textError = stringResource(error)) }

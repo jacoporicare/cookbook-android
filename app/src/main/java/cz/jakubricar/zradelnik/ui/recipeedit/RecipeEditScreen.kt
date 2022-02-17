@@ -23,7 +23,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
@@ -54,11 +53,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -577,8 +574,6 @@ private fun TextFieldTextState(
     singleLine: Boolean = true,
     maxLines: Int = Int.MAX_VALUE,
 ) {
-    val focusManager = LocalFocusManager.current
-
     Column(modifier = modifier) {
         TextField(
             value = state.value,
@@ -603,12 +598,6 @@ private fun TextFieldTextState(
                 capitalization = capitalization,
                 imeAction = if (singleLine) ImeAction.Next else ImeAction.None,
                 keyboardType = keyboardType
-            ),
-            // TODO: keyboardActions can be removed once FocusDirection.Next is implemented.
-            //  TextField automatically calls moveFocus(FocusDirection.Next) when
-            //  imeAction is Next.
-            keyboardActions = KeyboardActions(
-                onNext = { focusManager.moveFocus(FocusDirection.Down) }
             ),
             singleLine = singleLine,
             maxLines = maxLines
