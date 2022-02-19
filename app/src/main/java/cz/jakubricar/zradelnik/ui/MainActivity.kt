@@ -13,9 +13,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
+//        val recipeId = intent.extras?.get("recipe_id")
+
         setContent {
             ZradelnikApp {
-                ZradelnikNavGraph()
+                ZradelnikNavGraph(
+//                    startDestination = recipeId?.let { "${MainDestinations.RECIPE_ROUTE}/${recipeId}" }
+//                        ?: MainDestinations.RECIPE_LIST_ROUTE
+                )
             }
         }
     }
