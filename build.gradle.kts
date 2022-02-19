@@ -8,6 +8,7 @@ buildscript {
         classpath("com.android.tools.build:gradle:7.1.1")
         classpath(kotlin("gradle-plugin", "1.6.10"))
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.40.5")
+        classpath("com.google.gms:google-services:4.3.10")
     }
 }
 
