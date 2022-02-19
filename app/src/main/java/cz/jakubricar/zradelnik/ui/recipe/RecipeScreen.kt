@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -84,12 +85,7 @@ fun RecipeScreen(
     onNavigateToRecipeEdit: (String) -> Unit = {},
 ) {
     LaunchedEffect(id) {
-        // The app opened for the first time, navigate to the list to fetch recipes
-        if (viewModel.initialSync) {
-            onBack()
-        } else {
-            viewModel.getRecipe(id)
-        }
+        viewModel.getRecipe(id)
     }
 
     val viewState by viewModel.state.collectAsState()
@@ -182,14 +178,29 @@ fun RecipeScreen(
             )
         }
     ) { innerPadding ->
-        if (viewState.loading || viewState.recipe == null) {
-            FullScreenLoading()
-        } else {
-            Recipe(
-                recipe = viewState.recipe,
-                modifier = Modifier.padding(innerPadding),
-                listState = listState
-            )
+        when {
+            viewState.loading -> {
+                FullScreenLoading()
+            }
+            viewState.recipe == null -> {
+                Column(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stringResource(R.string.recipe_not_found),
+                        style = MaterialTheme.typography.h5
+                    )
+                }
+            }
+            else -> {
+                Recipe(
+                    recipe = viewState.recipe,
+                    modifier = Modifier.padding(innerPadding),
+                    listState = listState
+                )
+            }
         }
     }
 

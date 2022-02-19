@@ -37,6 +37,7 @@ const val WEB_URI = "https://www.zradelnik.eu"
 fun ZradelnikNavGraph(
     navController: NavHostController = rememberNavController(),
     startDestination: String = MainDestinations.RECIPE_LIST_ROUTE,
+    recipeId: String? = null,
 ) {
     val actions = remember(navController) { MainActions(navController) }
     val userViewModel: UserViewModel = hiltViewModel()
@@ -74,7 +75,10 @@ fun ZradelnikNavGraph(
         }
         composable(
             route = "${MainDestinations.RECIPE_ROUTE}/{$RECIPE_ID_KEY}",
-            arguments = listOf(navArgument(RECIPE_ID_KEY) { type = NavType.StringType }),
+            arguments = listOf(navArgument(RECIPE_ID_KEY) {
+                type = NavType.StringType
+                defaultValue = recipeId ?: ""
+            }),
             deepLinks = listOf(
                 navDeepLink { uriPattern = "$WEB_URI/recept/{$RECIPE_ID_KEY}" }
             )

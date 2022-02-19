@@ -67,6 +67,8 @@ import com.google.accompanist.insets.navigationBarsWithImePadding
 import com.google.accompanist.insets.rememberInsetsPaddingValues
 import com.google.accompanist.insets.ui.Scaffold
 import com.google.accompanist.insets.ui.TopAppBar
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
@@ -74,7 +76,6 @@ import cz.jakubricar.zradelnik.ui.ErrorSnackbar
 import cz.jakubricar.zradelnik.ui.ErrorState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
-import cz.jakubricar.zradelnik.ui.components.LoadingContent
 import cz.jakubricar.zradelnik.ui.components.floatingActionButtonSize
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
@@ -185,20 +186,48 @@ fun RecipeListScreen(
             {}
         },
     ) { innerPadding ->
-        LoadingContent(
-            empty = viewState.initialLoad,
-            emptyContent = { FullScreenLoading() },
-            loading = viewState.loading,
-            modifier = Modifier.padding(innerPadding),
-            onRefresh = onRefreshRecipes
-        ) {
-            RecipeListScreenErrorAndContent(
-                recipes = recipes,
-                isShowingErrors = errorState.errorMessages.isNotEmpty(),
-                listState = listState,
-                onNavigateToRecipe = onNavigateToRecipe,
-                onRefresh = onRefreshRecipes
-            )
+        when {
+            viewState.initialLoad -> {
+                FullScreenLoading()
+            }
+            else -> {
+                SwipeRefresh(
+                    state = rememberSwipeRefreshState(viewState.loading),
+                    onRefresh = onRefreshRecipes,
+                    modifier = Modifier.padding(innerPadding),
+                ) {
+                    when {
+                        recipes.isNotEmpty() -> {
+                            RecipeList(
+                                recipes = recipes,
+                                listState = listState,
+                                onNavigateToRecipe = onNavigateToRecipe
+                            )
+                        }
+                        errorState.errorMessages.isEmpty() -> {
+                            // if there are no posts, and no error, let the user refresh manually
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.no_recipes),
+                                    modifier = Modifier.padding(bottom = 8.dp),
+                                    style = MaterialTheme.typography.h5
+                                )
+                                Button(onClick = onRefreshRecipes) {
+                                    Text(text = stringResource(R.string.try_again))
+                                }
+                            }
+                        }
+                        else -> {
+                            // there's currently an error showing, don't show any content
+                            Spacer(modifier = Modifier.fillMaxSize())
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -340,43 +369,6 @@ private fun TopBarContent(
         },
         elevation = if (!isScrolled) 0.dp else 4.dp
     )
-}
-
-@Composable
-private fun RecipeListScreenErrorAndContent(
-    recipes: List<Recipe>,
-    isShowingErrors: Boolean = false,
-    listState: LazyListState = rememberLazyListState(),
-    onNavigateToRecipe: (String) -> Unit = {},
-    onRefresh: () -> Unit = {},
-) {
-    LogCompositions("RecipeListScreenErrorAndContent")
-    if (recipes.isNotEmpty()) {
-        RecipeList(
-            recipes = recipes,
-            listState = listState,
-            onNavigateToRecipe = onNavigateToRecipe
-        )
-    } else if (!isShowingErrors) {
-        // if there are no posts, and no error, let the user refresh manually
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = stringResource(R.string.no_recipes),
-                modifier = Modifier.padding(bottom = 8.dp),
-                style = MaterialTheme.typography.h5
-            )
-            Button(onClick = onRefresh) {
-                Text(text = stringResource(R.string.try_again))
-            }
-        }
-    } else {
-        // there's currently an error showing, don't show any content
-        Spacer(modifier = Modifier.fillMaxSize())
-    }
 }
 
 @Composable
