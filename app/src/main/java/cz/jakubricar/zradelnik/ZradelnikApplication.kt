@@ -3,6 +3,8 @@ package cz.jakubricar.zradelnik
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 import cz.jakubricar.zradelnik.di.ZradelnikApiUrl
 import cz.jakubricar.zradelnik.work.SyncDataWorker
 import cz.jakubricar.zradelnik.work.setupPeriodicSyncDataWork
@@ -35,6 +37,8 @@ class ZradelnikApplication : Application(), Configuration.Provider {
                 prefs.periodicSyncDataVersion = SyncDataWorker.PERIODIC_SYNC_DATA_VERSION
                 setupPeriodicSyncDataWork()
             }
+
+            Firebase.messaging.subscribeToTopic(BuildConfig.NEW_RECIPES_TOPIC)
         }
     }
 

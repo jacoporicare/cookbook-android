@@ -6,6 +6,9 @@ plugins {
     // Annotation processors
     kotlin("kapt")
 
+    // Firebase
+    id("com.google.gms.google-services")
+
     // Apollo
     id("com.apollographql.apollo") version "2.5.11"
 
@@ -56,17 +59,20 @@ android {
         create("local") {
             dimension = "environment"
             buildConfigField("String", "API_URL", "\"http://10.0.2.2:8888/graphql\"")
+            buildConfigField("String", "NEW_RECIPES_TOPIC", "\"new_recipes.debug\"")
             resValue("string", "uses_cleartext_traffic", "true")
         }
 
         create("development") {
             dimension = "environment"
             buildConfigField("String", "API_URL", "\"https://api-test.zradelnik.eu/graphql\"")
+            buildConfigField("String", "NEW_RECIPES_TOPIC", "\"new_recipes.debug\"")
         }
 
         create("production") {
             dimension = "environment"
             buildConfigField("String", "API_URL", "\"https://api.zradelnik.eu/graphql\"")
+            buildConfigField("String", "NEW_RECIPES_TOPIC", "\"new_recipes\"")
         }
     }
 
@@ -99,8 +105,13 @@ android {
 }
 
 dependencies {
-    implementation(kotlin("stdlib", "1.6.10" ))
+    implementation(kotlin("stdlib", "1.6.10"))
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0-native-mt")
+
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:29.1.0"))
+    implementation("com.google.firebase:firebase-analytics-ktx")
+    implementation("com.google.firebase:firebase-messaging-ktx")
 
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:1.1.0")
