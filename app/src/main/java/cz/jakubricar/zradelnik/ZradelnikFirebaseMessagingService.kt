@@ -21,7 +21,10 @@ class ZradelnikFirebaseMessagingService : FirebaseMessagingService() {
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         remoteMessage.notification?.let {
             val intent = Intent(this, MainActivity::class.java)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                .apply {
+                    addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                    putExtra("recipe_id", remoteMessage.data["recipe_id"])
+                }
             val pendingIntent = PendingIntent.getActivity(this, 0, intent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_ONE_SHOT)
 
