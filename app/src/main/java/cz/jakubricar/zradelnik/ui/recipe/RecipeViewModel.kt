@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.RecipeDetail
 import cz.jakubricar.zradelnik.repository.RecipeRepository
-import cz.jakubricar.zradelnik.repository.SyncDataRepository
 import cz.jakubricar.zradelnik.ui.ErrorState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +31,6 @@ data class RecipeViewState(
 @HiltViewModel
 class RecipeViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
-    private val syncDataRepository: SyncDataRepository,
 ) : ViewModel() {
 
     companion object {
@@ -44,9 +42,6 @@ class RecipeViewModel @Inject constructor(
     val state: StateFlow<RecipeViewState> = _state.asStateFlow()
 
     val errorState = ErrorState()
-
-    val initialSync
-        get() = syncDataRepository.initialSync()
 
     fun getRecipe(id: String) {
         viewModelScope.launch {

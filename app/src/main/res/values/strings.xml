@@ -36,6 +36,7 @@
     <string name="directions">Postup</string>
     <string name="no_directions">Kde nic tu nic.</string>
     <string name="edit">Upravit</string>
+    <string name="recipe_not_found">Recept nenalezen.</string>
 
     <!-- Recipe Edit -->
     <string name="recipe_edit">Úprava receptu</string>

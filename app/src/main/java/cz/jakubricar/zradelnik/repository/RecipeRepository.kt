@@ -59,7 +59,7 @@ class RecipeRepository @Inject constructor(
         try {
             apolloClient.query(RecipeDetailQuery(id))
                 .toBuilder()
-                .responseFetcher(ApolloResponseFetchers.CACHE_ONLY)
+                .responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
                 .build()
                 .await()
                 .toResult()
