@@ -20,12 +20,12 @@ plugins {
 }
 
 android {
-    compileSdk = 31
+    compileSdk = 32
 
     defaultConfig {
         applicationId = "cz.jakubricar.zradelnik"
         minSdk = 26
-        targetSdk = 31
+        targetSdk = 32
         versionCode = androidGitVersion.code()
         versionName = androidGitVersion.name()
 
@@ -114,11 +114,11 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
 
     // Jetpack Compose
-    implementation("androidx.compose.ui:ui:1.1.0")
-    implementation("androidx.compose.material:material:1.1.0")
-    implementation("androidx.compose.material3:material3:1.0.0-alpha05")
-    implementation("androidx.compose.material:material-icons-extended:1.1.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.1.0")
+    implementation("androidx.compose.ui:ui:1.1.1")
+    implementation("androidx.compose.material:material:1.1.1")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha07")
+    implementation("androidx.compose.material:material-icons-extended:1.1.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-insets:0.19.0")
@@ -165,10 +165,10 @@ dependencies {
 
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test:1.1.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.0")
+    androidTestImplementation("androidx.compose.ui:ui-test:1.1.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.1")
 
-    debugImplementation("androidx.compose.ui:ui-tooling:1.1.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.1.1")
 }
 
 apollo {
