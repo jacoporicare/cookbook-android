@@ -1,8 +1,6 @@
 package cz.jakubricar.zradelnik.ui.recipelist
 
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
-import androidx.compose.runtime.remember
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.R
@@ -38,19 +36,22 @@ data class RecipeListViewState(
         get() = recipes.isEmpty() && loading
 }
 
-@Composable
-fun rememberFilteredRecipes(recipes: List<Recipe>, searchQuery: String): List<Recipe> {
-    return remember(recipes, searchQuery) {
-        if (searchQuery.isBlank()) {
-            recipes
-        } else {
-            recipes.filter {
-                it.title
-                    .unaccent()
-                    .contains(searchQuery.unaccent(), true)
-            }
+private val collator = Collator.getInstance()
+private val recipeComparator =
+    Comparator<Recipe> { o1, o2 -> collator.compare(o1.title, o2.title) }
+
+fun filterAndSortRecipes(recipes: List<Recipe>, searchQuery: String): List<Recipe> {
+    val filtered = if (searchQuery.isBlank()) {
+        recipes
+    } else {
+        recipes.filter {
+            it.title
+                .unaccent()
+                .contains(searchQuery.unaccent(), true)
         }
     }
+
+    return filtered.sortedWith(recipeComparator)
 }
 
 @HiltViewModel
@@ -63,10 +64,6 @@ class RecipeListViewModel @Inject constructor(
     val state: StateFlow<RecipeListViewState> = _state.asStateFlow()
 
     val errorState = ErrorState()
-
-    private val collator = Collator.getInstance()
-    private val recipeComparator =
-        Comparator<Recipe> { o1, o2 -> collator.compare(o1.title, o2.title) }
 
     init {
         observeRecipes()
@@ -82,9 +79,7 @@ class RecipeListViewModel @Inject constructor(
                     return@onEach
                 }
 
-                _state.update {
-                    it.copy(recipes = recipes.sortedWith(recipeComparator), loading = false)
-                }
+                _state.update { it.copy(recipes = recipes, loading = false) }
             }
             .catch { error ->
                 Timber.e(error)

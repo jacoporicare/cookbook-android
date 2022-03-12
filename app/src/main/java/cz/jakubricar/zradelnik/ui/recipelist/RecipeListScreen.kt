@@ -4,7 +4,6 @@ import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -128,7 +127,9 @@ fun RecipeListScreen(
     onSearchQueryChange: (String) -> Unit = {},
 ) {
     LogCompositions("RecipeListScreenStateless")
-    val recipes = rememberFilteredRecipes(viewState.recipes, viewState.searchQuery)
+    val recipes = remember(viewState.recipes, viewState.searchQuery) {
+        filterAndSortRecipes(viewState.recipes, viewState.searchQuery)
+    }
     val listState = rememberLazyListState()
 
     val fabVisible = userViewState.loggedInUser != null
@@ -430,13 +431,9 @@ fun Recipe(
     modifier: Modifier = Modifier,
     onNavigateToRecipe: (String) -> Unit = {},
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-
     Card(
-        modifier = modifier.clickable(interactionSource = interactionSource, indication = null) {
-            onNavigateToRecipe(recipe.id)
-        },
-        interactionSource = interactionSource,
+        onClick = { onNavigateToRecipe(recipe.id) },
+        modifier = modifier
     ) {
         Column {
             Image(
