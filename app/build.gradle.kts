@@ -20,6 +20,8 @@ plugins {
 }
 
 android {
+    namespace = "cz.jakubricar.zradelnik"
+
     compileSdk = 32
 
     defaultConfig {
@@ -106,7 +108,7 @@ android {
 
 dependencies {
     implementation(kotlin("stdlib", "1.6.10"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0-native-mt")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:29.1.0"))
@@ -116,7 +118,7 @@ dependencies {
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:1.1.1")
     implementation("androidx.compose.material:material:1.1.1")
-    implementation("androidx.compose.material3:material3:1.0.0-alpha07")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha10")
     implementation("androidx.compose.material:material-icons-extended:1.1.1")
     implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
 
@@ -135,7 +137,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.4.1")
+    implementation("androidx.navigation:navigation-compose:2.4.2")
 
     // Work
     implementation("androidx.work:work-runtime-ktx:2.7.1")
