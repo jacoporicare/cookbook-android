@@ -10,7 +10,7 @@ plugins {
     id("com.google.gms.google-services")
 
     // Apollo
-    id("com.apollographql.apollo") version "2.5.11"
+    id("com.apollographql.apollo") version "2.5.12"
 
     // Hilt
     id("dagger.hilt.android.plugin")
@@ -22,12 +22,12 @@ plugins {
 android {
     namespace = "cz.jakubricar.zradelnik"
 
-    compileSdk = 32
+    compileSdk = 33
 
     defaultConfig {
         applicationId = "cz.jakubricar.zradelnik"
         minSdk = 26
-        targetSdk = 32
+        targetSdk = 33
         versionCode = androidGitVersion.code()
         versionName = androidGitVersion.name()
 
@@ -108,7 +108,7 @@ android {
 
 dependencies {
     implementation(kotlin("stdlib", "1.6.10"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:29.1.0"))
@@ -116,11 +116,11 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
 
     // Jetpack Compose
-    implementation("androidx.compose.ui:ui:1.1.1")
-    implementation("androidx.compose.material:material:1.1.1")
-    implementation("androidx.compose.material3:material3:1.0.0-alpha10")
-    implementation("androidx.compose.material:material-icons-extended:1.1.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.1.1")
+    implementation("androidx.compose.ui:ui:1.2.1")
+    implementation("androidx.compose.material:material:1.2.1")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha16")
+    implementation("androidx.compose.material:material-icons-extended:1.2.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.2.1")
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-insets:0.19.0")
@@ -128,24 +128,24 @@ dependencies {
     implementation("com.google.accompanist:accompanist-swiperefresh:0.19.0")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.19.0")
 
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.activity:activity-compose:1.4.0")
+    implementation("androidx.core:core-ktx:1.8.0")
+    implementation("androidx.appcompat:appcompat:1.5.0")
+    implementation("androidx.activity:activity-compose:1.5.1")
 
     // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.4.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.4.2")
+    implementation("androidx.navigation:navigation-compose:2.5.1")
 
     // Work
     implementation("androidx.work:work-runtime-ktx:2.7.1")
 
     // Apollo
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.11")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.11")
-    implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:2.5.11")
+    implementation("com.apollographql.apollo:apollo-runtime:2.5.12")
+    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.12")
+    implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:2.5.12")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.41")
@@ -167,10 +167,10 @@ dependencies {
 
     androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test:1.1.1")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.1.1")
+    androidTestImplementation("androidx.compose.ui:ui-test:1.2.1")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.2.1")
 
-    debugImplementation("androidx.compose.ui:ui-tooling:1.1.1")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.2.1")
 }
 
 apollo {
