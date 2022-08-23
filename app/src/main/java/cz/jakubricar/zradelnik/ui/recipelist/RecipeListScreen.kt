@@ -475,7 +475,12 @@ fun DefaultPreview() {
             recipe = Recipe(
                 id = "1",
                 title = "Koprovka",
-                imageUrl = "https://api-test.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=640x640&format=webp"
+                imageUrl = "https://api-test.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=640x640&format=webp",
+                directions = null,
+                ingredients = emptyList(),
+                preparationTime = null,
+                servingCount = null,
+                sideDish = null
             )
         )
     }

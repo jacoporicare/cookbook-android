@@ -3,7 +3,6 @@ package cz.jakubricar.zradelnik.ui.settings
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import cz.jakubricar.zradelnik.model.Settings
-import cz.jakubricar.zradelnik.model.SyncFrequency
 import cz.jakubricar.zradelnik.model.Theme
 import cz.jakubricar.zradelnik.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -39,20 +38,5 @@ class SettingsViewModel @Inject constructor(
     fun setTheme(theme: Theme) {
         _state.update { it.copy(settings = it.settings?.copy(theme = theme)) }
         settingsRepository.setTheme(theme)
-    }
-
-    fun setSync(sync: Boolean) {
-        _state.update { it.copy(settings = it.settings?.copy(sync = sync)) }
-        settingsRepository.setSync(sync)
-    }
-
-    fun setSyncFrequency(syncFrequency: SyncFrequency) {
-        _state.update { it.copy(settings = it.settings?.copy(syncFrequency = syncFrequency)) }
-        settingsRepository.setSyncFrequency(syncFrequency)
-    }
-
-    fun setSyncWifiOnly(syncWifiOnly: Boolean) {
-        _state.update { it.copy(settings = it.settings?.copy(syncWifiOnly = syncWifiOnly)) }
-        settingsRepository.setSyncWifiOnly(syncWifiOnly)
     }
 }

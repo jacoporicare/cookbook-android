@@ -3,10 +3,9 @@ package cz.jakubricar.zradelnik.repository
 import android.accounts.AccountManager
 import android.accounts.AccountManager.KEY_AUTHTOKEN
 import android.content.Context
-import com.apollographql.apollo.ApolloClient
-import com.apollographql.apollo.coroutines.await
-import com.apollographql.apollo.fetcher.ApolloResponseFetchers
-import com.apollographql.apollo.request.RequestHeaders
+import com.apollographql.apollo3.ApolloClient
+import com.apollographql.apollo3.cache.normalized.FetchPolicy
+import com.apollographql.apollo3.cache.normalized.fetchPolicy
 import cz.jakubricar.zradelnik.LoginMutation
 import cz.jakubricar.zradelnik.MeQuery
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator.Companion.ACCOUNT_TYPE
@@ -23,8 +22,8 @@ class UserRepository @Inject constructor(
 ) {
 
     suspend fun login(username: String, password: String): Result<String> =
-        apolloClient.mutate(LoginMutation(username, password))
-            .await()
+        apolloClient.mutation(LoginMutation(username, password))
+            .execute()
             .toResult()
             .map { it.login.token }
 
@@ -38,15 +37,9 @@ class UserRepository @Inject constructor(
     suspend fun getLoggedInUser(token: String): Result<LoggedInUser> =
         try {
             apolloClient.query(MeQuery())
-                .toBuilder()
-                .requestHeaders(
-                    RequestHeaders.builder()
-                        .addHeader("Authorization", "Bearer $token")
-                        .build()
-                )
-                .responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK)
-                .build()
-                .await()
+                .fetchPolicy(FetchPolicy.NetworkFirst)
+                .addHttpHeader("Authorization", "Bearer $token")
+                .execute()
                 .toResult()
                 .map { data ->
                     LoggedInUser(

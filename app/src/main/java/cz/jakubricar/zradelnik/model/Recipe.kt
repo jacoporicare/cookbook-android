@@ -7,4 +7,19 @@ data class Recipe(
     val id: String,
     val title: String,
     val imageUrl: String?,
-)
+    val directions: String?,
+    val ingredients: List<Ingredient>,
+    val preparationTime: String?,
+    val servingCount: String?,
+    val sideDish: String?,
+) {
+
+    @Immutable
+    data class Ingredient(
+        val id: String,
+        val name: String,
+        val isGroup: Boolean,
+        val amount: String?,
+        val amountUnit: String?,
+    )
+}
