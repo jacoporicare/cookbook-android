@@ -4,4 +4,15 @@ fragment RecipeFragment on Recipe {
   thumbImageUrl: imageUrl(size: { width: 640, height: 640 }, format: WEBP)
   fullImageUrl: imageUrl(size: { width: 1080, height: 1080 }, format: WEBP)
   tags
+  directions
+  sideDish
+  preparationTime
+  servingCount
+  ingredients {
+    id
+    name
+    isGroup
+    amount
+    amountUnit
+  }
 }

@@ -10,7 +10,7 @@ plugins {
     id("com.google.gms.google-services")
 
     // Apollo
-    id("com.apollographql.apollo") version "2.5.12"
+    id("com.apollographql.apollo3") version "3.5.0"
 
     // Hilt
     id("dagger.hilt.android.plugin")
@@ -108,7 +108,7 @@ android {
 
 dependencies {
     implementation(kotlin("stdlib", "1.6.10"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:29.1.0"))
@@ -143,9 +143,9 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.7.1")
 
     // Apollo
-    implementation("com.apollographql.apollo:apollo-runtime:2.5.12")
-    implementation("com.apollographql.apollo:apollo-coroutines-support:2.5.12")
-    implementation("com.apollographql.apollo:apollo-normalized-cache-sqlite:2.5.12")
+    implementation("com.apollographql.apollo3:apollo-runtime:3.5.0")
+    implementation("com.apollographql.apollo3:apollo-normalized-cache-sqlite:3.5.0")
+    implementation("com.apollographql.apollo3:apollo-adapters:3.5.0")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.41")
@@ -174,11 +174,8 @@ dependencies {
 }
 
 apollo {
-    generateKotlinModels.set(true)
-    customTypeMapping.set(
-        mapOf(
-            "Date" to "java.time.OffsetDateTime",
-            "Upload" to "com.apollographql.apollo.api.FileUpload",
-        )
-    )
+    packageName.set("cz.jakubricar.zradelnik")
+
+    mapScalar("Date", "java.time.OffsetDateTime")
+    mapScalar("Upload", "com.apollographql.apollo3.api.Upload")
 }

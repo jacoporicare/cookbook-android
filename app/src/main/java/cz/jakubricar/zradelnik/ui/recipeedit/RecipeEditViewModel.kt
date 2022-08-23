@@ -3,7 +3,7 @@ package cz.jakubricar.zradelnik.ui.recipeedit
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.apollographql.apollo.api.Input
+import com.apollographql.apollo3.api.Optional
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.repository.RecipeRepository
@@ -69,19 +69,20 @@ class RecipeEditViewModel @Inject constructor(
 
         val input = RecipeInput(
             title = formState.title.value.trim(),
-            directions = Input.fromNullable(formState.directions.value.trim().ifEmpty { null }),
-            sideDish = Input.fromNullable(formState.sideDish.value.trim().ifEmpty { null }),
-            preparationTime = Input.fromNullable(
+            directions = Optional.presentIfNotNull(formState.directions.value.trim()
+                .ifEmpty { null }),
+            sideDish = Optional.presentIfNotNull(formState.sideDish.value.trim().ifEmpty { null }),
+            preparationTime = Optional.presentIfNotNull(
                 formState.preparationTime.value.trim().ifEmpty { null }?.toIntOrNull()
             ),
-            servingCount = Input.fromNullable(
+            servingCount = Optional.presentIfNotNull(
                 formState.servingCount.value.trim().ifEmpty { null }?.toIntOrNull()
             ),
-            ingredients = Input.fromNullable(
+            ingredients = Optional.presentIfNotNull(
                 if (nonEmptyIngredients.isNotEmpty()) {
                     nonEmptyIngredients.map {
                         IngredientInput(
-                            amount = Input.fromNullable(
+                            amount = Optional.presentIfNotNull(
                                 it.amount.value
                                     .trim()
                                     .ifEmpty { null }
@@ -89,18 +90,18 @@ class RecipeEditViewModel @Inject constructor(
                                     ?.replace(" ", "")
                                     ?.toDoubleOrNull()
                             ),
-                            amountUnit = Input.fromNullable(
+                            amountUnit = Optional.presentIfNotNull(
                                 it.amountUnit.value.trim().ifEmpty { null }
                             ),
                             name = it.name.value.trim(),
-                            isGroup = Input.fromNullable(it.isGroup.value),
+                            isGroup = Optional.presentIfNotNull(it.isGroup.value),
                         )
                     }
                 } else {
                     null
                 }
             ),
-            tags = Input.fromNullable(_state.value.editedRecipe?.tags),
+            tags = Optional.presentIfNotNull(_state.value.editedRecipe?.tags),
         )
 
         _state.update { it.copy(loading = true) }

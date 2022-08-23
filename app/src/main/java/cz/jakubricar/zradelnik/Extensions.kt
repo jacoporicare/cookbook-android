@@ -15,8 +15,6 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalAutofill
 import androidx.compose.ui.platform.LocalAutofillTree
 
-fun Context.getAppSharedPreferences() = AppSharedPreferences(this)
-
 fun Context.getSettingsSharedPreferences() = SettingsSharedPreferences(this)
 
 fun Context.findActivity(): Activity? {

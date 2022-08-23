@@ -7,14 +7,13 @@ import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.platform.unaccent
 import cz.jakubricar.zradelnik.repository.RecipeRepository
-import cz.jakubricar.zradelnik.repository.SyncDataRepository
 import cz.jakubricar.zradelnik.ui.ErrorState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
@@ -29,7 +28,6 @@ data class RecipeListViewState(
     val loading: Boolean = false,
     val searchQuery: String = "",
     val searchVisible: Boolean = false,
-    val initialSync: Boolean = false,
 ) {
 
     val initialLoad: Boolean
@@ -57,8 +55,9 @@ fun filterAndSortRecipes(recipes: List<Recipe>, searchQuery: String): List<Recip
 @HiltViewModel
 class RecipeListViewModel @Inject constructor(
     private val recipeRepository: RecipeRepository,
-    private val syncDataRepository: SyncDataRepository,
 ) : ViewModel() {
+
+    private var observeJob: Job? = null
 
     private val _state = MutableStateFlow(RecipeListViewState(loading = true))
     val state: StateFlow<RecipeListViewState> = _state.asStateFlow()
@@ -69,21 +68,15 @@ class RecipeListViewModel @Inject constructor(
         observeRecipes()
     }
 
-    private fun observeRecipes() {
-        recipeRepository.observeRecipes()
+    fun observeRecipes() {
+        observeJob?.cancel()
+        observeJob = recipeRepository.observeRecipes()
             .onEach { recipes ->
-                if (syncDataRepository.initialSync()) {
-                    if (!_state.getAndUpdate { it.copy(initialSync = true) }.initialSync) {
-                        refreshRecipes()
-                    }
-                    return@onEach
-                }
-
                 _state.update { it.copy(recipes = recipes, loading = false) }
             }
             .catch { error ->
                 Timber.e(error)
-                errorState.addError(R.string.connection_error) { refreshRecipes() }
+                errorState.addError(R.string.connection_error) { observeRecipes() }
                 _state.update { it.copy(loading = false) }
             }
             .launchIn(viewModelScope)
@@ -93,15 +86,10 @@ class RecipeListViewModel @Inject constructor(
         _state.update { it.copy(loading = true) }
 
         viewModelScope.launch {
-            syncDataRepository.fetchAllRecipeDetails()
-                .onSuccess {
-                    _state.update { it.copy(loading = false, initialSync = false) }
-                }
-                .onFailure {
-                    errorState.addError(R.string.connection_error) { refreshRecipes() }
-                    _state.update { it.copy(loading = false, initialSync = false) }
-                }
+            recipeRepository.refetchRecipes()
+            // No need for onSuccess, watcher (flow) onEach from observeRecipes will do the work
         }
+
     }
 
     fun showSearch() {

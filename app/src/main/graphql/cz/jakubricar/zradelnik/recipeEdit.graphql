@@ -1,4 +1,4 @@
-query RecipeDetail($id: ID!) {
+query RecipeEdit($id: ID!) {
   recipe(id: $id) {
     ...RecipeFragment
   }

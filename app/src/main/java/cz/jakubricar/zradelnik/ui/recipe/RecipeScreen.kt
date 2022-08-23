@@ -41,6 +41,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,7 +66,7 @@ import com.google.accompanist.insets.ui.Scaffold
 import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
-import cz.jakubricar.zradelnik.model.RecipeDetail
+import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.ErrorSnackbar
 import cz.jakubricar.zradelnik.ui.ErrorState
@@ -252,6 +253,10 @@ private fun TopBarContent(
     onEdit: () -> Unit,
     onKeepAwake: () -> Unit,
 ) {
+    val firstVisibleItemScrollOffset = remember {
+        derivedStateOf { listState.firstVisibleItemScrollOffset }
+    }
+
     TopAppBar(
         title = {
             Text(text = title ?: stringResource(R.string.recipe))
@@ -329,18 +334,18 @@ private fun TopBarContent(
                 }
             }
         },
-        backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
-            MaterialTheme.colors.background
-        } else {
-            MaterialTheme.colors.surface
-        },
-        elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
+        backgroundColor = if (firstVisibleItemScrollOffset.value == 0) {
+        MaterialTheme.colors.background
+    } else {
+        MaterialTheme.colors.surface
+    },
+    elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
     )
 }
 
 @Composable
 fun Recipe(
-    recipe: RecipeDetail,
+    recipe: Recipe,
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
@@ -485,7 +490,7 @@ private fun DetailItem(
 
 @Composable
 private fun Ingredients(
-    ingredients: List<RecipeDetail.Ingredient>,
+    ingredients: List<Recipe.Ingredient>,
 ) {
     Row {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
@@ -529,7 +534,7 @@ private fun Ingredients(
 
 private fun Modifier.ingredientGroupPadding(
     index: Int,
-    ingredient: RecipeDetail.Ingredient,
+    ingredient: Recipe.Ingredient,
 ): Modifier {
     if (ingredient.isGroup && index > 0) {
         return padding(top = 16.dp)

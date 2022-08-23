@@ -4,7 +4,7 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import cz.jakubricar.zradelnik.R
-import cz.jakubricar.zradelnik.model.RecipeDetail
+import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.repository.RecipeRepository
 import cz.jakubricar.zradelnik.ui.ErrorState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,7 +18,7 @@ import javax.inject.Inject
 
 @Immutable
 data class RecipeViewState(
-    val recipe: RecipeDetail? = null,
+    val recipe: Recipe? = null,
     val loading: Boolean = false,
     val keepAwake: Boolean = false,
     val navigateToList: Boolean = false,
