@@ -87,6 +87,11 @@ class RecipeListViewModel @Inject constructor(
 
         viewModelScope.launch {
             recipeRepository.refetchRecipes()
+                .onFailure { error ->
+                    Timber.e(error)
+                    errorState.addError(R.string.connection_error) { refreshRecipes() }
+                    _state.update { it.copy(loading = false) }
+                }
             // No need for onSuccess, watcher (flow) onEach from observeRecipes will do the work
         }
 
