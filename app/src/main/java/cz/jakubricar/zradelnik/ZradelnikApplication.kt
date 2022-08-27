@@ -3,10 +3,12 @@ package cz.jakubricar.zradelnik
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.WorkManager
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.messaging.ktx.messaging
 import cz.jakubricar.zradelnik.di.ZradelnikApiUrl
+import cz.jakubricar.zradelnik.work.getFetchRecipesPeriodicWorkRequest
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,7 +32,14 @@ class ZradelnikApplication : Application(), Configuration.Provider {
     private fun delayedInit() {
         applicationScope.launch {
             Firebase.messaging.subscribeToTopic(BuildConfig.NEW_RECIPES_TOPIC)
-            WorkManager.getInstance(this@ZradelnikApplication).cancelUniqueWork("SyncData")
+
+            val workManager = WorkManager.getInstance(this@ZradelnikApplication)
+            workManager.cancelUniqueWork("SyncData") // Cleanup old worker
+            workManager.enqueueUniquePeriodicWork(
+                "FetchRecipes",
+                ExistingPeriodicWorkPolicy.KEEP,
+                getFetchRecipesPeriodicWorkRequest()
+            )
         }
     }
 
