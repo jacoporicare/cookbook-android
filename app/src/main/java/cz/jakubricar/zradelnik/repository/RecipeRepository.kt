@@ -49,39 +49,35 @@ class RecipeRepository @Inject constructor(
             .map { data -> data.recipe?.recipeFragment?.let { mapFragmentToRecipe(it) } }
 
     suspend fun getRecipeEdit(id: String): Result<RecipeEdit?> =
-        try {
-            apolloClient.query(RecipeEditQuery(id = id))
-                .fetchPolicy(FetchPolicy.NetworkOnly)
-                .execute()
-                .toResult()
-                .map { data ->
-                    data.recipe?.let {
-                        val recipe = it.recipeFragment
+        apolloClient.query(RecipeEditQuery(id = id))
+            .fetchPolicy(FetchPolicy.NetworkOnly)
+            .execute()
+            .toResult()
+            .map { data ->
+                data.recipe?.let {
+                    val recipe = it.recipeFragment
 
-                        RecipeEdit(
-                            id = recipe.id,
-                            title = recipe.title,
-                            imageUrl = recipe.fullImageUrl,
-                            directions = recipe.directions,
-                            ingredients = recipe.ingredients?.map { ingredient ->
-                                RecipeEdit.Ingredient(
-                                    id = ingredient.id,
-                                    name = ingredient.name,
-                                    isGroup = ingredient.isGroup,
-                                    amount = ingredient.amount,
-                                    amountUnit = ingredient.amountUnit,
-                                )
-                            } ?: emptyList(),
-                            preparationTime = recipe.preparationTime,
-                            servingCount = recipe.servingCount,
-                            sideDish = recipe.sideDish,
-                            tags = recipe.tags,
-                        )
-                    }
+                    RecipeEdit(
+                        id = recipe.id,
+                        title = recipe.title,
+                        imageUrl = recipe.fullImageUrl,
+                        directions = recipe.directions,
+                        ingredients = recipe.ingredients?.map { ingredient ->
+                            RecipeEdit.Ingredient(
+                                id = ingredient.id,
+                                name = ingredient.name,
+                                isGroup = ingredient.isGroup,
+                                amount = ingredient.amount,
+                                amountUnit = ingredient.amountUnit,
+                            )
+                        } ?: emptyList(),
+                        preparationTime = recipe.preparationTime,
+                        servingCount = recipe.servingCount,
+                        sideDish = recipe.sideDish,
+                        tags = recipe.tags,
+                    )
                 }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+            }
 
     suspend fun saveRecipe(
         authToken: String,
@@ -90,7 +86,6 @@ class RecipeRepository @Inject constructor(
         newImage: RecipeEdit.NewImage?,
     ): Result<Recipe> =
         try {
-
             val imageUpload = newImage?.let {
                 DefaultUpload.Builder()
                     .content(it.bytes)
@@ -129,22 +124,19 @@ class RecipeRepository @Inject constructor(
         }
 
     suspend fun deleteRecipe(authToken: String, id: String): Result<Unit> =
-        try {
-            apolloClient.mutation(DeleteRecipeMutation(id))
-                .addHttpHeader("Authorization", "Bearer $authToken")
-                .execute()
-                .toResult()
-                .map { }
-                .also { refetchRecipes() }
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+        apolloClient.mutation(DeleteRecipeMutation(id))
+            .addHttpHeader("Authorization", "Bearer $authToken")
+            .execute()
+            .toResult()
+            .map { }
+            .also { refetchRecipes() }
 
-    suspend fun refetchRecipes() {
+    suspend fun refetchRecipes() =
         apolloClient.query(RecipeListQuery())
             .fetchPolicy(FetchPolicy.NetworkOnly)
             .execute()
-    }
+            .toResult()
+            .map { }
 
     private fun mapFragmentToRecipe(recipe: RecipeFragment) =
         Recipe(
