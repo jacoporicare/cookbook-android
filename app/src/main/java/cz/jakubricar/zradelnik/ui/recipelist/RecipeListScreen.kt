@@ -350,7 +350,7 @@ private fun TopBarContent(
                             onRefreshRecipes()
                         }
                     ) {
-                        Text(text = stringResource(R.string.sync))
+                        Text(text = stringResource(R.string.refresh))
                     }
                     DropdownMenuItem(
                         onClick = {
