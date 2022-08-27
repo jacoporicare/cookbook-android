@@ -80,23 +80,25 @@ class RecipeEditViewModel @Inject constructor(
             ),
             ingredients = Optional.presentIfNotNull(
                 if (nonEmptyIngredients.isNotEmpty()) {
-                    nonEmptyIngredients.map {
-                        IngredientInput(
-                            amount = Optional.presentIfNotNull(
-                                it.amount.value
-                                    .trim()
-                                    .ifEmpty { null }
-                                    ?.replace(",", ".")
-                                    ?.replace(" ", "")
-                                    ?.toDoubleOrNull()
-                            ),
-                            amountUnit = Optional.presentIfNotNull(
-                                it.amountUnit.value.trim().ifEmpty { null }
-                            ),
-                            name = it.name.value.trim(),
-                            isGroup = Optional.presentIfNotNull(it.isGroup.value),
-                        )
-                    }
+                    nonEmptyIngredients
+                        .map {
+                            IngredientInput(
+                                amount = Optional.presentIfNotNull(
+                                    it.amount.value
+                                        .trim()
+                                        .ifEmpty { null }
+                                        ?.replace(",", ".")
+                                        ?.replace(" ", "")
+                                        ?.toDoubleOrNull()
+                                ),
+                                amountUnit = Optional.presentIfNotNull(
+                                    it.amountUnit.value.trim().ifEmpty { null }
+                                ),
+                                name = it.name.value.trim(),
+                                isGroup = Optional.presentIfNotNull(it.isGroup.value),
+                            )
+                        }
+                        .filter { it.name.isNotEmpty() }
                 } else {
                     null
                 }

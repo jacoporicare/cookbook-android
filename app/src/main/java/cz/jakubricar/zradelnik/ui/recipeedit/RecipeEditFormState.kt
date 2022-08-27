@@ -70,10 +70,6 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
     val isValid: Boolean
         get() = validatedFields.all { it.isValid } && ingredients.all { it.isValid }
 
-    init {
-        ingredients = ingredients + IngredientFormState()
-    }
-
     fun enableShowErrors() {
         validatedFields.forEach {
             it.isFocusedDirty = true
