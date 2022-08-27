@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -39,9 +38,9 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
@@ -219,6 +218,10 @@ private fun TopBarContent(
     val scope = rememberCoroutineScope()
     val connected by connectedState()
 
+    val firstVisibleItemScrollOffset = remember {
+        derivedStateOf { listState.firstVisibleItemScrollOffset }
+    }
+
     TopAppBar(
         title = {
             Text(
@@ -269,12 +272,12 @@ private fun TopBarContent(
                 }
             }
         },
-        backgroundColor = if (listState.firstVisibleItemScrollOffset == 0) {
+        backgroundColor = if (firstVisibleItemScrollOffset.value == 0) {
             MaterialTheme.colors.background
         } else {
             MaterialTheme.colors.surface
         },
-        elevation = if (listState.firstVisibleItemScrollOffset == 0) 0.dp else 4.dp
+        elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
     )
 }
 
@@ -435,35 +438,20 @@ fun RecipeEdit(
                             state = ingredientFormState.name,
                             modifier = Modifier.weight(1f),
                             label = { Text(text = stringResource(R.string.ingredient_name)) },
-                            onValueChange = {
-                                val last = formState.ingredients.last()
-                                val secondLast =
-                                    formState.ingredients.elementAtOrNull(formState.ingredients.lastIndex - 1)
-
-                                if (last.name.value != "") {
-                                    formState.ingredients =
-                                        formState.ingredients + RecipeEditFormState.IngredientFormState()
-                                } else if (last.name.value == "" && secondLast?.name?.value == "") {
-                                    formState.ingredients = formState.ingredients.dropLast(1)
-                                }
-                            }
                         )
 
-                        if (index < formState.ingredients.size - 1) {
-                            IconButton(
-                                onClick = {
-                                    formState.ingredients =
-                                        formState.ingredients - ingredientFormState
-                                },
-                                modifier = Modifier.padding(vertical = 4.dp),
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Close,
-                                    contentDescription = null,
-                                )
-                            }
-                        } else {
-                            Spacer(modifier = Modifier.size(48.dp))
+                        IconButton(
+                            onClick = {
+                                formState.ingredients =
+                                    formState.ingredients - ingredientFormState
+                            },
+                            modifier = Modifier.padding(vertical = 4.dp),
+                        ) {
+                            Icon(
+                                imageVector = Icons.Outlined.Delete,
+                                contentDescription = stringResource(R.string.delete),
+                                tint = MaterialTheme.colors.error
+                            )
                         }
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -511,6 +499,18 @@ fun RecipeEdit(
                             }
                         }
                     }
+                }
+            }
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TextButton(onClick = {
+                    formState.ingredients =
+                        formState.ingredients + RecipeEditFormState.IngredientFormState()
+                }) {
+                    Text(text = stringResource(R.string.add_ingredient))
                 }
             }
         }

@@ -50,6 +50,7 @@
     <string name="ingredient_amount">Množství</string>
     <string name="ingredient_amount_unit">Jednotka</string>
     <string name="ingredient_group">Skupina</string>
+    <string name="add_ingredient">Přidat ingredienci</string>
     <string name="pick_photo">Vybrat fotku</string>
     <string name="recipe_title_error">Název je povinný</string>
     <string name="preparation_time_error">Doba přípravy musí být celé číslo</string>
