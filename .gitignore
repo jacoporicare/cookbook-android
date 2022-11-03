@@ -13,3 +13,6 @@
 .externalNativeBuild
 .cxx
 local.properties
+.gitsecret/keys/random_seed
+!*.secret
+app/google-services.json
