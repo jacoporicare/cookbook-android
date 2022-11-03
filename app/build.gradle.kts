@@ -118,7 +118,7 @@ dependencies {
     // Jetpack Compose
     implementation("androidx.compose.ui:ui:1.2.1")
     implementation("androidx.compose.material:material:1.2.1")
-    implementation("androidx.compose.material3:material3:1.0.0-alpha16")
+    implementation("androidx.compose.material3:material3:1.0.0-beta03")
     implementation("androidx.compose.material:material-icons-extended:1.2.1")
     implementation("androidx.compose.ui:ui-tooling-preview:1.2.1")
 
@@ -128,16 +128,16 @@ dependencies {
     implementation("com.google.accompanist:accompanist-swiperefresh:0.19.0")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.19.0")
 
-    implementation("androidx.core:core-ktx:1.8.0")
-    implementation("androidx.appcompat:appcompat:1.5.0")
-    implementation("androidx.activity:activity-compose:1.5.1")
+    implementation("androidx.core:core-ktx:1.9.0")
+    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("androidx.activity:activity-compose:1.6.0")
 
     // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.5.1")
+    implementation("androidx.navigation:navigation-compose:2.5.2")
 
     // Work
     implementation("androidx.work:work-runtime-ktx:2.7.1")
