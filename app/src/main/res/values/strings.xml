@@ -20,6 +20,7 @@
     <string name="settings">Nastavení</string>
     <string name="keep_awake">Nevypínat displej</string>
     <string name="keep_awake_snackbar_message">Displej zůstane stále zapnutý.</string>
+    <string name="cooked">Uvařeno</string>
 
     <!-- Recipe List -->
     <string name="recipe_image">Fotka receptu %1$s</string>
@@ -29,6 +30,7 @@
 
     <!-- Recipe -->
     <string name="recipe">Recept</string>
+    <string name="cooked_last_time">Naposledy uvařeno</string>
     <string name="preparation_time">Doba přípravy</string>
     <string name="serving_count">Počet porcí</string>
     <string name="side_dish">Příloha</string>
@@ -57,6 +59,12 @@
     <string name="serving_count_error">Počet porcí musí být celé číslo</string>
     <string name="ingredient_amount_error">Množství musí být číslo</string>
     <string name="form_is_not_valid_snackbar_message">Formulář obsahuje chyby.</string>
+
+    <!-- Recipe Cooked -->
+    <string name="recipe_cooked_failed">Recept se nepodařilo označit jako uvařený. Zkontrolujte připojení k\u00A0internetu.</string>
+    <string name="recipe_cooked_title">Uvařeno?</string>
+    <string name="recipe_cooked_text">Pokud ano, vyberte datum.</string>
+    <string name="recipe_cooked_pick_date_button">Vybrat datum</string>
 
     <!-- Recipe Delete -->
     <string name="recipe_delete_failed">Recept se nepodařilo smazat. Zkontrolujte připojení k\u00A0internetu.</string>

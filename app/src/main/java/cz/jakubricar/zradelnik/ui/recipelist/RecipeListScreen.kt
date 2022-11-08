@@ -480,7 +480,8 @@ fun DefaultPreview() {
                 ingredients = emptyList(),
                 preparationTime = null,
                 servingCount = null,
-                sideDish = null
+                sideDish = null,
+                cookedHistory = emptyList()
             )
         )
     }

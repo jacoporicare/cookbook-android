@@ -1,5 +1,6 @@
 package cz.jakubricar.zradelnik.ui.recipe
 
+import android.app.DatePickerDialog
 import android.view.WindowManager
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
@@ -30,6 +31,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.DinnerDining
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.LightMode
@@ -75,6 +77,8 @@ import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
 import dev.jeziellago.compose.markdowntext.MarkdownText
 import kotlinx.coroutines.launch
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
 
 @Composable
 fun RecipeScreen(
@@ -131,6 +135,11 @@ fun RecipeScreen(
                 }
             }
         },
+        onCooked = { date ->
+            if (authToken != null) {
+                viewModel.recipeCooked(authToken, id, date)
+            }
+        }
     )
 
     LaunchedEffect(viewState) {
@@ -150,12 +159,15 @@ fun RecipeScreen(
     onEdit: () -> Unit = {},
     onDelete: () -> Unit = {},
     onKeepAwake: () -> Unit = {},
+    onCooked: (OffsetDateTime) -> Unit = {},
 ) {
     val listState = rememberLazyListState()
     var deleteRecipeDialogOpened by remember { mutableStateOf(false) }
+    var recipeCookedDialogOpened by remember { mutableStateOf(false) }
     val title = viewState.recipe?.title
     val keepAwake = viewState.keepAwake
     val isUserLoggedIn = userViewState.loggedInUser != null
+    val context = LocalContext.current
 
     Scaffold(
         scaffoldState = scaffoldState,
@@ -176,6 +188,7 @@ fun RecipeScreen(
                 onDelete = { deleteRecipeDialogOpened = true },
                 onEdit = onEdit,
                 onKeepAwake = onKeepAwake,
+                onCooked = { recipeCookedDialogOpened = true },
             )
         }
     ) { innerPadding ->
@@ -235,6 +248,51 @@ fun RecipeScreen(
         )
     }
 
+    if (recipeCookedDialogOpened) {
+        AlertDialog(
+            onDismissRequest = { recipeCookedDialogOpened = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        recipeCookedDialogOpened = false
+
+                        val now = OffsetDateTime.now()
+                        val dialog = DatePickerDialog(
+                            context,
+                            { _, year, month, dayOfMonth ->
+                                onCooked(
+                                    OffsetDateTime.of(year,
+                                        month + 1,
+                                        dayOfMonth,
+                                        0,
+                                        0,
+                                        0,
+                                        0,
+                                        ZoneOffset.UTC
+                                    )
+                                )
+                            },
+                            now.year,
+                            now.monthValue - 1,
+                            now.dayOfMonth,
+                        )
+
+                        dialog.show()
+                    }
+                ) {
+                    Text(text = stringResource(R.string.recipe_cooked_pick_date_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { recipeCookedDialogOpened = false }) {
+                    Text(text = stringResource(R.string.cancel))
+                }
+            },
+            title = { Text(text = stringResource(R.string.recipe_cooked_title)) },
+            text = { Text(text = stringResource(R.string.recipe_cooked_text)) },
+        )
+    }
+
     ErrorSnackbar(
         errorState = errorState,
         scaffoldState = scaffoldState,
@@ -252,6 +310,7 @@ private fun TopBarContent(
     onDelete: () -> Unit,
     onEdit: () -> Unit,
     onKeepAwake: () -> Unit,
+    onCooked: () -> Unit,
 ) {
     val firstVisibleItemScrollOffset = remember {
         derivedStateOf { listState.firstVisibleItemScrollOffset }
@@ -275,6 +334,15 @@ private fun TopBarContent(
             }
         },
         actions = {
+            if (isUserLoggedIn) {
+                IconButton(onClick = onCooked) {
+                    Icon(
+                        imageVector = Icons.Default.DinnerDining,
+                        contentDescription = stringResource(R.string.cooked)
+                    )
+                }
+            }
+
             IconButton(onClick = onKeepAwake) {
                 Icon(
                     imageVector = if (keepAwake) {
@@ -335,11 +403,11 @@ private fun TopBarContent(
             }
         },
         backgroundColor = if (firstVisibleItemScrollOffset.value == 0) {
-        MaterialTheme.colors.background
-    } else {
-        MaterialTheme.colors.surface
-    },
-    elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
+            MaterialTheme.colors.background
+        } else {
+            MaterialTheme.colors.surface
+        },
+        elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
     )
 }
 
@@ -378,6 +446,13 @@ fun Recipe(
                     alignment = Alignment.TopCenter,
                     contentScale = ContentScale.Crop
                 )
+            }
+        }
+
+        recipe.cookedHistory.lastOrNull()?.let {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                CookedHistory(cooked = it)
             }
         }
 
@@ -436,6 +511,19 @@ private fun Section(
 }
 
 @Composable
+private fun CookedHistory(
+    modifier: Modifier = Modifier,
+    cooked: Recipe.Cooked,
+) {
+    DetailItem(
+        modifier = modifier.padding(horizontal = 16.dp),
+        label = "${stringResource(R.string.cooked_last_time)}:",
+        value = "${cooked.date} (${cooked.userDisplayName})"
+    )
+
+}
+
+@Composable
 private fun Details(
     modifier: Modifier = Modifier,
     preparationTime: String? = null,
@@ -471,10 +559,11 @@ private fun Details(
 
 @Composable
 private fun DetailItem(
+    modifier: Modifier = Modifier,
     label: String,
     value: String,
 ) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+    Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
             Text(
                 text = label,

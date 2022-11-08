@@ -1,0 +1,5 @@
+mutation RecipeCooked($id: ID!, $date: Date!, $delete: Boolean) {
+  recipeCooked(id: $id, date: $date, delete: $delete) {
+    ...RecipeFragment
+  }
+}

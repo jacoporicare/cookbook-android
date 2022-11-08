@@ -12,6 +12,7 @@ data class Recipe(
     val preparationTime: String?,
     val servingCount: String?,
     val sideDish: String?,
+    val cookedHistory: List<Cooked>
 ) {
 
     @Immutable
@@ -21,5 +22,11 @@ data class Recipe(
         val isGroup: Boolean,
         val amount: String?,
         val amountUnit: String?,
+    )
+
+    @Immutable
+    data class Cooked(
+        val date: String,
+        val userDisplayName: String,
     )
 }

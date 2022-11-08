@@ -9,6 +9,7 @@ import com.apollographql.apollo3.cache.normalized.refetchPolicy
 import com.apollographql.apollo3.cache.normalized.watch
 import cz.jakubricar.zradelnik.CreateRecipeMutation
 import cz.jakubricar.zradelnik.DeleteRecipeMutation
+import cz.jakubricar.zradelnik.RecipeCookedMutation
 import cz.jakubricar.zradelnik.RecipeDetailQuery
 import cz.jakubricar.zradelnik.RecipeEditQuery
 import cz.jakubricar.zradelnik.RecipeListQuery
@@ -22,6 +23,9 @@ import cz.jakubricar.zradelnik.type.RecipeInput
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.text.NumberFormat
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.time.format.FormatStyle
 import javax.inject.Inject
 import kotlin.math.floor
 
@@ -67,7 +71,7 @@ class RecipeRepository @Inject constructor(
                             title = recipe.title,
                             imageUrl = recipe.fullImageUrl,
                             directions = recipe.directions,
-                            ingredients = recipe.ingredients?.map { ingredient ->
+                            ingredients = recipe.ingredients.map { ingredient ->
                                 RecipeEdit.Ingredient(
                                     id = ingredient.id,
                                     name = ingredient.name,
@@ -75,7 +79,7 @@ class RecipeRepository @Inject constructor(
                                     amount = ingredient.amount,
                                     amountUnit = ingredient.amountUnit,
                                 )
-                            } ?: emptyList(),
+                            },
                             preparationTime = recipe.preparationTime,
                             servingCount = recipe.servingCount,
                             sideDish = recipe.sideDish,
@@ -143,6 +147,17 @@ class RecipeRepository @Inject constructor(
             Result.failure(e)
         }
 
+    suspend fun recipeCooked(authToken: String, id: String, date: OffsetDateTime): Result<Recipe> =
+        try {
+            apolloClient.mutation(RecipeCookedMutation(id, date))
+                .addHttpHeader("Authorization", "Bearer $authToken")
+                .execute()
+                .toResult()
+                .map { mapFragmentToRecipe(it.recipeCooked.recipeFragment) }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+
     suspend fun refetchRecipes() =
         try {
             apolloClient.query(RecipeListQuery())
@@ -160,7 +175,7 @@ class RecipeRepository @Inject constructor(
             title = recipe.title,
             imageUrl = recipe.fullImageUrl,
             directions = recipe.directions,
-            ingredients = recipe.ingredients?.map { ingredient ->
+            ingredients = recipe.ingredients.map { ingredient ->
                 Recipe.Ingredient(
                     id = ingredient.id,
                     name = ingredient.name,
@@ -170,12 +185,18 @@ class RecipeRepository @Inject constructor(
                     },
                     amountUnit = ingredient.amountUnit,
                 )
-            } ?: emptyList(),
+            },
             preparationTime = recipe.preparationTime?.let { time ->
                 formatTime(time)
             },
             servingCount = recipe.servingCount?.toString(),
             sideDish = recipe.sideDish,
+            cookedHistory = recipe.cookedHistory.map { cooked ->
+                Recipe.Cooked(
+                    date = cooked.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
+                    userDisplayName = cooked.user.displayName
+                )
+            }
         )
 
     private fun formatTime(time: Int): String {

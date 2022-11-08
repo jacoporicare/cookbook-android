@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.time.OffsetDateTime
 import javax.inject.Inject
 
 @Immutable
@@ -67,6 +68,22 @@ class RecipeViewModel @Inject constructor(
                 .onFailure { error ->
                     Timber.e(error)
                     errorState.addError(R.string.recipe_delete_failed)
+                    _state.update { it.copy(loading = false) }
+                }
+        }
+    }
+
+    fun recipeCooked(authToken: String, id: String, date: OffsetDateTime) {
+        _state.update { it.copy(loading = true) }
+
+        viewModelScope.launch {
+            recipeRepository.recipeCooked(authToken, id, date)
+                .onSuccess { recipe ->
+                    _state.update { it.copy(recipe = recipe, loading = false) }
+                }
+                .onFailure { error ->
+                    Timber.e(error)
+                    errorState.addError(R.string.recipe_cooked_failed)
                     _state.update { it.copy(loading = false) }
                 }
         }

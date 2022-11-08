@@ -15,4 +15,11 @@ fragment RecipeFragment on Recipe {
     amount
     amountUnit
   }
+  cookedHistory {
+    date
+    user {
+      id
+      displayName
+    }
+  }
 }
