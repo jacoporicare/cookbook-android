@@ -32,6 +32,9 @@ data class RecipeListViewState(
 
     val initialLoad: Boolean
         get() = recipes.isEmpty() && loading
+
+    val instantPotRecipes: List<Recipe>
+        get() = recipes.filter { it.tags.contains(Recipe.instantPotTag) }
 }
 
 private val collator = Collator.getInstance()

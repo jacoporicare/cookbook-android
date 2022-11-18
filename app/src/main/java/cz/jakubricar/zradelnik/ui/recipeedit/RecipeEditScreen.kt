@@ -22,6 +22,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
@@ -33,6 +34,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarHost
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -56,6 +58,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -85,6 +88,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun RecipeEditScreen(
+    isInstantPotNewRecipe: Boolean = false,
     viewModel: RecipeEditViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     id: String? = null,
@@ -102,7 +106,9 @@ fun RecipeEditScreen(
 
     val viewState by viewModel.state.collectAsState()
     val userViewState by userViewModel.state.collectAsState()
-    val formState = remember(viewState.editedRecipe) { RecipeEditFormState(viewState.editedRecipe) }
+    val formState = remember(viewState.editedRecipe) {
+        RecipeEditFormState(viewState.editedRecipe, isInstantPotNewRecipe)
+    }
 
     val authToken = userViewState.authToken
     val context = LocalContext.current
@@ -182,7 +188,7 @@ fun RecipeEditScreen(
                 onBack = onBack,
                 onSave = onSave,
             )
-        }
+        },
     ) { innerPadding ->
         if (viewState.loading) {
             FullScreenLoading()
@@ -367,7 +373,8 @@ fun RecipeEdit(
         state = listState,
         contentPadding = rememberInsetsPaddingValues(
             insets = insets,
-            applyTop = false
+            applyTop = false,
+            applyBottom = false,
         )
     ) {
         item {
@@ -425,6 +432,22 @@ fun RecipeEdit(
                 state = formState.sideDish,
                 label = { Text(text = stringResource(R.string.side_dish)) }
             )
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp)
+                    .toggleable(
+                        role = Role.Switch,
+                        value = formState.isForInstantPot,
+                        onValueChange = { formState.isForInstantPot = it },
+                    ),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text(text = stringResource(R.string.instant_pot_recipe))
+
+                Switch(checked = formState.isForInstantPot, onCheckedChange = null)
+            }
         }
         section(title = { Text(text = stringResource(R.string.ingredients)) }) {
             formState.ingredients.forEachIndexed { index, ingredientFormState ->

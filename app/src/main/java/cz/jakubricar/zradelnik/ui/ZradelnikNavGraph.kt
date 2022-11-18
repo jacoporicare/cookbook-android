@@ -17,6 +17,7 @@ import androidx.navigation.navDeepLink
 import cz.jakubricar.zradelnik.ui.recipe.RecipeScreen
 import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel.Companion.RECIPE_ID_KEY
 import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditScreen
+import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditViewModel.Companion.RECIPE_ADD_IS_INSTANT_POT_KEY
 import cz.jakubricar.zradelnik.ui.recipeedit.RecipeEditViewModel.Companion.RECIPE_EDIT_ID_KEY
 import cz.jakubricar.zradelnik.ui.recipelist.RecipeListScreen
 import cz.jakubricar.zradelnik.ui.settings.SettingsScreen
@@ -25,6 +26,7 @@ import cz.jakubricar.zradelnik.ui.user.UserViewModel
 object MainDestinations {
 
     const val RECIPE_LIST_ROUTE = "recipelist"
+    const val INSTANT_POT_RECIPE_LIST_ROUTE = "instantpotrecipelist"
     const val RECIPE_ROUTE = "recipe"
     const val RECIPE_ADD_ROUTE = "recipeadd"
     const val RECIPE_EDIT_ROUTE = "recipeedit"
@@ -39,7 +41,7 @@ fun ZradelnikNavGraph(
     startDestination: String = MainDestinations.RECIPE_LIST_ROUTE,
     recipeId: String? = null,
 ) {
-    val actions = remember(navController) { MainActions(navController) }
+    val navActions = remember(navController) { MainActions(navController) }
     val userViewModel: UserViewModel = hiltViewModel()
 
     // Refresh logged in user - e.g. when the account is removed via system account settings
@@ -67,12 +69,25 @@ fun ZradelnikNavGraph(
             deepLinks = listOf(navDeepLink { uriPattern = WEB_URI })
         ) {
             RecipeListScreen(
+                navController = navController,
                 userViewModel = userViewModel,
-                onNavigateToRecipe = actions.navigateToRecipe,
-                onNavigateToRecipeAdd = actions.navigateToRecipeAdd,
-                onNavigateToSettings = actions.navigateToSettings
+                onNavigateToRecipe = navActions.navigateToRecipe,
+                onNavigateToRecipeAdd = navActions.navigateToRecipeAdd,
             )
         }
+
+        composable(
+            route = MainDestinations.INSTANT_POT_RECIPE_LIST_ROUTE
+        ) {
+            RecipeListScreen(
+                navController = navController,
+                isInstantPotScreen = true,
+                userViewModel = userViewModel,
+                onNavigateToRecipe = navActions.navigateToRecipe,
+                onNavigateToRecipeAdd = navActions.navigateToRecipeAdd,
+            )
+        }
+
         composable(
             route = "${MainDestinations.RECIPE_ROUTE}/{$RECIPE_ID_KEY}",
             arguments = listOf(navArgument(RECIPE_ID_KEY) {
@@ -88,17 +103,27 @@ fun ZradelnikNavGraph(
             RecipeScreen(
                 userViewModel = userViewModel,
                 id = id,
-                onBack = actions.upPress,
-                onNavigateToRecipeEdit = actions.navigateToRecipeEdit
+                onBack = navActions.upPress,
+                onNavigateToRecipeEdit = navActions.navigateToRecipeEdit
             )
         }
-        composable(route = MainDestinations.RECIPE_ADD_ROUTE) {
+
+        composable(
+            route = "${MainDestinations.RECIPE_ADD_ROUTE}/{$RECIPE_ADD_IS_INSTANT_POT_KEY}",
+            arguments = listOf(navArgument(RECIPE_ADD_IS_INSTANT_POT_KEY) {
+                type = NavType.BoolType
+            }),
+        ) { backStackEntry ->
+            val isInstantPot = backStackEntry.arguments?.getBoolean(RECIPE_ADD_IS_INSTANT_POT_KEY)!!
+
             RecipeEditScreen(
+                isInstantPotNewRecipe = isInstantPot,
                 userViewModel = userViewModel,
-                onBack = actions.upPress,
-                onNavigateToRecipe = actions.navigateAfterEditToRecipe,
+                onBack = navActions.upPress,
+                onNavigateToRecipe = navActions.navigateAfterEditToRecipe,
             )
         }
+
         composable(
             route = "${MainDestinations.RECIPE_EDIT_ROUTE}/{$RECIPE_EDIT_ID_KEY}",
             arguments = listOf(navArgument(RECIPE_EDIT_ID_KEY) { type = NavType.StringType })
@@ -108,16 +133,17 @@ fun ZradelnikNavGraph(
             RecipeEditScreen(
                 userViewModel = userViewModel,
                 id = id,
-                onBack = actions.upPress,
-                onNavigateToRecipe = actions.navigateAfterEditToRecipe,
+                onBack = navActions.upPress,
+                onNavigateToRecipe = navActions.navigateAfterEditToRecipe,
             )
         }
+
         composable(
             route = MainDestinations.SETTINGS_ROUTE
         ) {
             SettingsScreen(
+                navController = navController,
                 userViewModel = userViewModel,
-                onBack = actions.upPress
             )
         }
     }
@@ -125,26 +151,22 @@ fun ZradelnikNavGraph(
 
 class MainActions(navController: NavHostController) {
 
-    val navigateToRecipe: (String) -> Unit = { id: String ->
+    val navigateToRecipe: (String) -> Unit = { id ->
         navController.navigate("${MainDestinations.RECIPE_ROUTE}/$id")
     }
 
-    val navigateToRecipeAdd: () -> Unit = {
-        navController.navigate(MainDestinations.RECIPE_ADD_ROUTE)
+    val navigateToRecipeAdd: (Boolean) -> Unit = { isInstantPot ->
+        navController.navigate("${MainDestinations.RECIPE_ADD_ROUTE}/${isInstantPot}")
     }
 
-    val navigateToRecipeEdit: (String) -> Unit = { id: String ->
+    val navigateToRecipeEdit: (String) -> Unit = { id ->
         navController.navigate("${MainDestinations.RECIPE_EDIT_ROUTE}/$id")
     }
 
-    val navigateAfterEditToRecipe: (String) -> Unit = { id: String ->
+    val navigateAfterEditToRecipe: (String) -> Unit = { id ->
         navController.navigate("${MainDestinations.RECIPE_ROUTE}/$id") {
             popUpTo(MainDestinations.RECIPE_LIST_ROUTE)
         }
-    }
-
-    val navigateToSettings: () -> Unit = {
-        navController.navigate(MainDestinations.SETTINGS_ROUTE)
     }
 
     val upPress: () -> Unit = {

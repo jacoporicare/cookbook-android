@@ -5,11 +5,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import cz.jakubricar.zradelnik.R
+import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.ui.TextFieldState
 import java.text.NumberFormat
 
-class RecipeEditFormState(recipe: RecipeEdit?) {
+class RecipeEditFormState(recipe: RecipeEdit?, isInstantPotNewRecipe: Boolean) {
 
     class IngredientFormState(ingredient: RecipeEdit.Ingredient? = null) {
 
@@ -64,6 +65,9 @@ class RecipeEditFormState(recipe: RecipeEdit?) {
         recipe?.ingredients?.map { IngredientFormState(it) }
             ?: listOf()
     )
+
+    var isForInstantPot by mutableStateOf(recipe?.tags?.contains(Recipe.instantPotTag)
+        ?: isInstantPotNewRecipe)
 
     private val validatedFields = listOf(title, preparationTime, servingCount)
 

@@ -196,7 +196,8 @@ class RecipeRepository @Inject constructor(
                     date = cooked.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)),
                     userDisplayName = cooked.user.displayName
                 )
-            }
+            },
+            tags = recipe.tags,
         )
 
     private fun formatTime(time: Int): String {

@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.apollographql.apollo3.api.Optional
 import cz.jakubricar.zradelnik.R
+import cz.jakubricar.zradelnik.model.Recipe
 import cz.jakubricar.zradelnik.model.RecipeEdit
 import cz.jakubricar.zradelnik.repository.RecipeRepository
 import cz.jakubricar.zradelnik.type.IngredientInput
@@ -34,6 +35,7 @@ class RecipeEditViewModel @Inject constructor(
     companion object {
 
         const val RECIPE_EDIT_ID_KEY = "id"
+        const val RECIPE_ADD_IS_INSTANT_POT_KEY = "isinstantpot"
     }
 
     private val _state = MutableStateFlow(RecipeEditViewState(loading = true))
@@ -66,6 +68,18 @@ class RecipeEditViewModel @Inject constructor(
         }
 
         val nonEmptyIngredients = formState.ingredients.filter { it.name.value.isNotBlank() }
+
+        val tags = (_state.value.editedRecipe?.tags ?: emptyList()).let {
+            when {
+                formState.isForInstantPot && !it.contains(Recipe.instantPotTag) ->
+                    it + Recipe.instantPotTag
+
+                !formState.isForInstantPot && it.contains(Recipe.instantPotTag) ->
+                    it.filter { tag -> tag != Recipe.instantPotTag }
+
+                else -> it
+            }
+        }
 
         val input = RecipeInput(
             title = formState.title.value.trim(),
@@ -103,7 +117,7 @@ class RecipeEditViewModel @Inject constructor(
                     null
                 }
             ),
-            tags = Optional.presentIfNotNull(_state.value.editedRecipe?.tags),
+            tags = Optional.presentIfNotNull(tags),
         )
 
         _state.update { it.copy(loading = true) }

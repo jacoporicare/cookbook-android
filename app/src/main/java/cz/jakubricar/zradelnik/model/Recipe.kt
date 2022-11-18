@@ -12,8 +12,17 @@ data class Recipe(
     val preparationTime: String?,
     val servingCount: String?,
     val sideDish: String?,
-    val cookedHistory: List<Cooked>
+    val cookedHistory: List<Cooked>,
+    val tags: List<String>,
 ) {
+
+    companion object {
+
+        const val instantPotTag = "Instant Pot"
+    }
+
+    val isForInstantPot: Boolean
+        get() = tags.contains(instantPotTag)
 
     @Immutable
     data class Ingredient(

@@ -12,12 +12,16 @@
     <string name="changes_only_online_warning">Recept lze upravovat pouze s\u00A0připojením k\u00A0internetu.</string>
     <string name="check_internet_connection">Zkontrolujte připojení k\u00A0internetu.</string>
 
+    <!-- Bottom Bar -->
+    <string name="recipes">Recepty</string>
+    <string name="instant_pot">Instant Pot</string>
+    <string name="settings">Nastavení</string>
+
     <!-- Toolbar -->
     <string name="search_placeholder">Hledat…</string>
     <string name="search_clear">Vymazat hledání</string>
     <string name="refresh">Aktualizovat</string>
     <!--    <string name="action_side_dishes">Přílohy</string>-->
-    <string name="settings">Nastavení</string>
     <string name="keep_awake">Nevypínat displej</string>
     <string name="keep_awake_snackbar_message">Displej zůstane stále zapnutý.</string>
     <string name="cooked">Uvařeno</string>
@@ -27,6 +31,8 @@
     <string name="no_recipes">Žádné výsledky.</string>
     <string name="image_failure">Chyba při načítání fotky</string>
     <string name="new_recipe">Nový recept</string>
+    <string name="new_instant_pot_recipe">Nový Instant Pot recept</string>
+    <string name="instant_pot_recipes">Instant Pot recepty</string>
 
     <!-- Recipe -->
     <string name="recipe">Recept</string>
@@ -39,6 +45,8 @@
     <string name="no_directions">Kde nic tu nic.</string>
     <string name="edit">Upravit</string>
     <string name="recipe_not_found">Recept nenalezen.</string>
+    <string name="more_info">Více informací</string>
+    <string name="instant_pot_recipe_info">Recept je určený pro multifunkční hrnec Instant Pot nebo jeho kopie, např. česká Tesla EliteCook K70.</string>
 
     <!-- Recipe Edit -->
     <string name="recipe_edit">Úprava receptu</string>
@@ -54,6 +62,7 @@
     <string name="ingredient_group">Skupina</string>
     <string name="add_ingredient">Přidat ingredienci</string>
     <string name="pick_photo">Vybrat fotku</string>
+    <string name="instant_pot_recipe">Instant Pot recept</string>
     <string name="recipe_title_error">Název je povinný</string>
     <string name="preparation_time_error">Doba přípravy musí být celé číslo</string>
     <string name="serving_count_error">Počet porcí musí být celé číslo</string>

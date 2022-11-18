@@ -20,15 +20,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.ListItem
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -44,6 +40,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.navigationBarsPadding
 import com.google.accompanist.insets.navigationBarsWithImePadding
@@ -54,6 +51,7 @@ import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.LoggedInUser
 import cz.jakubricar.zradelnik.model.Settings
 import cz.jakubricar.zradelnik.model.Theme
+import cz.jakubricar.zradelnik.ui.BottomBarNavigation
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
 import cz.jakubricar.zradelnik.ui.login.LoginActivity
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
@@ -62,9 +60,9 @@ import cz.jakubricar.zradelnik.ui.user.UserViewState
 
 @Composable
 fun SettingsScreen(
+    navController: NavController,
     viewModel: SettingsViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
-    onBack: () -> Unit,
 ) {
     val viewState by viewModel.state.collectAsState()
     val userViewState by userViewModel.state.collectAsState()
@@ -73,9 +71,9 @@ fun SettingsScreen(
     }
 
     SettingsScreen(
+        navController = navController,
         viewState = viewState,
         userViewState = userViewState,
-        onBack = onBack,
         onThemeChange = { viewModel.setTheme(it) },
         onLogin = { launcher.launch(Unit) },
         onLogout = { userViewModel.logout() }
@@ -84,9 +82,9 @@ fun SettingsScreen(
 
 @Composable
 fun SettingsScreen(
+    navController: NavController,
     viewState: SettingsViewState,
     userViewState: UserViewState,
-    onBack: () -> Unit,
     onThemeChange: (Theme) -> Unit,
     onLogin: () -> Unit,
     onLogout: () -> Unit,
@@ -104,14 +102,6 @@ fun SettingsScreen(
                     LocalWindowInsets.current.statusBars,
                     applyBottom = false
                 ),
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        Icon(
-                            imageVector = Icons.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
-                        )
-                    }
-                },
                 backgroundColor = if (scrollState.value == 0) {
                     MaterialTheme.colors.background
                 } else {
@@ -119,6 +109,9 @@ fun SettingsScreen(
                 },
                 elevation = if (scrollState.value == 0) 0.dp else 4.dp
             )
+        },
+        bottomBar = {
+            BottomBarNavigation(navController = navController)
         }
     ) { innerPadding ->
         if (viewState.loading || viewState.settings == null) {

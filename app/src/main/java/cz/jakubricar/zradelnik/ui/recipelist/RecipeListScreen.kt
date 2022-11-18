@@ -58,6 +58,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.google.accompanist.insets.LocalWindowInsets
 import com.google.accompanist.insets.derivedWindowInsetsTypeOf
@@ -71,6 +72,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
+import cz.jakubricar.zradelnik.ui.BottomBarNavigation
 import cz.jakubricar.zradelnik.ui.ErrorSnackbar
 import cz.jakubricar.zradelnik.ui.ErrorState
 import cz.jakubricar.zradelnik.ui.components.ExpandableFloatingActionButton
@@ -82,12 +84,13 @@ import cz.jakubricar.zradelnik.ui.user.UserViewState
 
 @Composable
 fun RecipeListScreen(
+    navController: NavController,
+    isInstantPotScreen: Boolean = false,
     viewModel: RecipeListViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     onNavigateToRecipe: (String) -> Unit = {},
-    onNavigateToRecipeAdd: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {},
+    onNavigateToRecipeAdd: (Boolean) -> Unit = {},
 ) {
     LogCompositions("RecipeListScreen")
     val viewState by viewModel.state.collectAsState()
@@ -98,13 +101,14 @@ fun RecipeListScreen(
     }
 
     RecipeListScreen(
+        navController = navController,
+        isInstantPotScreen = isInstantPotScreen,
         viewState = viewState,
         userViewState = userViewState,
         scaffoldState = scaffoldState,
         errorState = viewModel.errorState,
         onNavigateToRecipe = onNavigateToRecipe,
         onNavigateToRecipeAdd = onNavigateToRecipeAdd,
-        onNavigateToSettings = onNavigateToSettings,
         onRefreshRecipes = { viewModel.refreshRecipes() },
         onSearchShow = { viewModel.showSearch() },
         onSearchHide = { viewModel.hideSearch() },
@@ -114,13 +118,14 @@ fun RecipeListScreen(
 
 @Composable
 fun RecipeListScreen(
+    navController: NavController,
+    isInstantPotScreen: Boolean = false,
     viewState: RecipeListViewState,
     userViewState: UserViewState,
     scaffoldState: ScaffoldState = rememberScaffoldState(),
     errorState: ErrorState = remember { ErrorState() },
     onNavigateToRecipe: (String) -> Unit = {},
-    onNavigateToRecipeAdd: () -> Unit = {},
-    onNavigateToSettings: () -> Unit = {},
+    onNavigateToRecipeAdd: (Boolean) -> Unit = {},
     onRefreshRecipes: () -> Unit = {},
     onSearchShow: () -> Unit = {},
     onSearchHide: () -> Unit = {},
@@ -128,7 +133,10 @@ fun RecipeListScreen(
 ) {
     LogCompositions("RecipeListScreenStateless")
     val recipes = remember(viewState.recipes, viewState.searchQuery) {
-        filterAndSortRecipes(viewState.recipes, viewState.searchQuery)
+        filterAndSortRecipes(
+            if (isInstantPotScreen) viewState.instantPotRecipes else viewState.recipes,
+            viewState.searchQuery
+        )
     }
     val listState = rememberLazyListState()
 
@@ -149,15 +157,18 @@ fun RecipeListScreen(
         },
         topBar = {
             TopBarContent(
+                isInstantPotScreen = isInstantPotScreen,
                 searchVisible = viewState.searchVisible,
                 searchQuery = viewState.searchQuery,
                 listState = listState,
-                onNavigateToSettings = onNavigateToSettings,
                 onRefreshRecipes = onRefreshRecipes,
                 onSearchHide = onSearchHide,
                 onSearchShow = onSearchShow,
                 onSearchQueryChange = onSearchQueryChange
             )
+        },
+        bottomBar = {
+            BottomBarNavigation(navController = navController)
         },
         floatingActionButton = if (fabVisible) {
             {
@@ -167,19 +178,21 @@ fun RecipeListScreen(
                     }
                 }
 
+                val textId =
+                    if (isInstantPotScreen) R.string.new_instant_pot_recipe else R.string.new_recipe
+
                 ExpandableFloatingActionButton(
                     text = {
-                        Text(text = stringResource(R.string.new_recipe))
+                        Text(text = stringResource(textId))
                     },
                     icon = {
                         Icon(
                             imageVector = Icons.Filled.Add,
-                            contentDescription = stringResource(R.string.new_recipe),
+                            contentDescription = stringResource(textId),
                             modifier = Modifier.floatingActionButtonSize()
                         )
                     },
-                    onClick = onNavigateToRecipeAdd,
-                    modifier = Modifier.navigationBarsPadding(),
+                    onClick = { onNavigateToRecipeAdd(isInstantPotScreen) },
                     expanded = expanded
                 )
             }
@@ -240,10 +253,10 @@ fun RecipeListScreen(
 
 @Composable
 private fun TopBarContent(
+    isInstantPotScreen: Boolean = false,
     searchVisible: Boolean = false,
     searchQuery: String = "",
     listState: LazyListState = rememberLazyListState(),
-    onNavigateToSettings: () -> Unit = {},
     onRefreshRecipes: () -> Unit = {},
     onSearchHide: () -> Unit = {},
     onSearchShow: () -> Unit = {},
@@ -259,7 +272,7 @@ private fun TopBarContent(
     TopAppBar(
         title = {
             if (!searchVisible) {
-                Text(text = stringResource(R.string.app_name))
+                Text(text = stringResource(if (isInstantPotScreen) R.string.instant_pot_recipes else R.string.app_name))
             } else {
                 val focusRequester = remember { FocusRequester() }
 
@@ -352,14 +365,6 @@ private fun TopBarContent(
                     ) {
                         Text(text = stringResource(R.string.refresh))
                     }
-                    DropdownMenuItem(
-                        onClick = {
-                            menuExpanded = false
-                            onNavigateToSettings()
-                        }
-                    ) {
-                        Text(text = stringResource(R.string.settings))
-                    }
                 }
             }
         },
@@ -394,6 +399,7 @@ fun RecipeList(
         contentPadding = rememberInsetsPaddingValues(
             insets = insets,
             applyTop = false,
+            applyBottom = false,
             additionalStart = 16.dp,
             additionalTop = 16.dp,
             additionalEnd = 16.dp,
@@ -481,7 +487,8 @@ fun DefaultPreview() {
                 preparationTime = null,
                 servingCount = null,
                 sideDish = null,
-                cookedHistory = emptyList()
+                cookedHistory = emptyList(),
+                tags = emptyList(),
             )
         )
     }

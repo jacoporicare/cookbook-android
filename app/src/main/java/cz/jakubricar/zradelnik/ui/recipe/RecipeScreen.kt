@@ -2,8 +2,9 @@ package cz.jakubricar.zradelnik.ui.recipe
 
 import android.app.DatePickerDialog
 import android.view.WindowManager
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.DropdownMenu
@@ -34,10 +34,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DinnerDining
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LightMode
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Card
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -190,7 +190,7 @@ fun RecipeScreen(
                 onKeepAwake = onKeepAwake,
                 onCooked = { recipeCookedDialogOpened = true },
             )
-        }
+        },
     ) { innerPadding ->
         when {
             viewState.loading -> {
@@ -420,13 +420,15 @@ fun Recipe(
     val ime = LocalWindowInsets.current.ime
     val navBars = LocalWindowInsets.current.navigationBars
     val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
+    var instantPotInfoVisible by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier,
         state = listState,
         contentPadding = rememberInsetsPaddingValues(
             insets = insets,
-            applyTop = false
+            applyTop = false,
+            applyBottom = false,
         )
     ) {
         recipe.imageUrl?.let { imageUrl ->
@@ -446,6 +448,40 @@ fun Recipe(
                     alignment = Alignment.TopCenter,
                     contentScale = ContentScale.Crop
                 )
+            }
+        }
+
+        if (recipe.isForInstantPot) {
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .clickable { instantPotInfoVisible = !instantPotInfoVisible }
+                ) {
+                    Column(
+                        modifier = Modifier.padding(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(text = stringResource(R.string.instant_pot_recipe))
+                            Icon(
+                                imageVector = Icons.Outlined.Info,
+                                contentDescription = stringResource(R.string.more_info)
+                            )
+                        }
+
+                        AnimatedVisibility(visible = instantPotInfoVisible) {
+                            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
+                                Text(text = stringResource(R.string.instant_pot_recipe_info))
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -490,7 +526,6 @@ fun Recipe(
 }
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
 private fun Section(
     title: String,
     content: @Composable () -> Unit,
@@ -530,11 +565,10 @@ private fun Details(
     servingCount: String? = null,
     sideDish: String? = null,
 ) {
-    Row(
+    Column(
         modifier = modifier
-            .horizontalScroll(rememberScrollState())
             .padding(horizontal = 16.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         preparationTime?.let {
             DetailItem(

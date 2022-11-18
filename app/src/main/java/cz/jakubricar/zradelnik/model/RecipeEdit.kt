@@ -12,7 +12,7 @@ data class RecipeEdit(
     val preparationTime: Int?,
     val servingCount: Int?,
     val sideDish: String?,
-    val tags: List<String>?,
+    val tags: List<String>,
 ) {
 
     @Immutable
