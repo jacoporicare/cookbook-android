@@ -56,6 +56,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberImagePainter
@@ -73,6 +74,7 @@ import cz.jakubricar.zradelnik.network.connectedState
 import cz.jakubricar.zradelnik.ui.ErrorSnackbar
 import cz.jakubricar.zradelnik.ui.ErrorState
 import cz.jakubricar.zradelnik.ui.components.FullScreenLoading
+import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 import cz.jakubricar.zradelnik.ui.user.UserViewModel
 import cz.jakubricar.zradelnik.ui.user.UserViewState
 import dev.jeziellago.compose.markdowntext.MarkdownText
@@ -462,7 +464,6 @@ fun Recipe(
                 ) {
                     Column(
                         modifier = Modifier.padding(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -477,7 +478,10 @@ fun Recipe(
 
                         AnimatedVisibility(visible = instantPotInfoVisible) {
                             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                                Text(text = stringResource(R.string.instant_pot_recipe_info))
+                                Text(
+                                    text = stringResource(R.string.instant_pot_recipe_info),
+                                    modifier = Modifier.padding(top = 8.dp),
+                                )
                             }
                         }
                     }
@@ -664,4 +668,25 @@ private fun Modifier.ingredientGroupPadding(
     }
 
     return this
+}
+
+@Preview
+@Composable
+fun DefaultPreview() {
+    ZradelnikTheme {
+        Recipe(
+            recipe = Recipe(
+                id = "1",
+                title = "Koprovka",
+                imageUrl = "https://api-test.zradelnik.eu/image/koprova-omacka_60b625cd71cc4b28a638d432?size=800x800&format=webp",
+                directions = null,
+                ingredients = emptyList(),
+                preparationTime = null,
+                servingCount = null,
+                sideDish = null,
+                cookedHistory = emptyList(),
+                tags = listOf(Recipe.instantPotTag),
+            )
+        )
+    }
 }
