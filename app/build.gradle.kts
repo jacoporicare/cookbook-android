@@ -10,7 +10,7 @@ plugins {
     id("com.google.gms.google-services")
 
     // Apollo
-    id("com.apollographql.apollo3") version "3.5.0"
+    id("com.apollographql.apollo3") version "3.7.4"
 
     // Hilt
     id("dagger.hilt.android.plugin")
@@ -116,11 +116,11 @@ dependencies {
     implementation("com.google.firebase:firebase-messaging-ktx")
 
     // Jetpack Compose
-    implementation("androidx.compose.ui:ui:1.3.0")
-    implementation("androidx.compose.material:material:1.3.0")
-    implementation("androidx.compose.material3:material3:1.0.0")
-    implementation("androidx.compose.material:material-icons-extended:1.3.0")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.3.0")
+    implementation("androidx.compose.ui:ui:1.3.3")
+    implementation("androidx.compose.material:material:1.3.1")
+    implementation("androidx.compose.material3:material3:1.0.1")
+    implementation("androidx.compose.material:material-icons-extended:1.3.1")
+    implementation("androidx.compose.ui:ui-tooling-preview:1.3.3")
 
     // Accompanist
     implementation("com.google.accompanist:accompanist-insets:0.19.0")
@@ -129,7 +129,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.19.0")
 
     implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.5.1")
+    implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("androidx.activity:activity-compose:1.6.1")
 
     // Lifecycle
@@ -140,12 +140,12 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.5.3")
 
     // Work
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
+    implementation("androidx.work:work-runtime-ktx:2.8.0")
 
     // Apollo
-    implementation("com.apollographql.apollo3:apollo-runtime:3.5.0")
-    implementation("com.apollographql.apollo3:apollo-normalized-cache-sqlite:3.5.0")
-    implementation("com.apollographql.apollo3:apollo-adapters:3.5.0")
+    implementation("com.apollographql.apollo3:apollo-runtime:3.7.4")
+    implementation("com.apollographql.apollo3:apollo-normalized-cache-sqlite:3.7.4")
+    implementation("com.apollographql.apollo3:apollo-adapters:3.7.4")
 
     // Hilt
     implementation("com.google.dagger:hilt-android:2.41")
@@ -165,12 +165,12 @@ dependencies {
     // Markdown
     implementation("com.github.jeziellago:compose-markdown:0.2.6")
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.3")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
-    androidTestImplementation("androidx.compose.ui:ui-test:1.3.0")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.3.0")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+    androidTestImplementation("androidx.compose.ui:ui-test:1.3.3")
+    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.3.3")
 
-    debugImplementation("androidx.compose.ui:ui-tooling:1.3.0")
+    debugImplementation("androidx.compose.ui:ui-tooling:1.3.3")
 }
 
 apollo {
