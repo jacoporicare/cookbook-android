@@ -21,13 +21,12 @@ plugins {
 
 android {
     namespace = "cz.jakubricar.zradelnik"
-
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "cz.jakubricar.zradelnik"
         minSdk = 26
-        targetSdk = 33
+        targetSdk = 34
         versionCode = androidGitVersion.code()
         versionName = androidGitVersion.name()
 
@@ -87,7 +86,7 @@ android {
         jvmTarget = JavaVersion.VERSION_11.toString()
         freeCompilerArgs =
             freeCompilerArgs + listOf(
-                "-Xopt-in=kotlin.RequiresOptIn"
+                "-opt-in=kotlin.RequiresOptIn"
             )
     }
 

@@ -5,10 +5,10 @@ buildscript {
     }
 
     dependencies {
-        classpath("com.android.tools.build:gradle:8.3.1")
+        classpath("com.android.tools.build:gradle:8.5.1")
         classpath(kotlin("gradle-plugin", "1.6.10"))
         classpath("com.google.dagger:hilt-android-gradle-plugin:2.40.5")
-        classpath("com.google.gms:google-services:4.4.1")
+        classpath("com.google.gms:google-services:4.3.15")
     }
 }
 
