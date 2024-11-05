@@ -1,28 +1,13 @@
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-
-    dependencies {
-        classpath("com.android.tools.build:gradle:8.7.1")
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.6.21")
-        classpath("com.google.dagger:hilt-android-gradle-plugin:2.40.5")
-        classpath("com.google.gms:google-services:4.3.15")
-    }
-}
-
 plugins {
-    id("com.diffplug.spotless") version "5.15.0"
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.compose) apply false
+    alias(libs.plugins.ksp) apply false
+    alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.spotless)
 }
 
 subprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-    }
-
     apply(plugin = "com.diffplug.spotless")
 
     configure<com.diffplug.gradle.spotless.SpotlessExtension> {
@@ -31,7 +16,7 @@ subprojects {
             targetExclude("$buildDir/**/*.kt")
             targetExclude("bin/**/*.kt")
 
-            ktlint("0.41.0")
+            ktlint(libs.versions.ktlint.get())
         }
     }
 }

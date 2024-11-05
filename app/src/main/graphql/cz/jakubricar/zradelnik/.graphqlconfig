@@ -2,7 +2,7 @@
   "schemaPath": "schema.json",
   "extensions": {
     "endpoints": {
-      "local": "http://localhost:8888/graphql",
+      "local": "http://localhost:4000/graphql",
       "staging": "https://api-test.zradelnik.eu/graphql"
     }
   }

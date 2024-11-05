@@ -2,42 +2,47 @@ package cz.jakubricar.zradelnik.ui.recipelist
 
 import android.content.res.Configuration
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.pullToRefresh
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,25 +55,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil.compose.rememberImagePainter
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.derivedWindowInsetsTypeOf
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.navigationBarsWithImePadding
-import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.ui.Scaffold
-import com.google.accompanist.insets.ui.TopAppBar
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.Recipe
@@ -88,7 +87,7 @@ fun RecipeListScreen(
     isInstantPotScreen: Boolean = false,
     viewModel: RecipeListViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onNavigateToRecipe: (String) -> Unit = {},
     onNavigateToRecipeAdd: (Boolean) -> Unit = {},
 ) {
@@ -105,7 +104,7 @@ fun RecipeListScreen(
         isInstantPotScreen = isInstantPotScreen,
         viewState = viewState,
         userViewState = userViewState,
-        scaffoldState = scaffoldState,
+        snackbarHostState = snackbarHostState,
         errorState = viewModel.errorState,
         onNavigateToRecipe = onNavigateToRecipe,
         onNavigateToRecipeAdd = onNavigateToRecipeAdd,
@@ -116,13 +115,14 @@ fun RecipeListScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeListScreen(
     navController: NavController,
     isInstantPotScreen: Boolean = false,
     viewState: RecipeListViewState,
     userViewState: UserViewState,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     errorState: ErrorState = remember { ErrorState() },
     onNavigateToRecipe: (String) -> Unit = {},
     onNavigateToRecipeAdd: (Boolean) -> Unit = {},
@@ -143,12 +143,13 @@ fun RecipeListScreen(
     val fabVisible = userViewState.loggedInUser != null
 
     Scaffold(
-        scaffoldState = scaffoldState,
         snackbarHost = {
             SnackbarHost(
-                hostState = it,
+                hostState = snackbarHostState,
                 modifier = if (!fabVisible) {
-                    Modifier.navigationBarsWithImePadding()
+                    Modifier
+                        .navigationBarsPadding()
+                        .imePadding()
                 } else {
                     // FAB is visible, position is handled by Scaffold based on FAB's position
                     Modifier
@@ -204,11 +205,17 @@ fun RecipeListScreen(
             viewState.initialLoad -> {
                 FullScreenLoading()
             }
+
             else -> {
-                SwipeRefresh(
-                    state = rememberSwipeRefreshState(viewState.loading),
-                    onRefresh = onRefreshRecipes,
-                    modifier = Modifier.padding(innerPadding),
+                Box(
+                    modifier = Modifier
+                        .pullToRefresh(
+                            isRefreshing = viewState.loading,
+                            state = rememberPullToRefreshState(),
+                            onRefresh = onRefreshRecipes
+                        )
+                        .consumeWindowInsets(innerPadding)
+                        .padding(innerPadding)
                 ) {
                     when {
                         recipes.isNotEmpty() -> {
@@ -218,6 +225,7 @@ fun RecipeListScreen(
                                 onNavigateToRecipe = onNavigateToRecipe
                             )
                         }
+
                         errorState.errorMessages.isEmpty() -> {
                             // if there are no posts, and no error, let the user refresh manually
                             Column(
@@ -228,13 +236,14 @@ fun RecipeListScreen(
                                 Text(
                                     text = stringResource(R.string.no_recipes),
                                     modifier = Modifier.padding(bottom = 8.dp),
-                                    style = MaterialTheme.typography.h5
+                                    style = MaterialTheme.typography.bodyLarge
                                 )
                                 Button(onClick = onRefreshRecipes) {
                                     Text(text = stringResource(R.string.try_again))
                                 }
                             }
                         }
+
                         else -> {
                             // there's currently an error showing, don't show any content
                             Spacer(modifier = Modifier.fillMaxSize())
@@ -247,10 +256,11 @@ fun RecipeListScreen(
 
     ErrorSnackbar(
         errorState = errorState,
-        scaffoldState = scaffoldState,
+        snackbarHostState = snackbarHostState,
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBarContent(
     isInstantPotScreen: Boolean = false,
@@ -272,7 +282,11 @@ private fun TopBarContent(
     TopAppBar(
         title = {
             if (!searchVisible) {
-                Text(text = stringResource(if (isInstantPotScreen) R.string.instant_pot_recipes else R.string.app_name))
+                Text(
+                    text = stringResource(if (isInstantPotScreen) R.string.instant_pot_recipes else R.string.app_name),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             } else {
                 val focusRequester = remember { FocusRequester() }
 
@@ -305,10 +319,10 @@ private fun TopBarContent(
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        autoCorrect = false,
+                        autoCorrectEnabled = false,
                         imeAction = ImeAction.Search
                     ),
-                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.Transparent)
+//                    colors = TextFieldDefaults.colors(backgroundColor = Color.Transparent)
                 )
 
                 LaunchedEffect(true) {
@@ -316,22 +330,17 @@ private fun TopBarContent(
                 }
             }
         },
-        modifier = Modifier.navigationBarsPadding(bottom = false),
-        contentPadding = rememberInsetsPaddingValues(
-            LocalWindowInsets.current.statusBars,
-            applyBottom = false
-        ),
-        navigationIcon = if (searchVisible) {
-            {
-                IconButton(onClick = onSearchHide) {
-                    Icon(
-                        imageVector = Icons.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back)
-                    )
-                }
+        navigationIcon = {
+            if (!searchVisible) {
+                return@TopAppBar
             }
-        } else {
-            null
+
+            IconButton(onClick = onSearchHide) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(R.string.back)
+                )
+            }
         },
         actions = {
             if (searchVisible) {
@@ -358,22 +367,21 @@ private fun TopBarContent(
                     onDismissRequest = { menuExpanded = false }
                 ) {
                     DropdownMenuItem(
+                        text = { Text(text = stringResource(R.string.refresh)) },
                         onClick = {
                             menuExpanded = false
                             onRefreshRecipes()
                         }
-                    ) {
-                        Text(text = stringResource(R.string.refresh))
-                    }
+                    )
                 }
             }
         },
-        backgroundColor = if (!isScrolled) {
-            MaterialTheme.colors.background
-        } else {
-            MaterialTheme.colors.surface
-        },
-        elevation = if (!isScrolled) 0.dp else 4.dp
+//        backgroundColor = if (!isScrolled) {
+//            MaterialTheme.colors.background
+//        } else {
+//            MaterialTheme.colors.surface
+//        },
+//        elevation = if (!isScrolled) 0.dp else 4.dp
     )
 }
 
@@ -390,21 +398,9 @@ fun RecipeList(
     }
     val chunkedRecipes = remember(recipes) { recipes.chunked(columnsPerRow) }
 
-    val ime = LocalWindowInsets.current.ime
-    val navBars = LocalWindowInsets.current.navigationBars
-    val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
-
     LazyColumn(
         state = listState,
-        contentPadding = rememberInsetsPaddingValues(
-            insets = insets,
-            applyTop = false,
-            applyBottom = false,
-            additionalStart = 16.dp,
-            additionalTop = 16.dp,
-            additionalEnd = 16.dp,
-            additionalBottom = 16.dp
-        ),
+        contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(
@@ -442,14 +438,12 @@ fun Recipe(
         modifier = modifier
     ) {
         Column {
-            Image(
-                painter = rememberImagePainter(
-                    data = recipe.imageUrl ?: R.drawable.ic_food_placeholder,
-                    builder = {
-                        crossfade(200)
-                        error(R.drawable.ic_broken_image)
-                    }
-                ),
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(recipe.imageUrl ?: R.drawable.ic_food_placeholder)
+                    .crossfade(true)
+//                    .error(R.drawable.ic_broken_image.toDrawable().asImage())
+                    .build(),
                 contentDescription = stringResource(R.string.recipe_image, recipe.title),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -467,7 +461,7 @@ fun Recipe(
             Text(
                 text = recipe.title,
                 modifier = Modifier.padding(8.dp),
-                style = MaterialTheme.typography.subtitle1
+                style = MaterialTheme.typography.headlineSmall
             )
         }
     }

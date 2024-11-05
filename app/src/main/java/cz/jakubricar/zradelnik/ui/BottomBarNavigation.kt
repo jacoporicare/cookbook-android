@@ -1,14 +1,16 @@
 package cz.jakubricar.zradelnik.ui
 
+import android.annotation.SuppressLint
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -23,7 +25,6 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.google.accompanist.insets.ui.Scaffold
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.ui.theme.ZradelnikTheme
 
@@ -37,7 +38,7 @@ sealed class Screen(
     object RecipeList : Screen(
         route = MainDestinations.RECIPE_LIST_ROUTE,
         labelId = R.string.recipes,
-        imageVector = Icons.Outlined.MenuBook,
+        imageVector = Icons.AutoMirrored.Outlined.MenuBook,
     )
 
     object InstantPotRecipeList : Screen(
@@ -108,6 +109,7 @@ fun BottomBarNavigation(navController: NavController) {
 }
 
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Preview(heightDp = 200)
 @Composable
 fun DefaultPreview() {

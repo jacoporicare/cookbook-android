@@ -6,7 +6,6 @@ import android.provider.MediaStore
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -14,37 +13,43 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,17 +69,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toDrawable
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.derivedWindowInsetsTypeOf
-import com.google.accompanist.insets.navigationBarsHeight
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.navigationBarsWithImePadding
-import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.ui.Scaffold
-import com.google.accompanist.insets.ui.TopAppBar
+import coil3.asImage
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.compose.LogCompositions
 import cz.jakubricar.zradelnik.model.RecipeEdit.NewImage
@@ -93,7 +95,7 @@ fun RecipeEditScreen(
     viewModel: RecipeEditViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     id: String? = null,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onBack: () -> Unit = {},
     onNavigateToRecipe: (String) -> Unit = {},
 ) {
@@ -117,7 +119,7 @@ fun RecipeEditScreen(
     RecipeEditScreen(
         viewState = viewState,
         formState = formState,
-        scaffoldState = scaffoldState,
+        snackbarHostState = snackbarHostState,
         errorState = viewModel.errorState,
         isNew = id == null,
         onBack = onBack,
@@ -160,7 +162,7 @@ fun RecipeEditScreen(
 fun RecipeEditScreen(
     viewState: RecipeEditViewState,
     formState: RecipeEditFormState,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     errorState: ErrorState = remember { ErrorState() },
     isNew: Boolean = true,
     onBack: () -> Unit = {},
@@ -171,11 +173,12 @@ fun RecipeEditScreen(
     val failedLoading = !isNew && viewState.editedRecipe == null
 
     Scaffold(
-        scaffoldState = scaffoldState,
         snackbarHost = {
             SnackbarHost(
-                hostState = it,
-                modifier = Modifier.navigationBarsWithImePadding()
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .imePadding()
             )
         },
         topBar = {
@@ -184,7 +187,7 @@ fun RecipeEditScreen(
                 isNew = isNew,
                 loading = viewState.loading,
                 failedLoading = failedLoading,
-                scaffoldState = scaffoldState,
+                snackbarHostState = snackbarHostState,
                 listState = listState,
                 onBack = onBack,
                 onSave = onSave,
@@ -207,17 +210,18 @@ fun RecipeEditScreen(
 
     ErrorSnackbar(
         errorState = errorState,
-        scaffoldState = scaffoldState,
+        snackbarHostState = snackbarHostState,
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBarContent(
     title: String?,
     isNew: Boolean,
     loading: Boolean,
     failedLoading: Boolean,
-    scaffoldState: ScaffoldState,
+    snackbarHostState: SnackbarHostState,
     listState: LazyListState,
     onBack: () -> Unit,
     onSave: () -> Unit,
@@ -236,18 +240,15 @@ private fun TopBarContent(
                     stringResource(R.string.new_recipe)
                 } else {
                     title ?: stringResource(R.string.recipe_edit)
-                }
+                },
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         },
-        modifier = Modifier.navigationBarsPadding(bottom = false),
-        contentPadding = rememberInsetsPaddingValues(
-            LocalWindowInsets.current.statusBars,
-            applyBottom = false
-        ),
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back)
                 )
             }
@@ -261,8 +262,7 @@ private fun TopBarContent(
                     onClick = {
                         if (!connected) {
                             scope.launch {
-                                scaffoldState.snackbarHostState
-                                    .showSnackbar(onlyOnlineWarningMessage)
+                                snackbarHostState.showSnackbar(onlyOnlineWarningMessage)
                             }
 
                             return@IconButton
@@ -279,12 +279,12 @@ private fun TopBarContent(
                 }
             }
         },
-        backgroundColor = if (firstVisibleItemScrollOffset.value == 0) {
-            MaterialTheme.colors.background
-        } else {
-            MaterialTheme.colors.surface
-        },
-        elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
+//        backgroundColor = if (firstVisibleItemScrollOffset.value == 0) {
+//            MaterialTheme.colors.background
+//        } else {
+//            MaterialTheme.colors.surface
+//        },
+//        elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
     )
 }
 
@@ -317,19 +317,19 @@ private fun RecipeScreenErrorAndContent(
                 text = stringResource(R.string.recipe_load_failed),
                 modifier = Modifier.padding(bottom = 8.dp),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.h6
+                style = MaterialTheme.typography.headlineSmall
             )
             Text(
                 text = stringResource(R.string.changes_only_online_warning),
                 modifier = Modifier.padding(bottom = 16.dp),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.bodyMedium
             )
             Text(
                 text = stringResource(R.string.check_internet_connection),
                 modifier = Modifier.padding(bottom = 16.dp),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.caption
+                style = MaterialTheme.typography.bodySmall
             )
             Button(onClick = onRefresh) {
                 Text(text = stringResource(R.string.try_again))
@@ -338,7 +338,6 @@ private fun RecipeScreenErrorAndContent(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RecipeEdit(
     formState: RecipeEditFormState,
@@ -346,9 +345,6 @@ fun RecipeEdit(
     imageUrl: String? = null,
     listState: LazyListState = rememberLazyListState(),
 ) {
-    val ime = LocalWindowInsets.current.ime
-    val navBars = LocalWindowInsets.current.navigationBars
-    val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
     val context = LocalContext.current
 
     val newImage by remember {
@@ -372,22 +368,15 @@ fun RecipeEdit(
     LazyColumn(
         modifier = modifier,
         state = listState,
-        contentPadding = rememberInsetsPaddingValues(
-            insets = insets,
-            applyTop = false,
-            applyBottom = false,
-        )
     ) {
         item {
             if (newImage != null || imageUrl != null) {
-                Image(
-                    painter = rememberImagePainter(
-                        data = newImage ?: imageUrl,
-                        builder = {
-                            crossfade(200)
-                            error(R.drawable.ic_broken_image)
-                        }
-                    ),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(newImage ?: imageUrl)
+                        .crossfade(true)
+                        .error(R.drawable.ic_broken_image.toDrawable().asImage())
+                        .build(),
                     contentDescription = stringResource(
                         R.string.recipe_image,
                         formState.title.value
@@ -453,7 +442,7 @@ fun RecipeEdit(
         section(title = { Text(text = stringResource(R.string.ingredients)) }) {
             formState.ingredients.forEachIndexed { index, ingredientFormState ->
                 if (index > 0) {
-                    Divider()
+                    HorizontalDivider()
                 }
 
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -474,7 +463,7 @@ fun RecipeEdit(
                             Icon(
                                 imageVector = Icons.Outlined.Delete,
                                 contentDescription = stringResource(R.string.delete),
-                                tint = MaterialTheme.colors.error
+                                tint = MaterialTheme.colorScheme.error
                             )
                         }
                     }
@@ -546,7 +535,11 @@ fun RecipeEdit(
             )
         }
         item {
-            Spacer(modifier = Modifier.navigationBarsHeight(additional = 16.dp))
+            Spacer(
+                modifier = Modifier
+                    .windowInsetsBottomHeight(WindowInsets.navigationBars)
+                    .padding(16.dp)
+            )
         }
     }
 }
@@ -562,17 +555,17 @@ private fun LazyListScope.section(
     stickyHeader {
         Column(
             modifier = Modifier
-                .background(MaterialTheme.colors.background)
+                .background(MaterialTheme.colorScheme.background)
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            ProvideTextStyle(MaterialTheme.typography.h6) {
+            ProvideTextStyle(MaterialTheme.typography.headlineSmall) {
                 title()
             }
             Spacer(modifier = Modifier.height(8.dp))
         }
-        Divider()
+        HorizontalDivider()
     }
     item {
         Spacer(modifier = Modifier.height(8.dp))

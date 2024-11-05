@@ -3,7 +3,7 @@ package cz.jakubricar.zradelnik.ui
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
+import androidx.activity.enableEdgeToEdge
 import cz.jakubricar.zradelnik.ui.recipe.RecipeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -12,7 +12,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        // including IME animations, and go edge-to-edge
+        // This also sets up the initial system bar style based on the platform theme
+        enableEdgeToEdge()
 
         val recipeId = intent.extras?.getString("recipe_id")
 

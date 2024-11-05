@@ -1,7 +1,7 @@
 package cz.jakubricar.zradelnik.ui
 
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarResult
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -12,7 +12,7 @@ import cz.jakubricar.zradelnik.R
 @Composable
 fun ErrorSnackbar(
     errorState: ErrorState,
-    scaffoldState: ScaffoldState,
+    snackbarHostState: SnackbarHostState,
 ) {
     val errorMessages = errorState.errorMessages
 
@@ -32,8 +32,8 @@ fun ErrorSnackbar(
     val onTryAgainState by rememberUpdatedState(errorMessage.onTryAgain)
     val onErrorDismissState by rememberUpdatedState(errorState::errorShown)
 
-    LaunchedEffect(errorMessage.id, scaffoldState) {
-        val result = scaffoldState.snackbarHostState.showSnackbar(
+    LaunchedEffect(errorMessage.id, snackbarHostState) {
+        val result = snackbarHostState.showSnackbar(
             message = errorMessageText,
             actionLabel = errorMessage.onTryAgain?.let { retryMessageText }
         )

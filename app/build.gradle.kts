@@ -1,36 +1,27 @@
 plugins {
-    // Standard
-    id("com.android.application")
-    kotlin("android")
-
-    // Annotation processors
-    kotlin("kapt")
-
-    // Firebase
-    id("com.google.gms.google-services")
-
-    // Apollo
-    id("com.apollographql.apollo3") version "3.7.4"
-
-    // Hilt
-    id("dagger.hilt.android.plugin")
-
-    // App version via Git tags
-    id("com.gladed.androidgitversion") version "0.4.14"
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.services)
+    alias(libs.plugins.apollo)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
+    alias(libs.plugins.android.git.version)
 }
 
 android {
     namespace = "cz.jakubricar.zradelnik"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "cz.jakubricar.zradelnik"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = androidGitVersion.code()
         versionName = androidGitVersion.name()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -39,12 +30,12 @@ android {
     }
 
     buildTypes {
-        named("debug") {
+        debug {
             applicationIdSuffix = ".debug"
             versionNameSuffix = "-DEBUG"
         }
 
-        named("release") {
+        release {
             isMinifyEnabled = false
             setProguardFiles(
                 listOf(
@@ -59,7 +50,7 @@ android {
     productFlavors {
         create("local") {
             dimension = "environment"
-            buildConfigField("String", "API_URL", "\"http://10.0.2.2:8888/graphql\"")
+            buildConfigField("String", "API_URL", "\"http://10.0.2.2:4000/graphql\"")
             buildConfigField("String", "NEW_RECIPES_TOPIC", "\"new_recipes.debug\"")
             resValue("string", "uses_cleartext_traffic", "true")
         }
@@ -92,10 +83,7 @@ android {
 
     buildFeatures {
         compose = true
-    }
-
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.0"
+        buildConfig = true
     }
 
     packaging {
@@ -106,70 +94,67 @@ android {
 }
 
 dependencies {
-    implementation(kotlin("stdlib", "1.6.10"))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4")
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.activity.compose)
 
-    // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:29.1.0"))
-    implementation("com.google.firebase:firebase-analytics-ktx")
-    implementation("com.google.firebase:firebase-messaging-ktx")
+    // Compose
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.ui.graphics)
+    implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.material3)
 
-    // Jetpack Compose
-    implementation("androidx.compose.ui:ui:1.3.3")
-    implementation("androidx.compose.material:material:1.3.1")
-    implementation("androidx.compose.material3:material3:1.0.1")
-    implementation("androidx.compose.material:material-icons-extended:1.3.1")
-    implementation("androidx.compose.ui:ui-tooling-preview:1.3.3")
-
-    // Accompanist
-    implementation("com.google.accompanist:accompanist-insets:0.19.0")
-    implementation("com.google.accompanist:accompanist-insets-ui:0.19.0")
-    implementation("com.google.accompanist:accompanist-swiperefresh:0.19.0")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.19.0")
-
-    implementation("androidx.core:core-ktx:1.9.0")
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("androidx.activity:activity-compose:1.6.1")
+    // Compose - legacy
+    implementation(libs.compose.material.icons.extended)
 
     // Lifecycle
-    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.5.1")
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     // Navigation
-    implementation("androidx.navigation:navigation-compose:2.5.3")
+    implementation(libs.androidx.navigation.compose)
 
-    // Work
-    implementation("androidx.work:work-runtime-ktx:2.8.0")
+    // WorkManager
+    implementation(libs.androidx.work.runtime.ktx)
 
     // Apollo
-    implementation("com.apollographql.apollo3:apollo-runtime:3.7.4")
-    implementation("com.apollographql.apollo3:apollo-normalized-cache-sqlite:3.7.4")
-    implementation("com.apollographql.apollo3:apollo-adapters:3.7.4")
+    implementation(libs.apollo.runtime)
+    implementation(libs.apollo.normalized.cache.sqlite)
+    implementation(libs.apollo.adapters)
 
     // Hilt
-    implementation("com.google.dagger:hilt-android:2.41")
-    kapt("com.google.dagger:hilt-compiler:2.41")
-    // Hilt Compose
-    implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
-    // Hilt Work
-    implementation("androidx.hilt:hilt-work:1.0.0")
-    kapt("androidx.hilt:hilt-compiler:1.0.0")
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    implementation(libs.hilt.work)
+    ksp(libs.hilt.compiler)
+    ksp(libs.hilt.androidx.compiler)
+
+    // Firebase
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics.ktx)
+    implementation(libs.firebase.messaging.ktx)
 
     // Logging
-    implementation("com.jakewharton.timber:timber:5.0.1")
+    implementation(libs.timber)
 
     // Coil
-    implementation("io.coil-kt:coil-compose:1.4.0")
+    implementation(libs.coil.compose.android)
+    implementation(libs.coil.network.okhttp)
 
     // Markdown
-    implementation("com.github.jeziellago:compose-markdown:0.2.6")
+    implementation(libs.markdown)
 
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-    androidTestImplementation("androidx.compose.ui:ui-test:1.3.3")
-    androidTestImplementation("androidx.compose.ui:ui-test-junit4:1.3.3")
+    // Testing
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.androidx.junit)
+    androidTestImplementation(libs.androidx.espresso.core)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
 
-    debugImplementation("androidx.compose.ui:ui-tooling:1.3.3")
+    // Debugging
+    debugImplementation(libs.androidx.ui.tooling)
+    debugImplementation(libs.androidx.ui.test.manifest)
 }
 
 apollo {

@@ -3,43 +3,46 @@ package cz.jakubricar.zradelnik.ui.recipe
 import android.app.DatePickerDialog
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.DinnerDining
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.LightMode
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,16 +61,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toDrawable
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.rememberImagePainter
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.derivedWindowInsetsTypeOf
-import com.google.accompanist.insets.navigationBarsHeight
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.navigationBarsWithImePadding
-import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.ui.Scaffold
-import com.google.accompanist.insets.ui.TopAppBar
+import coil3.asImage
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.findActivity
 import cz.jakubricar.zradelnik.model.Recipe
@@ -88,7 +87,7 @@ fun RecipeScreen(
     viewModel: RecipeViewModel = hiltViewModel(),
     userViewModel: UserViewModel = hiltViewModel(),
     id: String,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     onBack: () -> Unit = {},
     onNavigateToRecipeEdit: (String) -> Unit = {},
 ) {
@@ -120,7 +119,7 @@ fun RecipeScreen(
     RecipeScreen(
         viewState = viewState,
         userViewState = userViewState,
-        scaffoldState = scaffoldState,
+        snackbarHostState = snackbarHostState,
         errorState = viewModel.errorState,
         onBack = onBack,
         onEdit = { onNavigateToRecipeEdit(id) },
@@ -134,7 +133,7 @@ fun RecipeScreen(
 
             if (!viewState.keepAwake) {
                 scope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar(snackbarKeepAwakeMessage)
+                    snackbarHostState.showSnackbar(snackbarKeepAwakeMessage)
                 }
             }
         },
@@ -156,7 +155,7 @@ fun RecipeScreen(
 fun RecipeScreen(
     viewState: RecipeViewState,
     userViewState: UserViewState,
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     errorState: ErrorState = remember { ErrorState() },
     onBack: () -> Unit = {},
     onEdit: () -> Unit = {},
@@ -173,11 +172,12 @@ fun RecipeScreen(
     val context = LocalContext.current
 
     Scaffold(
-        scaffoldState = scaffoldState,
         snackbarHost = {
             SnackbarHost(
-                hostState = it,
-                modifier = Modifier.navigationBarsWithImePadding()
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .imePadding()
             )
         },
         topBar = {
@@ -185,7 +185,7 @@ fun RecipeScreen(
                 title = title,
                 keepAwake = keepAwake,
                 isUserLoggedIn = isUserLoggedIn,
-                scaffoldState = scaffoldState,
+                snackbarHostState = snackbarHostState,
                 listState = listState,
                 onBack = onBack,
                 onDelete = { deleteRecipeDialogOpened = true },
@@ -199,6 +199,7 @@ fun RecipeScreen(
             viewState.loading -> {
                 FullScreenLoading()
             }
+
             viewState.recipe == null -> {
                 Column(
                     modifier = Modifier.fillMaxSize(),
@@ -207,10 +208,11 @@ fun RecipeScreen(
                 ) {
                     Text(
                         text = stringResource(R.string.recipe_not_found),
-                        style = MaterialTheme.typography.h5
+                        style = MaterialTheme.typography.headlineMedium
                     )
                 }
             }
+
             else -> {
                 Recipe(
                     recipe = viewState.recipe,
@@ -264,7 +266,8 @@ fun RecipeScreen(
                             context,
                             { _, year, month, dayOfMonth ->
                                 onCooked(
-                                    OffsetDateTime.of(year,
+                                    OffsetDateTime.of(
+                                        year,
                                         month + 1,
                                         dayOfMonth,
                                         0,
@@ -298,16 +301,17 @@ fun RecipeScreen(
 
     ErrorSnackbar(
         errorState = errorState,
-        scaffoldState = scaffoldState,
+        snackbarHostState = snackbarHostState,
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun TopBarContent(
     title: String?,
     keepAwake: Boolean,
     isUserLoggedIn: Boolean,
-    scaffoldState: ScaffoldState,
+    snackbarHostState: SnackbarHostState,
     listState: LazyListState,
     onBack: () -> Unit,
     onDelete: () -> Unit,
@@ -321,17 +325,16 @@ private fun TopBarContent(
 
     TopAppBar(
         title = {
-            Text(text = title ?: stringResource(R.string.recipe))
+            Text(
+                text = title ?: stringResource(R.string.recipe),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         },
-        modifier = Modifier.navigationBarsPadding(bottom = false),
-        contentPadding = rememberInsetsPaddingValues(
-            LocalWindowInsets.current.statusBars,
-            applyBottom = false
-        ),
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(
-                    imageVector = Icons.Filled.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.back)
                 )
             }
@@ -376,21 +379,20 @@ private fun TopBarContent(
                         onDismissRequest = { menuExpanded = false }
                     ) {
                         DropdownMenuItem(
+                            text = { Text(text = stringResource(R.string.edit)) },
                             onClick = {
                                 menuExpanded = false
                                 onEdit()
                             }
-                        ) {
-                            Text(text = stringResource(R.string.edit))
-                        }
+                        )
                         DropdownMenuItem(
+                            text = { Text(text = stringResource(R.string.delete)) },
                             onClick = {
                                 menuExpanded = false
 
                                 if (!connected) {
                                     scope.launch {
-                                        scaffoldState.snackbarHostState
-                                            .showSnackbar(onlyOnlineWarningMessage)
+                                        snackbarHostState.showSnackbar(onlyOnlineWarningMessage)
                                     }
 
                                     return@DropdownMenuItem
@@ -398,19 +400,17 @@ private fun TopBarContent(
 
                                 onDelete()
                             }
-                        ) {
-                            Text(text = stringResource(R.string.delete))
-                        }
+                        )
                     }
                 }
             }
         },
-        backgroundColor = if (firstVisibleItemScrollOffset.value == 0) {
-            MaterialTheme.colors.background
-        } else {
-            MaterialTheme.colors.surface
-        },
-        elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
+//        backgroundColor = if (firstVisibleItemScrollOffset.value == 0) {
+//            MaterialTheme.colors.background
+//        } else {
+//            MaterialTheme.colors.surface
+//        },
+//        elevation = if (firstVisibleItemScrollOffset.value == 0) 0.dp else 4.dp
     )
 }
 
@@ -420,30 +420,20 @@ fun Recipe(
     modifier: Modifier = Modifier,
     listState: LazyListState = rememberLazyListState(),
 ) {
-    val ime = LocalWindowInsets.current.ime
-    val navBars = LocalWindowInsets.current.navigationBars
-    val insets = remember(ime, navBars) { derivedWindowInsetsTypeOf(ime, navBars) }
     var instantPotInfoVisible by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier,
         state = listState,
-        contentPadding = rememberInsetsPaddingValues(
-            insets = insets,
-            applyTop = false,
-            applyBottom = false,
-        )
     ) {
         recipe.imageUrl?.let { imageUrl ->
             item {
-                Image(
-                    painter = rememberImagePainter(
-                        data = imageUrl,
-                        builder = {
-                            crossfade(200)
-                            error(R.drawable.ic_broken_image)
-                        }
-                    ),
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .error(R.drawable.ic_broken_image.toDrawable().asImage())
+                        .build(),
                     contentDescription = stringResource(R.string.recipe_image, recipe.title),
                     modifier = Modifier
                         .fillMaxWidth()
@@ -478,12 +468,11 @@ fun Recipe(
                         }
 
                         AnimatedVisibility(visible = instantPotInfoVisible) {
-                            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                                Text(
-                                    text = stringResource(R.string.instant_pot_recipe_info),
-                                    modifier = Modifier.padding(top = 8.dp),
-                                )
-                            }
+                            Text(
+                                text = stringResource(R.string.instant_pot_recipe_info),
+                                modifier = Modifier.padding(top = 8.dp),
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                            )
                         }
                     }
                 }
@@ -528,7 +517,11 @@ fun Recipe(
         }
 
         item {
-            Spacer(modifier = Modifier.navigationBarsHeight(additional = 16.dp))
+            Spacer(
+                modifier = Modifier
+                    .windowInsetsBottomHeight(WindowInsets.navigationBars)
+                    .padding(16.dp)
+            )
         }
     }
 }
@@ -542,7 +535,7 @@ private fun Section(
     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
             text = title,
-            style = MaterialTheme.typography.h6
+            style = MaterialTheme.typography.headlineSmall
         )
         Spacer(modifier = Modifier.height(8.dp))
         Card(modifier = Modifier.fillMaxWidth()) {
@@ -606,15 +599,14 @@ private fun DetailItem(
     value: String,
 ) {
     Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.body2
-            )
-        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+        )
         Text(
             text = value,
-            style = MaterialTheme.typography.body2
+            style = MaterialTheme.typography.bodyMedium
         )
     }
 }
@@ -624,40 +616,39 @@ private fun Ingredients(
     ingredients: List<Recipe.Ingredient>,
 ) {
     Row {
-        CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-            Column(horizontalAlignment = Alignment.End) {
-                ingredients.forEachIndexed { index, ingredient ->
-                    Text(
-                        text = ingredient.amount ?: "",
-                        modifier = Modifier.ingredientGroupPadding(index, ingredient),
-                        style = MaterialTheme.typography.body2
-                    )
-                }
+        Column(horizontalAlignment = Alignment.End) {
+            ingredients.forEachIndexed { index, ingredient ->
+                Text(
+                    text = ingredient.amount ?: "",
+                    modifier = Modifier.ingredientGroupPadding(index, ingredient),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
             }
-            Column(modifier = Modifier.padding(start = 8.dp)) {
-                ingredients.forEachIndexed { index, ingredient ->
-                    Text(
-                        text = ingredient.amountUnit ?: "",
-                        modifier = Modifier.ingredientGroupPadding(index, ingredient),
-                        style = MaterialTheme.typography.body2
-                    )
-                }
+        }
+        Column(modifier = Modifier.padding(start = 8.dp)) {
+            ingredients.forEachIndexed { index, ingredient ->
+                Text(
+                    text = ingredient.amountUnit ?: "",
+                    modifier = Modifier.ingredientGroupPadding(index, ingredient),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f)
+                )
             }
         }
         Column(modifier = Modifier.padding(start = 16.dp)) {
             ingredients.forEachIndexed { index, ingredient ->
-                val alpha = if (ingredient.isGroup) ContentAlpha.medium else ContentAlpha.high
+                val alpha = if (ingredient.isGroup) 0.6f else 1.0f
 
-                CompositionLocalProvider(LocalContentAlpha provides alpha) {
-                    Text(
-                        text = ingredient.name,
-                        modifier = Modifier.ingredientGroupPadding(index, ingredient),
-                        fontWeight = if (ingredient.isGroup) FontWeight.Bold else FontWeight.Normal,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.body2
-                    )
-                }
+                Text(
+                    text = ingredient.name,
+                    modifier = Modifier.ingredientGroupPadding(index, ingredient),
+                    fontWeight = if (ingredient.isGroup) FontWeight.Bold else FontWeight.Normal,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = alpha)
+                )
             }
         }
     }

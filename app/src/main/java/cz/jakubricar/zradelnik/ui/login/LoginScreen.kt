@@ -10,29 +10,32 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProgressIndicatorDefaults
-import androidx.compose.material.ScaffoldState
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
-import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -52,12 +55,6 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.navigationBarsWithImePadding
-import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.ui.Scaffold
-import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.auth.AccountAuthenticator
 import cz.jakubricar.zradelnik.autofill
@@ -67,7 +64,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
-    scaffoldState: ScaffoldState = rememberScaffoldState(),
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     isNewAccount: Boolean,
     defaultUsername: String?,
     onResult: (intent: Intent) -> Unit,
@@ -81,7 +78,7 @@ fun LoginScreen(
         viewState = viewState,
         usernameState = usernameState,
         passwordState = passwordState,
-        scaffoldState = scaffoldState,
+        snackbarHostState = snackbarHostState,
         onBack = onBack,
         onSubmit = {
             viewModel.login(usernameState.value, passwordState.value)
@@ -109,29 +106,31 @@ fun LoginScreen(
                 viewModel.resetLoginResult()
 
                 scope.launch {
-                    scaffoldState.snackbarHostState.showSnackbar(snackbarLoginFailedMessage)
+                    snackbarHostState.showSnackbar(snackbarLoginFailedMessage)
                 }
             }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(
     viewState: LoginViewState,
     usernameState: UsernameState,
     passwordState: PasswordState,
-    scaffoldState: ScaffoldState,
+    snackbarHostState: SnackbarHostState,
     onBack: () -> Unit,
     onSubmit: () -> Unit,
 ) {
     val scrollState = rememberScrollState()
 
     Scaffold(
-        scaffoldState = scaffoldState,
         snackbarHost = {
             SnackbarHost(
-                hostState = it,
-                modifier = Modifier.navigationBarsWithImePadding()
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .navigationBarsPadding()
+                    .imePadding()
             )
         },
         topBar = {
@@ -139,25 +138,20 @@ fun LoginScreen(
                 title = {
                     Text(text = stringResource(R.string.login))
                 },
-                modifier = Modifier.navigationBarsPadding(bottom = false),
-                contentPadding = rememberInsetsPaddingValues(
-                    LocalWindowInsets.current.statusBars,
-                    applyBottom = false
-                ),
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(
-                            imageVector = Icons.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
                         )
                     }
                 },
-                backgroundColor = if (scrollState.value == 0) {
-                    MaterialTheme.colors.background
-                } else {
-                    MaterialTheme.colors.surface
-                },
-                elevation = if (scrollState.value == 0) 0.dp else 4.dp
+//                backgroundColor = if (scrollState.value == 0) {
+//                    MaterialTheme.colors.background
+//                } else {
+//                    MaterialTheme.colors.surface
+//                },
+//                elevation = if (scrollState.value == 0) 0.dp else 4.dp
             )
         }
     ) { innerPadding ->
@@ -184,15 +178,16 @@ fun LoginScreen(
     Column {
         if (loading) {
             LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-        } else {
-            Spacer(modifier = Modifier.height(ProgressIndicatorDefaults.StrokeWidth))
+//        } else {
+//            Spacer(modifier = Modifier.height(ProgressIndicatorDefaults.StrokeWidth))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
         Column(
             modifier = modifier
                 .verticalScroll(scrollState)
-                .navigationBarsWithImePadding()
+                .navigationBarsPadding()
+                .imePadding()
                 .padding(horizontal = 16.dp)
         ) {
             Username(usernameState = usernameState)
@@ -239,11 +234,11 @@ fun Username(
                 }
             }
             .autofill(listOf(AutofillType.Username)) { usernameState.value = it },
-        textStyle = MaterialTheme.typography.body2,
+        textStyle = MaterialTheme.typography.bodyMedium,
         isError = usernameState.showErrors(),
         keyboardOptions = KeyboardOptions(
-            autoCorrect = false,
-            imeAction = ImeAction.Next,
+            autoCorrectEnabled = false,
+            imeAction = ImeAction.Next
         ),
     )
 
@@ -274,7 +269,7 @@ fun Password(
                 }
             }
             .autofill(listOf(AutofillType.Password)) { passwordState.value = it },
-        textStyle = MaterialTheme.typography.body2,
+        textStyle = MaterialTheme.typography.bodyMedium,
         label = { Text(text = stringResource(R.string.login_password)) },
         trailingIcon = {
             if (showPassword.value) {
@@ -319,7 +314,7 @@ fun TextFieldError(textError: String) {
         Text(
             text = textError,
             modifier = Modifier.fillMaxWidth(),
-            style = LocalTextStyle.current.copy(color = MaterialTheme.colors.error)
+            style = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.error)
         )
     }
 }

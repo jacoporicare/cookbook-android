@@ -34,7 +34,7 @@ object NetworkModule {
             obj: Map<String, Any?>,
             context: CacheKeyGeneratorContext,
         ): CacheKey? =
-            obj["id"]?.toString()?.let { CacheKey(context.field.type.leafType().name, it) }
+            obj["id"]?.toString()?.let { CacheKey(context.field.type.rawType().name, it) }
                 ?: TypePolicyCacheKeyGenerator.cacheKeyForObject(obj, context)
     }
 
@@ -43,7 +43,7 @@ object NetworkModule {
             field: CompiledField,
             variables: Executable.Variables,
         ): CacheKey? = (field.resolveArgument("id", variables) as String?)?.let {
-            CacheKey(field.type.leafType().name, it)
+            CacheKey(field.type.rawType().name, it)
         }
     }
 

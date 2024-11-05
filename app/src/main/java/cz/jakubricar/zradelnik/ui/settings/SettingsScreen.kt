@@ -12,20 +12,24 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -41,12 +45,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.google.accompanist.insets.LocalWindowInsets
-import com.google.accompanist.insets.navigationBarsPadding
-import com.google.accompanist.insets.navigationBarsWithImePadding
-import com.google.accompanist.insets.rememberInsetsPaddingValues
-import com.google.accompanist.insets.ui.Scaffold
-import com.google.accompanist.insets.ui.TopAppBar
 import cz.jakubricar.zradelnik.R
 import cz.jakubricar.zradelnik.model.LoggedInUser
 import cz.jakubricar.zradelnik.model.Settings
@@ -80,6 +78,7 @@ fun SettingsScreen(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     navController: NavController,
@@ -97,17 +96,12 @@ fun SettingsScreen(
                 title = {
                     Text(text = stringResource(R.string.settings))
                 },
-                modifier = Modifier.navigationBarsPadding(bottom = false),
-                contentPadding = rememberInsetsPaddingValues(
-                    LocalWindowInsets.current.statusBars,
-                    applyBottom = false
-                ),
-                backgroundColor = if (scrollState.value == 0) {
-                    MaterialTheme.colors.background
-                } else {
-                    MaterialTheme.colors.surface
-                },
-                elevation = if (scrollState.value == 0) 0.dp else 4.dp
+//                backgroundColor = if (scrollState.value == 0) {
+//                    MaterialTheme.colors.background
+//                } else {
+//                    MaterialTheme.colors.surface
+//                },
+//                elevation = if (scrollState.value == 0) 0.dp else 4.dp
             )
         },
         bottomBar = {
@@ -131,7 +125,6 @@ fun SettingsScreen(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun Settings(
     settings: Settings,
@@ -148,13 +141,14 @@ fun Settings(
     Column(
         modifier = modifier
             .verticalScroll(scrollState)
-            .navigationBarsWithImePadding()
+            .navigationBarsPadding()
+            .imePadding()
     ) {
         ListItem(
-            text = {
+            headlineContent = {
                 Text(text = stringResource(R.string.settings_theme))
             },
-            secondaryText = {
+            supportingContent = {
                 Text(
                     text = stringResource(
                         when (settings.theme) {
@@ -171,32 +165,34 @@ fun Settings(
         Text(
             text = stringResource(R.string.settings_account),
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-            color = MaterialTheme.colors.secondaryVariant,
-            style = MaterialTheme.typography.body2
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium
         )
 
         when {
             loadingLoggedInUser -> {
                 ListItem(
-                    text = {
+                    headlineContent = {
                         CircularProgressIndicator()
                     }
                 )
             }
+
             loggedInUser != null -> {
                 ListItem(
-                    text = {
+                    headlineContent = {
                         Text(text = loggedInUser.displayName)
                     },
-                    secondaryText = {
+                    supportingContent = {
                         Text(text = stringResource(R.string.settings_logout))
                     },
                     modifier = Modifier.clickable { onLogout() }
                 )
             }
+
             else -> {
                 ListItem(
-                    text = {
+                    headlineContent = {
                         Text(text = stringResource(R.string.settings_login))
                     },
                     modifier = Modifier.clickable { onLogin() }
@@ -258,7 +254,7 @@ fun <T> ListSettingsDialog(
                         end = 24.dp,
                         bottom = 12.dp
                     ),
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.headlineSmall
                 )
                 Column(
                     modifier = Modifier
@@ -285,7 +281,7 @@ fun <T> ListSettingsDialog(
                             )
                             Text(
                                 text = option.label,
-                                style = MaterialTheme.typography.body1
+                                style = MaterialTheme.typography.bodyLarge
                             )
                         }
                     }
@@ -299,7 +295,7 @@ fun <T> ListSettingsDialog(
                     TextButton(
                         onClick = onDismiss,
                         colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colors.secondary
+                            contentColor = MaterialTheme.colorScheme.secondary
                         )
                     ) {
                         Text(text = stringResource(R.string.cancel))

@@ -2,39 +2,14 @@ package cz.jakubricar.zradelnik.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.material.darkColors
-import androidx.compose.material.lightColors
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import cz.jakubricar.zradelnik.model.Theme
-import androidx.compose.material.MaterialTheme as Material2Theme
-import androidx.compose.material3.MaterialTheme as Material3Theme
-
-private val M2_LightColorPalette = lightColors(
-    primary = M2_Blue700,
-    primaryVariant = M2_Blue800,
-    secondary = M2_GoogleBlueLight,
-    secondaryVariant = M2_GoogleBlueDark,
-    background = M2_Gray50,
-    onPrimary = Color.White,
-    onSecondary = M2_GoogleOnBlueLight
-)
-
-private val M2_DarkColorPalette = darkColors(
-    primary = M2_Blue600,
-    primaryVariant = M2_Blue700,
-    secondary = M2_Cyan700,
-    secondaryVariant = M2_Cyan700,
-    background = M2_BlueGray1000,
-    surface = M2_BlueGray1000,
-    onPrimary = Color.Black,
-    onSecondary = Color.White
-)
 
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
@@ -103,26 +78,19 @@ fun ZradelnikTheme(
         Theme.DEFAULT -> isSystemInDarkTheme()
     }
 
-    val m2ColorPalette = if (darkTheme) M2_DarkColorPalette else M2_LightColorPalette
-
-    val m3ColorScheme = when {
+    val colorScheme = when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && darkTheme ->
             dynamicDarkColorScheme(LocalContext.current)
+
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !darkTheme ->
             dynamicLightColorScheme(LocalContext.current)
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
-    Material3Theme(
-        colorScheme = m3ColorScheme,
-        content = {
-            Material2Theme(
-                colors = m2ColorPalette,
-                typography = Typography,
-                shapes = Shapes,
-                content = content
-            )
-        }
+    MaterialTheme(
+        colorScheme = colorScheme,
+        content = content
     )
 }

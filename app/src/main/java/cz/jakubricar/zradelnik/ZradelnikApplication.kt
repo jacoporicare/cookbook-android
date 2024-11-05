@@ -49,8 +49,8 @@ class ZradelnikApplication : Application(), Configuration.Provider {
         delayedInit()
     }
 
-    override fun getWorkManagerConfiguration() =
-        Configuration.Builder()
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
             .setWorkerFactory(workerFactory)
             .build()
 }
