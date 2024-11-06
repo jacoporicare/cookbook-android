@@ -7,17 +7,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -215,7 +214,8 @@ fun RecipeScreen(
             else -> {
                 Recipe(
                     recipe = viewState.recipe,
-                    modifier = Modifier.padding(innerPadding),
+                    modifier = Modifier.consumeWindowInsets(innerPadding),
+                    contentPadding = innerPadding,
                     listState = listState
                 )
             }
@@ -417,12 +417,14 @@ private fun TopBarContent(
 fun Recipe(
     recipe: Recipe,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     listState: LazyListState = rememberLazyListState(),
 ) {
     var instantPotInfoVisible by remember { mutableStateOf(false) }
 
     LazyColumn(
         modifier = modifier,
+        contentPadding = contentPadding,
         state = listState,
     ) {
         recipe.imageUrl?.let { imageUrl ->
@@ -517,9 +519,7 @@ fun Recipe(
 
         item {
             Spacer(
-                modifier = Modifier
-                    .windowInsetsBottomHeight(WindowInsets.navigationBars)
-                    .padding(16.dp)
+                modifier = Modifier.padding(8.dp)
             )
         }
     }
