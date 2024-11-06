@@ -5,7 +5,7 @@ import android.accounts.AccountManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
+import androidx.activity.enableEdgeToEdge
 import cz.jakubricar.zradelnik.ui.ZradelnikApp
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -19,7 +19,8 @@ class LoginActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        enableEdgeToEdge()
 
         val accountAuthenticatorResponse = intent.getParcelableExtra<AccountAuthenticatorResponse?>(
             AccountManager.KEY_ACCOUNT_AUTHENTICATOR_RESPONSE
@@ -31,7 +32,7 @@ class LoginActivity : ComponentActivity() {
         val username = intent.getStringExtra(PARAM_USERNAME)
 
         setContent {
-            ZradelnikApp {
+            ZradelnikApp(enableEdgeToEdge = ::enableEdgeToEdge) {
                 LoginScreen(
                     isNewAccount = isNewAccount,
                     defaultUsername = username,

@@ -40,6 +40,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.pullToRefresh
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
@@ -55,9 +56,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -322,7 +325,12 @@ private fun TopBarContent(
                         autoCorrectEnabled = false,
                         imeAction = ImeAction.Search
                     ),
-//                    colors = TextFieldDefaults.colors(backgroundColor = Color.Transparent)
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        errorContainerColor = Color.Transparent
+                    )
                 )
 
                 LaunchedEffect(true) {
@@ -442,8 +450,8 @@ fun Recipe(
                 model = ImageRequest.Builder(LocalContext.current)
                     .data(recipe.imageUrl ?: R.drawable.ic_food_placeholder)
                     .crossfade(true)
-//                    .error(R.drawable.ic_broken_image.toDrawable().asImage())
                     .build(),
+                error = painterResource(R.drawable.ic_broken_image),
                 contentDescription = stringResource(R.string.recipe_image, recipe.title),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -461,7 +469,7 @@ fun Recipe(
             Text(
                 text = recipe.title,
                 modifier = Modifier.padding(8.dp),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.bodyLarge
             )
         }
     }

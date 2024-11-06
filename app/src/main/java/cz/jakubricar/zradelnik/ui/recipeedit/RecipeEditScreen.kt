@@ -62,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.TextStyle
@@ -71,9 +72,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.core.graphics.drawable.toDrawable
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil3.asImage
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -375,8 +374,8 @@ fun RecipeEdit(
                     model = ImageRequest.Builder(LocalContext.current)
                         .data(newImage ?: imageUrl)
                         .crossfade(true)
-                        .error(R.drawable.ic_broken_image.toDrawable().asImage())
                         .build(),
+                    error = painterResource(R.drawable.ic_broken_image),
                     contentDescription = stringResource(
                         R.string.recipe_image,
                         formState.title.value

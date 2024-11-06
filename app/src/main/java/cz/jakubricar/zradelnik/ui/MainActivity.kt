@@ -20,7 +20,7 @@ class MainActivity : ComponentActivity() {
         val recipeId = intent.extras?.getString("recipe_id")
 
         setContent {
-            ZradelnikApp {
+            ZradelnikApp(enableEdgeToEdge = ::enableEdgeToEdge) {
                 ZradelnikNavGraph(
                     startDestination = recipeId?.let { "${MainDestinations.RECIPE_ROUTE}/{${RecipeViewModel.RECIPE_ID_KEY}}" }
                         ?: MainDestinations.RECIPE_LIST_ROUTE,
